@@ -116,6 +116,10 @@ impl Game {
             walls: vec![
                 Wall {
                     a: vec2(-1.0, -1.0),
+                    b: vec2(-0.2, -1.0),
+                },
+                Wall {
+                    a: vec2(0.2, -1.0),
                     b: vec2(1.0, -1.0),
                 },
                 Wall {
@@ -129,6 +133,10 @@ impl Game {
                 Wall {
                     a: vec2(-1.0, 1.0),
                     b: vec2(-1.0, -1.0),
+                },
+                Wall {
+                    a: vec2(-1.0, -2.0),
+                    b: vec2(1.0, -2.0),
                 },
             ],
         };
@@ -153,7 +161,7 @@ impl Game {
 impl geng::State for Game {
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         self.framebuffer_size = framebuffer.size().map(|x| x as f32);
-        ugli::clear(framebuffer, Some(Rgba::BLACK), None, None);
+        ugli::clear(framebuffer, Some(Rgba::BLACK), Some(1.0), None);
 
         ugli::draw(
             framebuffer,
@@ -166,7 +174,10 @@ impl geng::State for Game {
                 },
                 geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
             ),
-            ugli::DrawParameters { ..default() },
+            ugli::DrawParameters {
+                depth_func: Some(ugli::DepthFunc::Less),
+                ..default()
+            },
         );
     }
 
