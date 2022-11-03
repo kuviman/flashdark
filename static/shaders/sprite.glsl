@@ -9,7 +9,7 @@ uniform mat4 u_projection_matrix;
 uniform mat4 u_view_matrix;
 void main() {
     v_uv = a_pos;
-    v_eye_pos = (u_view_matrix * vec4(u_pos + vec3(0.0, 0.0, a_pos.y * u_size.y), 1.0)).xyz + vec3((a_pos.x - 0.5) * u_size.x, 0.0, 0.0);
+    v_eye_pos = (u_view_matrix * vec4(u_pos, 1.0)).xyz + vec3(vec2(a_pos.x - 0.5, a_pos.y - 0.5) * u_size, 0.0);
     gl_Position = u_projection_matrix * vec4(v_eye_pos, 1.0);
 }
 #endif

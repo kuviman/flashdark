@@ -34,6 +34,9 @@ impl geng::AbstractCamera3d for Camera {
 pub struct Shaders {
     pub wall: ugli::Program,
     pub billboard: ugli::Program,
+    pub sprite: ugli::Program,
+    pub horizontal_sprite: ugli::Program,
+    pub vertical_sprite: ugli::Program,
 }
 
 pub fn make_repeated(texture: &mut ugli::Texture) {
@@ -50,6 +53,13 @@ pub struct Assets {
     #[asset(postprocess = "make_repeated")]
     pub ceiling: ugli::Texture,
     pub ghost: ugli::Texture,
+    pub key: ugli::Texture,
+    pub table_top: ugli::Texture,
+    pub table_leg: ugli::Texture,
+    pub bed_bottom: ugli::Texture,
+    pub bed_back: ugli::Texture,
+    #[asset(path = "box.png")]
+    pub box_texture: ugli::Texture,
 }
 
 pub struct Wall {
@@ -165,12 +175,14 @@ impl Game {
         }
     }
 
-    fn draw_billboard(
+    fn draw_texture(
         &self,
         framebuffer: &mut ugli::Framebuffer,
+        program: &ugli::Program,
         texture: &ugli::Texture,
         pos: Vec3<f32>,
         size: f32,
+        rot: f32,
     ) {
         let size = vec2(
             size * texture.size().x as f32 / texture.size().y as f32,
@@ -182,7 +194,7 @@ impl Game {
         }
         ugli::draw(
             framebuffer,
-            &self.assets.shaders.billboard,
+            program,
             ugli::DrawMode::TriangleFan,
             &ugli::VertexBuffer::new_dynamic(self.geng.ugli(), {
                 vec![
@@ -204,6 +216,7 @@ impl Game {
                 ugli::uniforms! {
                     u_pos: pos,
                     u_size: size,
+                    u_rot: rot,
                     u_texture: texture,
                 },
                 geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
@@ -213,6 +226,78 @@ impl Game {
                 depth_func: Some(ugli::DepthFunc::Less),
                 ..default()
             },
+        );
+    }
+
+    fn draw_billboard(
+        &self,
+        framebuffer: &mut ugli::Framebuffer,
+        texture: &ugli::Texture,
+        pos: Vec3<f32>,
+        size: f32,
+        rot: f32,
+    ) {
+        self.draw_texture(
+            framebuffer,
+            &self.assets.shaders.billboard,
+            texture,
+            pos,
+            size,
+            rot,
+        );
+    }
+
+    fn draw_sprite(
+        &self,
+        framebuffer: &mut ugli::Framebuffer,
+        texture: &ugli::Texture,
+        pos: Vec3<f32>,
+        size: f32,
+        rot: f32,
+    ) {
+        self.draw_texture(
+            framebuffer,
+            &self.assets.shaders.sprite,
+            texture,
+            pos,
+            size,
+            rot,
+        );
+    }
+
+    fn draw_horizontal_sprite(
+        &self,
+        framebuffer: &mut ugli::Framebuffer,
+        texture: &ugli::Texture,
+        pos: Vec3<f32>,
+        size: f32,
+        rot: f32,
+    ) {
+        self.draw_texture(
+            framebuffer,
+            &self.assets.shaders.horizontal_sprite,
+            texture,
+            pos,
+            size,
+            rot,
+        );
+    }
+
+    fn draw_vertical_sprite(
+        &self,
+        framebuffer: &mut ugli::Framebuffer,
+        texture: &ugli::Texture,
+        pos: Vec3<f32>,
+        size: f32,
+        rot: f32,
+    ) {
+        self.draw_texture(
+            framebuffer,
+            &self.assets.shaders.vertical_sprite,
+            texture,
+            pos,
+            size,
+            rot,
         );
     }
 }
@@ -318,7 +403,120 @@ impl geng::State for Game {
             },
         );
 
-        self.draw_billboard(framebuffer, &self.assets.ghost, vec3(0.0, 0.0, 0.0), 0.7);
+        self.draw_billboard(
+            framebuffer,
+            &self.assets.ghost,
+            vec3(-0.7, 0.0, 0.0),
+            0.7,
+            0.0,
+        );
+        self.draw_horizontal_sprite(
+            framebuffer,
+            &self.assets.table_top,
+            vec3(0.0, 0.0, 0.3),
+            0.3,
+            0.0,
+        );
+        self.draw_billboard(
+            framebuffer,
+            &self.assets.table_leg,
+            vec3(-0.1, -0.1, 0.0),
+            0.3,
+            0.0,
+        );
+        self.draw_billboard(
+            framebuffer,
+            &self.assets.table_leg,
+            vec3(0.1, -0.1, 0.0),
+            0.3,
+            0.0,
+        );
+        self.draw_billboard(
+            framebuffer,
+            &self.assets.table_leg,
+            vec3(0.1, 0.1, 0.0),
+            0.3,
+            0.0,
+        );
+        self.draw_billboard(
+            framebuffer,
+            &self.assets.table_leg,
+            vec3(-0.1, 0.1, 0.0),
+            0.3,
+            0.0,
+        );
+
+        self.draw_sprite(
+            framebuffer,
+            &self.assets.key,
+            vec3(0.0, 0.0, 0.35),
+            0.05,
+            0.0,
+        );
+
+        let bed_pos = vec2(0.5, 0.0);
+        let bed_rot = 0.3;
+        let bed_size = 0.4;
+        self.draw_vertical_sprite(
+            framebuffer,
+            &self.assets.bed_back,
+            (bed_pos + vec2(0.0, -bed_size).rotate(bed_rot)).extend(0.0),
+            bed_size,
+            bed_rot,
+        );
+        self.draw_vertical_sprite(
+            framebuffer,
+            &self.assets.bed_back,
+            (bed_pos + vec2(0.0, bed_size).rotate(bed_rot)).extend(0.0),
+            bed_size,
+            bed_rot,
+        );
+        self.draw_horizontal_sprite(
+            framebuffer,
+            &self.assets.bed_bottom,
+            bed_pos.extend(bed_size * 0.3),
+            bed_size,
+            bed_rot + f32::PI / 2.0,
+        );
+
+        let box_pos = vec2(0.0, 0.7);
+        let box_size = 0.3;
+        let box_rot = 0.7;
+        self.draw_horizontal_sprite(
+            framebuffer,
+            &self.assets.box_texture,
+            box_pos.extend(box_size),
+            box_size,
+            box_rot,
+        );
+        self.draw_vertical_sprite(
+            framebuffer,
+            &self.assets.box_texture,
+            (box_pos + vec2(0.0, box_size / 2.0).rotate(box_rot)).extend(0.0),
+            box_size,
+            box_rot,
+        );
+        self.draw_vertical_sprite(
+            framebuffer,
+            &self.assets.box_texture,
+            (box_pos + vec2(0.0, -box_size / 2.0).rotate(box_rot)).extend(0.0),
+            box_size,
+            box_rot,
+        );
+        self.draw_vertical_sprite(
+            framebuffer,
+            &self.assets.box_texture,
+            (box_pos + vec2(box_size / 2.0, 0.0).rotate(box_rot)).extend(0.0),
+            box_size,
+            box_rot + f32::PI / 2.0,
+        );
+        self.draw_vertical_sprite(
+            framebuffer,
+            &self.assets.box_texture,
+            (box_pos + vec2(-box_size / 2.0, 0.0).rotate(box_rot)).extend(0.0),
+            box_size,
+            box_rot + f32::PI / 2.0,
+        );
     }
 
     fn handle_event(&mut self, event: geng::Event) {

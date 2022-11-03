@@ -5,11 +5,16 @@ varying vec3 v_eye_pos;
 attribute vec2 a_pos;
 uniform vec3 u_pos;
 uniform vec2 u_size;
+uniform float u_rot;
 uniform mat4 u_projection_matrix;
 uniform mat4 u_view_matrix;
 void main() {
     v_uv = a_pos;
-    v_eye_pos = (u_view_matrix * vec4(u_pos + vec3(0.0, 0.0, a_pos.y * u_size.y), 1.0)).xyz + vec3((a_pos.x - 0.5) * u_size.x, 0.0, 0.0);
+    vec2 quad_pos = (a_pos - vec2(0.5, 0.0)) * u_size;
+    vec3 local_pos = vec3(quad_pos.x, 0.0, quad_pos.y);
+    local_pos.xy = rotate(local_pos.xy, u_rot);
+    vec3 world_pos = u_pos + local_pos;
+    v_eye_pos = (u_view_matrix * vec4(world_pos, 1.0)).xyz;
     gl_Position = u_projection_matrix * vec4(v_eye_pos, 1.0);
 }
 #endif
