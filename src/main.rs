@@ -14,7 +14,10 @@ impl Camera {
 
 impl geng::AbstractCamera3d for Camera {
     fn view_matrix(&self) -> Mat4<f32> {
-        Mat4::rotate_x(-self.rot_v) * Mat4::rotate_y(-self.rot_h) * Mat4::translate(-self.pos)
+        Mat4::rotate_x(-self.rot_v)
+            * Mat4::rotate_y(-self.rot_h)
+            * Mat4::rotate_x(-f32::PI / 2.0)
+            * Mat4::translate(-self.pos)
     }
 
     fn projection_matrix(&self, framebuffer_size: Vec2<f32>) -> Mat4<f32> {
@@ -41,6 +44,10 @@ pub struct Assets {
     pub shaders: Shaders,
     #[asset(postprocess = "make_repeated")]
     pub wall: ugli::Texture,
+    #[asset(postprocess = "make_repeated")]
+    pub floor: ugli::Texture,
+    #[asset(postprocess = "make_repeated")]
+    pub ceiling: ugli::Texture,
 }
 
 pub struct Wall {
@@ -72,22 +79,21 @@ impl LevelMesh {
                     .iter()
                     .flat_map(|wall| {
                         let len = (wall.b - wall.a).len();
-                        let f = |v: Vec3<f32>| -> Vec3<f32> { vec3(v.x, v.z, v.y) };
                         let quad = [
                             WallVertex {
-                                a_pos: f(wall.a.extend(0.0)),
+                                a_pos: wall.a.extend(0.0),
                                 a_uv: vec2(0.0, 0.0),
                             },
                             WallVertex {
-                                a_pos: f(wall.b.extend(0.0)),
+                                a_pos: wall.b.extend(0.0),
                                 a_uv: vec2(len, 0.0),
                             },
                             WallVertex {
-                                a_pos: f(wall.b.extend(1.0)),
+                                a_pos: wall.b.extend(1.0),
                                 a_uv: vec2(len, 1.0),
                             },
                             WallVertex {
-                                a_pos: f(wall.a.extend(1.0)),
+                                a_pos: wall.a.extend(1.0),
                                 a_uv: vec2(0.0, 1.0),
                             },
                         ];
@@ -128,10 +134,10 @@ impl Game {
                 },
                 Wall {
                     a: vec2(1.0, 1.0),
-                    b: vec2(-1.0, 1.0),
+                    b: vec2(-1.5, 1.0),
                 },
                 Wall {
-                    a: vec2(-1.0, 1.0),
+                    a: vec2(-1.5, 1.0),
                     b: vec2(-1.0, -1.0),
                 },
                 Wall {
@@ -146,7 +152,7 @@ impl Game {
             geng: geng.clone(),
             assets: assets.clone(),
             camera: Camera {
-                pos: vec3(0.0, 0.5, 0.0),
+                pos: vec3(0.0, 0.0, 0.5),
                 fov: f32::PI / 2.0,
                 rot_h: 0.0,
                 rot_v: 0.0,
@@ -159,6 +165,33 @@ impl Game {
 }
 
 impl geng::State for Game {
+    fn update(&mut self, delta_time: f64) {
+        let delta_time = delta_time as f32;
+        let mut mov = vec2(0.0, 0.0);
+        if self.geng.window().is_key_pressed(geng::Key::W)
+            || self.geng.window().is_key_pressed(geng::Key::Up)
+        {
+            mov.y += 1.0;
+        }
+        if self.geng.window().is_key_pressed(geng::Key::A)
+            || self.geng.window().is_key_pressed(geng::Key::Left)
+        {
+            mov.x -= 1.0;
+        }
+        if self.geng.window().is_key_pressed(geng::Key::S)
+            || self.geng.window().is_key_pressed(geng::Key::Down)
+        {
+            mov.y -= 1.0;
+        }
+        if self.geng.window().is_key_pressed(geng::Key::D)
+            || self.geng.window().is_key_pressed(geng::Key::Right)
+        {
+            mov.x += 1.0;
+        }
+        let mov = mov.clamp_len(..=1.0);
+        self.camera.pos += mov.rotate(self.camera.rot_h).extend(0.0) * delta_time;
+    }
+
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         self.framebuffer_size = framebuffer.size().map(|x| x as f32);
         ugli::clear(framebuffer, Some(Rgba::BLACK), Some(1.0), None);
@@ -179,6 +212,58 @@ impl geng::State for Game {
                 ..default()
             },
         );
+        // floor
+        ugli::draw(
+            framebuffer,
+            &self.assets.shaders.wall,
+            ugli::DrawMode::TriangleFan,
+            &ugli::VertexBuffer::new_dynamic(self.geng.ugli(), {
+                let v = |x: f32, y: f32| -> WallVertex {
+                    let p = vec2(x, y) * 100.0 + self.camera.pos.xy();
+                    WallVertex {
+                        a_pos: p.extend(0.0),
+                        a_uv: p,
+                    }
+                };
+                vec![v(-1.0, -1.0), v(1.0, -1.0), v(1.0, 1.0), v(-1.0, 1.0)]
+            }),
+            (
+                ugli::uniforms! {
+                    u_texture: &self.assets.floor,
+                },
+                geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
+            ),
+            ugli::DrawParameters {
+                depth_func: Some(ugli::DepthFunc::Less),
+                ..default()
+            },
+        );
+        // ceiling
+        ugli::draw(
+            framebuffer,
+            &self.assets.shaders.wall,
+            ugli::DrawMode::TriangleFan,
+            &ugli::VertexBuffer::new_dynamic(self.geng.ugli(), {
+                let v = |x: f32, y: f32| -> WallVertex {
+                    let p = vec2(x, y) * 100.0 + self.camera.pos.xy();
+                    WallVertex {
+                        a_pos: p.extend(1.0),
+                        a_uv: p,
+                    }
+                };
+                vec![v(-1.0, -1.0), v(1.0, -1.0), v(1.0, 1.0), v(-1.0, 1.0)]
+            }),
+            (
+                ugli::uniforms! {
+                    u_texture: &self.assets.ceiling,
+                },
+                geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
+            ),
+            ugli::DrawParameters {
+                depth_func: Some(ugli::DepthFunc::Less),
+                ..default()
+            },
+        );
     }
 
     fn handle_event(&mut self, event: geng::Event) {
@@ -187,7 +272,7 @@ impl geng::State for Game {
                 self.geng.window().lock_cursor();
             }
             geng::Event::MouseMove { position, delta } => {
-                let delta = dbg!(delta.map(|x| x as f32));
+                let delta = delta.map(|x| x as f32);
                 self.camera.rot_h -= delta.x * self.sens;
                 self.camera.rot_v = (self.camera.rot_v + delta.y * self.sens)
                     .clamp(Camera::MIN_ROT_V, Camera::MAX_ROT_V);
