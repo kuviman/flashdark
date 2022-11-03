@@ -1,5 +1,9 @@
 use geng::prelude::*;
 
+mod obj;
+
+use obj::*;
+
 pub struct Camera {
     pub fov: f32,
     pub pos: Vec3<f32>,
@@ -37,6 +41,7 @@ pub struct Shaders {
     pub sprite: ugli::Program,
     pub horizontal_sprite: ugli::Program,
     pub vertical_sprite: ugli::Program,
+    pub obj: ugli::Program,
 }
 
 pub fn make_repeated(texture: &mut ugli::Texture) {
@@ -60,6 +65,8 @@ pub struct Assets {
     pub bed_back: ugli::Texture,
     #[asset(path = "box.png")]
     pub box_texture: ugli::Texture,
+    #[asset(path = "table.obj")]
+    pub obj: Obj,
 }
 
 pub struct Wall {
@@ -300,6 +307,42 @@ impl Game {
             rot,
         );
     }
+
+    fn draw_obj(&self, framebuffer: &mut ugli::Framebuffer, obj: &Obj, matrix: Mat4<f32>) {
+        for mesh in &obj.meshes {
+            let mut matrix = matrix;
+            if mesh.name.starts_with("B_") {
+                // TODO: only once
+                let mut sum = Vec3::ZERO;
+                for v in &*mesh.geometry {
+                    sum += v.a_v;
+                }
+                let center = sum / mesh.geometry.len() as f32;
+                matrix = matrix
+                    * Mat4::translate(center)
+                    * Mat4::rotate_z(self.camera.rot_h)
+                    * Mat4::translate(-center);
+            }
+            ugli::draw(
+                framebuffer,
+                &self.assets.shaders.obj,
+                ugli::DrawMode::Triangles,
+                &mesh.geometry,
+                (
+                    ugli::uniforms! {
+                        u_model_matrix: matrix,
+                        u_texture: mesh.material.texture.as_deref().unwrap_or(&self.assets.box_texture),
+                    },
+                    geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
+                ),
+                ugli::DrawParameters {
+                    blend_mode: Some(ugli::BlendMode::default()),
+                    depth_func: Some(ugli::DepthFunc::Less),
+                    ..default()
+                },
+            );
+        }
+    }
 }
 
 impl geng::State for Game {
@@ -516,6 +559,12 @@ impl geng::State for Game {
             (box_pos + vec2(-box_size / 2.0, 0.0).rotate(box_rot)).extend(0.0),
             box_size,
             box_rot + f32::PI / 2.0,
+        );
+
+        self.draw_obj(
+            framebuffer,
+            &self.assets.obj,
+            Mat4::translate(vec3(0.0, 0.0, 0.5)) * Mat4::scale_uniform(0.1),
         );
     }
 
