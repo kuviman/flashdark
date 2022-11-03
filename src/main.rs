@@ -32,9 +32,15 @@ pub struct Shaders {
     pub wall: ugli::Program,
 }
 
+pub fn make_repeated(texture: &mut ugli::Texture) {
+    texture.set_wrap_mode(ugli::WrapMode::Repeat);
+}
+
 #[derive(geng::Assets)]
 pub struct Assets {
     pub shaders: Shaders,
+    #[asset(postprocess = "make_repeated")]
+    pub wall: ugli::Texture,
 }
 
 pub struct Wall {
@@ -49,6 +55,7 @@ pub struct Level {
 #[derive(ugli::Vertex, Copy, Clone)]
 pub struct WallVertex {
     pub a_pos: Vec3<f32>,
+    pub a_uv: Vec2<f32>,
 }
 
 pub struct LevelMesh {
@@ -64,19 +71,24 @@ impl LevelMesh {
                     .walls
                     .iter()
                     .flat_map(|wall| {
+                        let len = (wall.b - wall.a).len();
                         let f = |v: Vec3<f32>| -> Vec3<f32> { vec3(v.x, v.z, v.y) };
                         let quad = [
                             WallVertex {
                                 a_pos: f(wall.a.extend(0.0)),
+                                a_uv: vec2(0.0, 0.0),
                             },
                             WallVertex {
                                 a_pos: f(wall.b.extend(0.0)),
+                                a_uv: vec2(len, 0.0),
                             },
                             WallVertex {
                                 a_pos: f(wall.b.extend(1.0)),
+                                a_uv: vec2(len, 1.0),
                             },
                             WallVertex {
                                 a_pos: f(wall.a.extend(1.0)),
+                                a_uv: vec2(0.0, 1.0),
                             },
                         ];
                         [quad[0], quad[1], quad[2], quad[0], quad[2], quad[3]]
@@ -126,7 +138,7 @@ impl Game {
             geng: geng.clone(),
             assets: assets.clone(),
             camera: Camera {
-                pos: vec3(0.0, 0.0, 0.0),
+                pos: vec3(0.0, 0.5, 0.0),
                 fov: f32::PI / 2.0,
                 rot_h: 0.0,
                 rot_v: 0.0,
@@ -149,7 +161,9 @@ impl geng::State for Game {
             ugli::DrawMode::Triangles,
             &self.level_mesh.walls,
             (
-                ugli::uniforms! {},
+                ugli::uniforms! {
+                    u_texture: &self.assets.wall,
+                },
                 geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
             ),
             ugli::DrawParameters { ..default() },
