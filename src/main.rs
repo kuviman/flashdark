@@ -33,6 +33,7 @@ impl geng::AbstractCamera3d for Camera {
 #[derive(geng::Assets)]
 pub struct Shaders {
     pub wall: ugli::Program,
+    pub billboard: ugli::Program,
 }
 
 pub fn make_repeated(texture: &mut ugli::Texture) {
@@ -48,6 +49,7 @@ pub struct Assets {
     pub floor: ugli::Texture,
     #[asset(postprocess = "make_repeated")]
     pub ceiling: ugli::Texture,
+    pub ghost: ugli::Texture,
 }
 
 pub struct Wall {
@@ -162,6 +164,57 @@ impl Game {
             level_mesh,
         }
     }
+
+    fn draw_billboard(
+        &self,
+        framebuffer: &mut ugli::Framebuffer,
+        texture: &ugli::Texture,
+        pos: Vec3<f32>,
+        size: f32,
+    ) {
+        let size = vec2(
+            size * texture.size().x as f32 / texture.size().y as f32,
+            size,
+        );
+        #[derive(ugli::Vertex)]
+        struct Vertex {
+            a_pos: Vec2<f32>,
+        }
+        ugli::draw(
+            framebuffer,
+            &self.assets.shaders.billboard,
+            ugli::DrawMode::TriangleFan,
+            &ugli::VertexBuffer::new_dynamic(self.geng.ugli(), {
+                vec![
+                    Vertex {
+                        a_pos: vec2(0.0, 0.0),
+                    },
+                    Vertex {
+                        a_pos: vec2(1.0, 0.0),
+                    },
+                    Vertex {
+                        a_pos: vec2(1.0, 1.0),
+                    },
+                    Vertex {
+                        a_pos: vec2(0.0, 1.0),
+                    },
+                ]
+            }),
+            (
+                ugli::uniforms! {
+                    u_pos: pos,
+                    u_size: size,
+                    u_texture: texture,
+                },
+                geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
+            ),
+            ugli::DrawParameters {
+                blend_mode: Some(ugli::BlendMode::default()),
+                depth_func: Some(ugli::DepthFunc::Less),
+                ..default()
+            },
+        );
+    }
 }
 
 impl geng::State for Game {
@@ -264,6 +317,8 @@ impl geng::State for Game {
                 ..default()
             },
         );
+
+        self.draw_billboard(framebuffer, &self.assets.ghost, vec3(0.0, 0.0, 0.0), 0.7);
     }
 
     fn handle_event(&mut self, event: geng::Event) {
