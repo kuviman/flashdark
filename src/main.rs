@@ -37,28 +37,103 @@ pub struct Assets {
     pub shaders: Shaders,
 }
 
+pub struct Wall {
+    pub a: Vec2<f32>,
+    pub b: Vec2<f32>,
+}
+
+pub struct Level {
+    walls: Vec<Wall>,
+}
+
+#[derive(ugli::Vertex, Copy, Clone)]
+pub struct WallVertex {
+    pub a_pos: Vec3<f32>,
+}
+
+pub struct LevelMesh {
+    walls: ugli::VertexBuffer<WallVertex>,
+}
+
+impl LevelMesh {
+    pub fn new(geng: &Geng, level: &Level) -> Self {
+        Self {
+            walls: ugli::VertexBuffer::new_static(
+                geng.ugli(),
+                level
+                    .walls
+                    .iter()
+                    .flat_map(|wall| {
+                        let f = |v: Vec3<f32>| -> Vec3<f32> { vec3(v.x, v.z, v.y) };
+                        let quad = [
+                            WallVertex {
+                                a_pos: f(wall.a.extend(0.0)),
+                            },
+                            WallVertex {
+                                a_pos: f(wall.b.extend(0.0)),
+                            },
+                            WallVertex {
+                                a_pos: f(wall.b.extend(1.0)),
+                            },
+                            WallVertex {
+                                a_pos: f(wall.a.extend(1.0)),
+                            },
+                        ];
+                        [quad[0], quad[1], quad[2], quad[0], quad[2], quad[3]]
+                    })
+                    .collect(),
+            ),
+        }
+    }
+}
+
 pub struct Game {
     framebuffer_size: Vec2<f32>,
     geng: Geng,
     assets: Rc<Assets>,
     camera: Camera,
     sens: f32,
+    level: Level,
+    level_mesh: LevelMesh,
 }
 
 impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
         geng.window().lock_cursor();
+        let level = Level {
+            walls: vec![
+                Wall {
+                    a: vec2(-1.0, -1.0),
+                    b: vec2(1.0, -1.0),
+                },
+                Wall {
+                    a: vec2(1.0, -1.0),
+                    b: vec2(1.0, 1.0),
+                },
+                Wall {
+                    a: vec2(1.0, 1.0),
+                    b: vec2(-1.0, 1.0),
+                },
+                Wall {
+                    a: vec2(-1.0, 1.0),
+                    b: vec2(-1.0, -1.0),
+                },
+            ],
+        };
+        let level_mesh = LevelMesh::new(geng, &level);
         Self {
             framebuffer_size: vec2(1.0, 1.0),
             geng: geng.clone(),
             assets: assets.clone(),
             camera: Camera {
-                pos: vec3(0.0, 0.0, 1.0),
+                pos: vec3(0.0, 0.0, 0.0),
                 fov: f32::PI / 2.0,
                 rot_h: 0.0,
                 rot_v: 0.0,
             },
             sens: 0.001,
+            level,
+            level_mesh,
         }
     }
 }
@@ -68,32 +143,11 @@ impl geng::State for Game {
         self.framebuffer_size = framebuffer.size().map(|x| x as f32);
         ugli::clear(framebuffer, Some(Rgba::BLACK), None, None);
 
-        #[derive(ugli::Vertex)]
-        pub struct Vertex {
-            pub a_pos: Vec3<f32>,
-        }
-
         ugli::draw(
             framebuffer,
             &self.assets.shaders.wall,
-            ugli::DrawMode::TriangleFan,
-            &ugli::VertexBuffer::new_dynamic(
-                self.geng.ugli(),
-                vec![
-                    Vertex {
-                        a_pos: vec3(0.0, 0.0, 0.0),
-                    },
-                    Vertex {
-                        a_pos: vec3(1.0, 0.0, 0.0),
-                    },
-                    Vertex {
-                        a_pos: vec3(1.0, 1.0, 0.0),
-                    },
-                    Vertex {
-                        a_pos: vec3(0.0, 1.0, 0.0),
-                    },
-                ],
-            ),
+            ugli::DrawMode::Triangles,
+            &self.level_mesh.walls,
             (
                 ugli::uniforms! {},
                 geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
