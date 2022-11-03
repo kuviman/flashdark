@@ -23,7 +23,7 @@ float light_at(vec3 pos) {
     vec3 light_dir = normalize(vec3(-1.0, -1.0, -1.0));
     float light_angle = 0.5;
     float a = smoothstep(cos(light_angle), cos(light_angle) + 0.1, dot(light_dir, normalize(pos - light_pos)));
-    return a;
+    return a * 0.9 + 0.1;
     // if (dot(light_dir, normalize(pos - light_pos)) < cos(light_angle)) {
     //     return 0.0;
     // }

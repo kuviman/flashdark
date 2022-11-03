@@ -67,6 +67,8 @@ pub struct Assets {
     pub box_texture: ugli::Texture,
     #[asset(path = "table.obj")]
     pub obj: Obj,
+    #[asset(path = "JumpScare1.wav")]
+    pub jumpscare: geng::Sound,
 }
 
 pub struct Wall {
@@ -347,6 +349,15 @@ impl Game {
 
 impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
+        self.geng
+            .audio()
+            .set_listener_position(self.camera.pos.map(|x| x as f64));
+        self.geng.audio().set_listener_orientation(
+            { Mat4::rotate_z(self.camera.rot_h) * vec4(0.0, 1.0, 0.0, 1.0) }
+                .xyz()
+                .map(|x| x as f64),
+            vec3(0.0, 0.0, 1.0),
+        );
         let delta_time = delta_time as f32;
         let mut mov = vec2(0.0, 0.0);
         if self.geng.window().is_key_pressed(geng::Key::W)
@@ -578,6 +589,11 @@ impl geng::State for Game {
                 self.camera.rot_h -= delta.x * self.sens;
                 self.camera.rot_v = (self.camera.rot_v + delta.y * self.sens)
                     .clamp(Camera::MIN_ROT_V, Camera::MAX_ROT_V);
+            }
+            geng::Event::KeyDown {
+                key: geng::Key::Space,
+            } => {
+                self.assets.jumpscare.play();
             }
             _ => {}
         }
