@@ -26,10 +26,10 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v2
       - name: Upload itch.io (Web)
-        uses: josephbmanley/butler-publish-itchio-action@master
-        env:
-          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
-          CHANNEL: html5
-          ITCH_GAME: flashdark
-          ITCH_USER: kuviman
-          PACKAGE: web
+        uses: KikimoraGames/itch-publish@v0.0.3
+        with:
+          butlerApiKey: ${{secrets.BUTLER_CREDENTIALS}}
+          gameData: web
+          itchUsername: kuviman
+          itchGameId: flashdark
+          buildChannel: html5
