@@ -14,7 +14,7 @@ pub struct ObjMesh {
 
 pub struct Obj {
     pub meshes: Vec<ObjMesh>,
-    pub size: f32,
+    // pub size: f32,
 }
 
 impl Obj {
@@ -63,7 +63,7 @@ impl Obj {
                     diffuse_color: Rgba::WHITE,
                 }),
             }],
-            size: 1.0,
+            // size: 1.0,
         }
     }
 }
@@ -86,7 +86,11 @@ impl geng::LoadAsset for Obj {
             let mut v = Vec::new();
             let mut vn = Vec::new();
             let mut vt = Vec::new();
-            let mut current_material: Option<Rc<Material>> = None;
+            let mut current_material: Option<Rc<Material>> = Some(Rc::new(Material {
+                texture: None,
+                ambient_color: Rgba::WHITE,
+                diffuse_color: Rgba::WHITE,
+            }));
             let mut current_geometry = Vec::new();
             let mut materials = HashMap::<String, Rc<Material>>::new();
             for line in obj_source.lines().chain(std::iter::once("o _")) {
@@ -212,7 +216,10 @@ impl geng::LoadAsset for Obj {
                 .unwrap()
                 .as_f32();
             debug!("{:?} size is {:?}", path.file_name().unwrap(), size);
-            Ok(Obj { meshes, size })
+            Ok(Obj {
+                meshes,
+                // size,
+            })
         }
         .boxed_local()
     }

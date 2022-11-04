@@ -4,6 +4,89 @@ mod obj;
 
 use obj::*;
 
+const EPS: f32 = 1e-7;
+
+pub fn intersect_ray_with_triangle(tri: [Vec3<f32>; 3], ray: geng::CameraRay) -> Option<f32> {
+    let n = Vec3::cross(tri[1] - tri[0], tri[2] - tri[0]).normalize_or_zero();
+    // dot(ray.from + ray.dir * t - tri[0], n) = 0
+    if Vec3::dot(ray.dir, n).abs() < EPS {
+        return None;
+    }
+    let t = -Vec3::dot(ray.from - tri[0], n) / Vec3::dot(ray.dir, n);
+    if t < EPS {
+        return None;
+    }
+    let p = ray.from + ray.dir * t;
+    // assert!(Vec3::dot(p - tri[0], n).abs() < EPS);
+    for i in 0..3 {
+        let p1 = tri[i];
+        let p2 = tri[(i + 1) % 3];
+        let v_inside = Vec3::cross(n, p2 - p1);
+        if Vec3::dot(v_inside, p - p1) <= EPS {
+            return None;
+        }
+    }
+    Some(t)
+}
+
+pub fn intersect_ray_with_obj(mesh: &Obj, ray: geng::CameraRay) -> Option<f32> {
+    mesh.meshes
+        .iter()
+        .flat_map(|mesh| {
+            mesh.geometry.chunks(3).flat_map(|tri| {
+                intersect_ray_with_triangle([tri[0].a_v, tri[1].a_v, tri[2].a_v], ray)
+            })
+        })
+        .min_by_key(|&x| r32(x))
+}
+
+pub fn vector_from_triangle(tri: [Vec3<f32>; 3], p: Vec3<f32>) -> Vec3<f32> {
+    let mut options = vec![];
+    for v in tri {
+        options.push(p - v);
+    }
+    for i in 0..3 {
+        let p1 = tri[i];
+        let p2 = tri[(i + 1) % 3];
+        if Vec3::dot(p - p1, p2 - p1) <= EPS {
+            continue;
+        }
+        if Vec3::dot(p - p2, p1 - p2) <= EPS {
+            continue;
+        }
+        let v = (p2 - p1).normalize_or_zero();
+        options.push(Vec3::cross(Vec3::cross(v, p - p1), v));
+    }
+    let n = Vec3::cross(tri[1] - tri[0], tri[2] - tri[0]).normalize_or_zero();
+    let mut inside = true;
+    for i in 0..3 {
+        let p1 = tri[i];
+        let p2 = tri[(i + 1) % 3];
+        let v_inside = Vec3::cross(n, p2 - p1);
+        if Vec3::dot(v_inside, p - p1) <= EPS {
+            inside = false;
+            break;
+        }
+    }
+    if inside {
+        options.push(n * Vec3::dot(n, p - tri[0]));
+    }
+
+    options.into_iter().min_by_key(|v| r32(v.len())).unwrap()
+}
+
+pub fn vector_from_obj(mesh: &Obj, p: Vec3<f32>) -> Vec3<f32> {
+    mesh.meshes
+        .iter()
+        .flat_map(|mesh| {
+            mesh.geometry
+                .chunks(3)
+                .map(|tri| vector_from_triangle([tri[0].a_v, tri[1].a_v, tri[2].a_v], p))
+        })
+        .min_by_key(|v| r32(v.len()))
+        .unwrap()
+}
+
 pub struct Camera {
     pub fov: f32,
     pub pos: Vec3<f32>,
@@ -48,6 +131,10 @@ pub fn make_repeated(texture: &mut ugli::Texture) {
     texture.set_wrap_mode(ugli::WrapMode::Repeat);
 }
 
+pub fn loop_sound(sound: &mut geng::Sound) {
+    sound.looped = true;
+}
+
 #[derive(geng::Assets)]
 pub struct Assets {
     pub shaders: Shaders,
@@ -69,6 +156,9 @@ pub struct Assets {
     pub obj: Obj,
     #[asset(path = "JumpScare1.wav")]
     pub jumpscare: geng::Sound,
+    #[asset(path = "MainCreepyToneAmbient.wav", postprocess = "loop_sound")]
+    pub music: geng::Sound,
+    pub level: LevelData,
 }
 
 pub struct Wall {
@@ -76,54 +166,68 @@ pub struct Wall {
     pub b: Vec2<f32>,
 }
 
-pub struct Level {
-    walls: Vec<Wall>,
+struct Door {
+    obj: Obj,
+    pivot: Vec3<f32>,
 }
 
-#[derive(ugli::Vertex, Copy, Clone)]
-pub struct WallVertex {
-    pub a_pos: Vec3<f32>,
-    pub a_uv: Vec2<f32>,
+pub struct LevelData {
+    obj: Obj,
+    doors: Vec<Door>,
+    spawn_point: Vec3<f32>,
 }
 
-pub struct LevelMesh {
-    walls: ugli::VertexBuffer<WallVertex>,
-}
-
-impl LevelMesh {
-    pub fn new(geng: &Geng, level: &Level) -> Self {
-        Self {
-            walls: ugli::VertexBuffer::new_static(
-                geng.ugli(),
-                level
-                    .walls
-                    .iter()
-                    .flat_map(|wall| {
-                        let len = (wall.b - wall.a).len();
-                        let quad = [
-                            WallVertex {
-                                a_pos: wall.a.extend(0.0),
-                                a_uv: vec2(0.0, 0.0),
-                            },
-                            WallVertex {
-                                a_pos: wall.b.extend(0.0),
-                                a_uv: vec2(len, 0.0),
-                            },
-                            WallVertex {
-                                a_pos: wall.b.extend(1.0),
-                                a_uv: vec2(len, 1.0),
-                            },
-                            WallVertex {
-                                a_pos: wall.a.extend(1.0),
-                                a_uv: vec2(0.0, 1.0),
-                            },
-                        ];
-                        [quad[0], quad[1], quad[2], quad[0], quad[2], quad[3]]
-                    })
-                    .collect(),
-            ),
+impl geng::LoadAsset for LevelData {
+    fn load(geng: &Geng, path: &std::path::Path) -> geng::AssetFuture<Self> {
+        let geng = geng.clone();
+        let path = path.to_owned();
+        async move {
+            let mut obj = <Obj as geng::LoadAsset>::load(&geng, &path.join("roomMVP.obj")).await?;
+            Ok(LevelData {
+                spawn_point: {
+                    let index = obj
+                        .meshes
+                        .iter()
+                        .position(|mesh| mesh.name == "PlayerSpawn")
+                        .unwrap();
+                    let mesh = obj.meshes.remove(index);
+                    let mut sum = Vec3::ZERO;
+                    for v in mesh.geometry.iter() {
+                        sum += v.a_v;
+                    }
+                    sum / mesh.geometry.len() as f32
+                },
+                doors: {
+                    let mut doors = Vec::new();
+                    for i in (0..obj.meshes.len()).rev() {
+                        if obj.meshes[i].name.starts_with("D_") {
+                            let mesh = obj.meshes.remove(i);
+                            let pivot = mesh.geometry[2].a_v;
+                            doors.push(Door {
+                                obj: Obj { meshes: vec![mesh] },
+                                pivot,
+                            });
+                        }
+                    }
+                    doors
+                },
+                obj,
+            })
         }
+        .boxed_local()
     }
+
+    const DEFAULT_EXT: Option<&'static str> = None;
+}
+
+struct Player {
+    pos: Vec3<f32>,
+    vel: Vec3<f32>,
+}
+
+struct DoorState {
+    open: bool,
+    rot: f32,
 }
 
 pub struct Game {
@@ -132,55 +236,78 @@ pub struct Game {
     assets: Rc<Assets>,
     camera: Camera,
     sens: f32,
-    level: Level,
-    level_mesh: LevelMesh,
+    white_texture: ugli::Texture,
+    player: Player,
+    waypoints: Vec<Vec3<f32>>,
+    doors: Vec<DoorState>,
 }
 
 impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
         geng.window().lock_cursor();
-        let level = Level {
-            walls: vec![
-                Wall {
-                    a: vec2(-1.0, -1.0),
-                    b: vec2(-0.2, -1.0),
-                },
-                Wall {
-                    a: vec2(0.2, -1.0),
-                    b: vec2(1.0, -1.0),
-                },
-                Wall {
-                    a: vec2(1.0, -1.0),
-                    b: vec2(1.0, 1.0),
-                },
-                Wall {
-                    a: vec2(1.0, 1.0),
-                    b: vec2(-1.5, 1.0),
-                },
-                Wall {
-                    a: vec2(-1.5, 1.0),
-                    b: vec2(-1.0, -1.0),
-                },
-                Wall {
-                    a: vec2(-1.0, -2.0),
-                    b: vec2(1.0, -2.0),
-                },
-            ],
+        let mut music = assets.music.effect();
+        music.set_volume(0.5);
+        music.play();
+        let waypoints = {
+            let obj = &assets.level.obj;
+            let mut points = Vec::new();
+            const HOR_GRID_SIZE: usize = 20;
+            const VER_GRID_SIZE: usize = 5;
+            let hor_range = -10.0..10.0;
+            let ver_range = 0.0..1.0;
+            for x in 0..=HOR_GRID_SIZE {
+                let x = hor_range.start
+                    + (hor_range.end - hor_range.start) * x as f32 / HOR_GRID_SIZE as f32;
+                for y in 0..=HOR_GRID_SIZE {
+                    let y = hor_range.start
+                        + (hor_range.end - hor_range.start) * y as f32 / HOR_GRID_SIZE as f32;
+                    for z in 0..=VER_GRID_SIZE {
+                        let z = ver_range.start
+                            + (ver_range.end - ver_range.start) * z as f32 / VER_GRID_SIZE as f32;
+                        let p = vec3(x, y, z);
+                        if let Some(t) = intersect_ray_with_obj(
+                            obj,
+                            geng::CameraRay {
+                                from: p,
+                                dir: vec3(0.0, 0.0, -1.0),
+                            },
+                        ) {
+                            if t > 0.1 {
+                                continue;
+                            }
+                        }
+                        points.push(p);
+                    }
+                }
+            }
+            points
         };
-        let level_mesh = LevelMesh::new(geng, &level);
         Self {
+            doors: assets
+                .level
+                .doors
+                .iter()
+                .map(|_| DoorState {
+                    open: false,
+                    rot: 0.0,
+                })
+                .collect(),
             framebuffer_size: vec2(1.0, 1.0),
             geng: geng.clone(),
             assets: assets.clone(),
+            player: Player {
+                pos: assets.level.spawn_point,
+                vel: Vec3::ZERO,
+            },
             camera: Camera {
-                pos: vec3(0.0, 0.0, 0.5),
+                pos: assets.level.spawn_point,
                 fov: f32::PI / 2.0,
                 rot_h: 0.0,
                 rot_v: 0.0,
             },
             sens: 0.001,
-            level,
-            level_mesh,
+            white_texture: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| Rgba::WHITE),
+            waypoints,
         }
     }
 
@@ -313,6 +440,9 @@ impl Game {
     fn draw_obj(&self, framebuffer: &mut ugli::Framebuffer, obj: &Obj, matrix: Mat4<f32>) {
         for mesh in &obj.meshes {
             let mut matrix = matrix;
+            if mesh.name == "PlayerSpawn" {
+                continue;
+            }
             if mesh.name.starts_with("B_") {
                 // TODO: only once
                 let mut sum = Vec3::ZERO;
@@ -333,7 +463,7 @@ impl Game {
                 (
                     ugli::uniforms! {
                         u_model_matrix: matrix,
-                        u_texture: mesh.material.texture.as_deref().unwrap_or(&self.assets.box_texture),
+                        u_texture: mesh.material.texture.as_deref().unwrap_or(&self.white_texture),
                     },
                     geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
                 ),
@@ -349,6 +479,7 @@ impl Game {
 
 impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
+        let walk_speed = 3.0;
         self.geng
             .audio()
             .set_listener_position(self.camera.pos.map(|x| x as f64));
@@ -359,6 +490,7 @@ impl geng::State for Game {
             vec3(0.0, 0.0, 1.0),
         );
         let delta_time = delta_time as f32;
+        let delta_time = delta_time.min(1.0 / 30.0);
         let mut mov = vec2(0.0, 0.0);
         if self.geng.window().is_key_pressed(geng::Key::W)
             || self.geng.window().is_key_pressed(geng::Key::Up)
@@ -381,208 +513,90 @@ impl geng::State for Game {
             mov.x += 1.0;
         }
         let mov = mov.clamp_len(..=1.0);
-        self.camera.pos += mov.rotate(self.camera.rot_h).extend(0.0) * delta_time;
+        let target_vel = mov.rotate(self.camera.rot_h) * walk_speed;
+        let accel = 50.0;
+        self.player.vel += (target_vel - self.player.vel.xy())
+            .clamp_len(..=accel * delta_time)
+            .extend(0.0);
+
+        // if self.geng.window().is_key_pressed(geng::Key::Space) {
+        //     self.player.pos.z += delta_time * walk_speed;
+        // }
+        // if self.geng.window().is_key_pressed(geng::Key::LCtrl) {
+        let gravity = 5.0;
+        self.player.vel.z -= gravity * delta_time;
+        // }
+
+        self.player.pos += self.player.vel * delta_time;
+
+        for _ in 0..3 {
+            let v = vector_from_obj(&self.assets.level.obj, self.player.pos);
+            let radius = 0.25;
+            if v.len() < radius {
+                let n = v.normalize_or_zero();
+                self.player.vel -= n * Vec3::dot(n, self.player.vel);
+                self.player.pos += v.normalize_or_zero() * (radius - v.len());
+            }
+        }
+
+        for door_state in &mut self.doors {
+            if door_state.open {
+                door_state.rot += delta_time;
+            } else {
+                door_state.rot -= delta_time;
+            }
+            door_state.rot = door_state.rot.clamp(0.0, f32::PI / 2.0);
+        }
     }
 
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         self.framebuffer_size = framebuffer.size().map(|x| x as f32);
         ugli::clear(framebuffer, Some(Rgba::BLACK), Some(1.0), None);
 
-        ugli::draw(
-            framebuffer,
-            &self.assets.shaders.wall,
-            ugli::DrawMode::Triangles,
-            &self.level_mesh.walls,
-            (
-                ugli::uniforms! {
-                    u_texture: &self.assets.wall,
-                },
-                geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
-            ),
-            ugli::DrawParameters {
-                depth_func: Some(ugli::DepthFunc::Less),
-                ..default()
-            },
-        );
-        // floor
-        ugli::draw(
-            framebuffer,
-            &self.assets.shaders.wall,
-            ugli::DrawMode::TriangleFan,
-            &ugli::VertexBuffer::new_dynamic(self.geng.ugli(), {
-                let v = |x: f32, y: f32| -> WallVertex {
-                    let p = vec2(x, y) * 100.0 + self.camera.pos.xy();
-                    WallVertex {
-                        a_pos: p.extend(0.0),
-                        a_uv: p,
-                    }
-                };
-                vec![v(-1.0, -1.0), v(1.0, -1.0), v(1.0, 1.0), v(-1.0, 1.0)]
-            }),
-            (
-                ugli::uniforms! {
-                    u_texture: &self.assets.floor,
-                },
-                geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
-            ),
-            ugli::DrawParameters {
-                depth_func: Some(ugli::DepthFunc::Less),
-                ..default()
-            },
-        );
-        // ceiling
-        ugli::draw(
-            framebuffer,
-            &self.assets.shaders.wall,
-            ugli::DrawMode::TriangleFan,
-            &ugli::VertexBuffer::new_dynamic(self.geng.ugli(), {
-                let v = |x: f32, y: f32| -> WallVertex {
-                    let p = vec2(x, y) * 100.0 + self.camera.pos.xy();
-                    WallVertex {
-                        a_pos: p.extend(1.0),
-                        a_uv: p,
-                    }
-                };
-                vec![v(-1.0, -1.0), v(1.0, -1.0), v(1.0, 1.0), v(-1.0, 1.0)]
-            }),
-            (
-                ugli::uniforms! {
-                    u_texture: &self.assets.ceiling,
-                },
-                geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
-            ),
-            ugli::DrawParameters {
-                depth_func: Some(ugli::DepthFunc::Less),
-                ..default()
-            },
-        );
+        self.camera.pos = self.player.pos + vec3(0.0, 0.0, 1.0);
+        self.draw_obj(framebuffer, &self.assets.level.obj, Mat4::identity());
+        for (door_data, door_state) in izip![&self.assets.level.doors, &self.doors] {
+            self.draw_obj(
+                framebuffer,
+                &door_data.obj,
+                Mat4::translate(door_data.pivot)
+                    * Mat4::rotate_z(door_state.rot)
+                    * Mat4::translate(-door_data.pivot),
+            );
+        }
 
-        self.draw_billboard(
-            framebuffer,
-            &self.assets.ghost,
-            vec3(-0.7, 0.0, 0.0),
-            0.7,
-            0.0,
-        );
-        self.draw_horizontal_sprite(
-            framebuffer,
-            &self.assets.table_top,
-            vec3(0.0, 0.0, 0.3),
-            0.3,
-            0.0,
-        );
-        self.draw_billboard(
-            framebuffer,
-            &self.assets.table_leg,
-            vec3(-0.1, -0.1, 0.0),
-            0.3,
-            0.0,
-        );
-        self.draw_billboard(
-            framebuffer,
-            &self.assets.table_leg,
-            vec3(0.1, -0.1, 0.0),
-            0.3,
-            0.0,
-        );
-        self.draw_billboard(
-            framebuffer,
-            &self.assets.table_leg,
-            vec3(0.1, 0.1, 0.0),
-            0.3,
-            0.0,
-        );
-        self.draw_billboard(
-            framebuffer,
-            &self.assets.table_leg,
-            vec3(-0.1, 0.1, 0.0),
-            0.3,
-            0.0,
-        );
-
-        self.draw_sprite(
-            framebuffer,
-            &self.assets.key,
-            vec3(0.0, 0.0, 0.35),
-            0.05,
-            0.0,
-        );
-
-        let bed_pos = vec2(0.5, 0.0);
-        let bed_rot = 0.3;
-        let bed_size = 0.4;
-        self.draw_vertical_sprite(
-            framebuffer,
-            &self.assets.bed_back,
-            (bed_pos + vec2(0.0, -bed_size).rotate(bed_rot)).extend(0.0),
-            bed_size,
-            bed_rot,
-        );
-        self.draw_vertical_sprite(
-            framebuffer,
-            &self.assets.bed_back,
-            (bed_pos + vec2(0.0, bed_size).rotate(bed_rot)).extend(0.0),
-            bed_size,
-            bed_rot,
-        );
-        self.draw_horizontal_sprite(
-            framebuffer,
-            &self.assets.bed_bottom,
-            bed_pos.extend(bed_size * 0.3),
-            bed_size,
-            bed_rot + f32::PI / 2.0,
-        );
-
-        let box_pos = vec2(0.0, 0.7);
-        let box_size = 0.3;
-        let box_rot = 0.7;
-        self.draw_horizontal_sprite(
-            framebuffer,
-            &self.assets.box_texture,
-            box_pos.extend(box_size),
-            box_size,
-            box_rot,
-        );
-        self.draw_vertical_sprite(
-            framebuffer,
-            &self.assets.box_texture,
-            (box_pos + vec2(0.0, box_size / 2.0).rotate(box_rot)).extend(0.0),
-            box_size,
-            box_rot,
-        );
-        self.draw_vertical_sprite(
-            framebuffer,
-            &self.assets.box_texture,
-            (box_pos + vec2(0.0, -box_size / 2.0).rotate(box_rot)).extend(0.0),
-            box_size,
-            box_rot,
-        );
-        self.draw_vertical_sprite(
-            framebuffer,
-            &self.assets.box_texture,
-            (box_pos + vec2(box_size / 2.0, 0.0).rotate(box_rot)).extend(0.0),
-            box_size,
-            box_rot + f32::PI / 2.0,
-        );
-        self.draw_vertical_sprite(
-            framebuffer,
-            &self.assets.box_texture,
-            (box_pos + vec2(-box_size / 2.0, 0.0).rotate(box_rot)).extend(0.0),
-            box_size,
-            box_rot + f32::PI / 2.0,
-        );
-
-        self.draw_obj(
-            framebuffer,
-            &self.assets.obj,
-            Mat4::translate(vec3(0.0, 0.0, 0.5)) * Mat4::scale_uniform(0.1),
-        );
+        let mut ray = self
+            .camera
+            .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0);
+        ray.dir = ray.dir.normalize_or_zero();
+        if let Some(t) = intersect_ray_with_obj(&self.assets.level.obj, ray) {
+            // self.draw_sprite(
+            //     framebuffer,
+            //     &self.assets.key,
+            //     ray.from + ray.dir * (t - 0.05),
+            //     0.05,
+            //     0.0,
+            // );
+        }
     }
 
     fn handle_event(&mut self, event: geng::Event) {
         match event {
             geng::Event::MouseDown { .. } => {
                 self.geng.window().lock_cursor();
+
+                let mut ray = self
+                    .camera
+                    .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0);
+                ray.dir = ray.dir.normalize_or_zero();
+                let max_t = intersect_ray_with_obj(&self.assets.level.obj, ray).unwrap_or(1e9);
+                for (door_data, door_state) in izip![&self.assets.level.doors, &mut self.doors] {
+                    if let Some(t) = intersect_ray_with_obj(&door_data.obj, ray) {
+                        if t < max_t {
+                            door_state.open = !door_state.open;
+                        }
+                    }
+                }
             }
             geng::Event::MouseMove { position, delta } => {
                 let delta = delta.map(|x| x as f32);
@@ -590,9 +604,7 @@ impl geng::State for Game {
                 self.camera.rot_v = (self.camera.rot_v + delta.y * self.sens)
                     .clamp(Camera::MIN_ROT_V, Camera::MAX_ROT_V);
             }
-            geng::Event::KeyDown {
-                key: geng::Key::Space,
-            } => {
+            geng::Event::KeyDown { key: geng::Key::J } => {
                 self.assets.jumpscare.play();
             }
             _ => {}
