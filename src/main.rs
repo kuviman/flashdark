@@ -23,6 +23,7 @@ pub struct Player {
     pub flashdark_on: bool,
     pub flashdark_dir: Vec3<f32>,
     pub flashdark_pos: Vec3<f32>,
+    pub item: Option<String>,
 }
 
 struct InteractableState {
@@ -32,6 +33,7 @@ struct InteractableState {
 
 pub struct Game {
     framebuffer_size: Vec2<f32>,
+    quad_geometry: ugli::VertexBuffer<geng::obj::Vertex>,
     geng: Geng,
     assets: Rc<Assets>,
     camera: Camera,
@@ -42,6 +44,14 @@ pub struct Game {
     player: Player,
     waypoints: Vec<Vec3<f32>>,
     interactables: Vec<InteractableState>,
+    items: Vec<Item>,
+}
+
+pub struct Item {
+    pub name: String,
+    pub mesh_index: usize,
+    pub parent_interactable: Option<usize>,
+    pub pos: Vec3<f32>,
 }
 
 impl Game {
@@ -87,6 +97,48 @@ impl Game {
         // };
         let waypoints = vec![];
         Self {
+            items: assets
+                .level
+                .items
+                .iter()
+                // .map(|(name, spawns)| Item {
+                //     name: name.clone(),
+                //     pos: spawns.choose(&mut global_rng()).unwrap().clone(),
+                // })
+                .flat_map(|(name, data)| {
+                    data.spawns.iter().enumerate().map(|(index, data)| Item {
+                        name: name.clone(),
+                        parent_interactable: data.parent_interactable,
+                        mesh_index: index,
+                        pos: data.pos,
+                    })
+                })
+                .collect(),
+            quad_geometry: ugli::VertexBuffer::new_static(
+                geng.ugli(),
+                vec![
+                    geng::obj::Vertex {
+                        a_v: vec3(0.0, 0.0, 0.0),
+                        a_vt: vec2(0.0, 0.0),
+                        a_vn: vec3(0.0, 1.0, 0.0),
+                    },
+                    geng::obj::Vertex {
+                        a_v: vec3(1.0, 0.0, 0.0),
+                        a_vt: vec2(1.0, 0.0),
+                        a_vn: vec3(0.0, 1.0, 0.0),
+                    },
+                    geng::obj::Vertex {
+                        a_v: vec3(1.0, 1.0, 0.0),
+                        a_vt: vec2(1.0, 1.0),
+                        a_vn: vec3(0.0, 1.0, 0.0),
+                    },
+                    geng::obj::Vertex {
+                        a_v: vec3(0.0, 1.0, 0.0),
+                        a_vt: vec2(0.0, 1.0),
+                        a_vn: vec3(0.0, 1.0, 0.0),
+                    },
+                ],
+            ),
             interactables: assets
                 .level
                 .interactables
@@ -111,6 +163,7 @@ impl Game {
                 flashdark_dir: vec3(0.0, 1.0, 0.0),
                 flashdark_on: false,
                 flashdark_strength: 0.0,
+                item: None,
             },
             camera: Camera {
                 pos: assets.level.spawn_point,
@@ -149,9 +202,54 @@ impl geng::State for Game {
                             .camera
                             .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0);
                         ray.dir = ray.dir.normalize_or_zero();
-                        let max_t =
+                        let mut look_at_t =
                             intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray)
                                 .unwrap_or(1e9);
+                        for (data, state) in
+                            izip![&self.assets.level.interactables, &self.interactables]
+                        {
+                            if let Some(t) = intersect_ray_with_obj(
+                                &data.obj,
+                                data.typ.matrix(state.progress),
+                                ray,
+                            ) {
+                                if t < look_at_t {
+                                    look_at_t = t;
+                                }
+                            }
+                        }
+
+                        for (index, item) in self.items.iter().enumerate() {
+                            // TODO: copypasta
+                            let data = &self.assets.level.items[&item.name].spawns[item.mesh_index];
+                            let mut matrix = Mat4::translate(item.pos);
+                            if let Some(index) = item.parent_interactable {
+                                matrix = self.assets.level.interactables[index]
+                                    .typ
+                                    .matrix(self.interactables[index].progress)
+                                    * matrix;
+                            }
+                            let see = || -> bool {
+                                let pos = (matrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz();
+                                let t = Vec3::dot(pos - ray.from, ray.dir);
+                                if t < 0.0 || t > look_at_t {
+                                    return false;
+                                }
+                                Vec3::cross(pos - ray.from, ray.dir).len() < 0.1
+                            }();
+                            if see {
+                                let item = self.items.remove(index);
+                                if let Some(prev) = self.player.item.replace(item.name) {
+                                    self.items.push(Item {
+                                        name: prev,
+                                        parent_interactable: None,
+                                        mesh_index: 0,
+                                        pos: self.player.pos,
+                                    })
+                                }
+                                return;
+                            }
+                        }
                         for (door_data, door_state) in
                             izip![&self.assets.level.interactables, &mut self.interactables]
                         {
@@ -160,7 +258,7 @@ impl geng::State for Game {
                                 door_data.typ.matrix(door_state.progress),
                                 ray,
                             ) {
-                                if t < max_t {
+                                if t <= look_at_t + EPS {
                                     door_state.open = !door_state.open;
                                 }
                             }

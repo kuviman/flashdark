@@ -17,7 +17,6 @@ impl Game {
         let mut look_at_t =
             intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray).unwrap_or(1e9);
         for (data, state) in izip![&self.assets.level.interactables, &self.interactables] {
-            let mut highlight = false;
             if let Some(t) = intersect_ray_with_obj(&data.obj, data.typ.matrix(state.progress), ray)
             {
                 if t < look_at_t {
@@ -72,6 +71,71 @@ impl Game {
             );
         }
 
+        for item in &self.items {
+            let data = &self.assets.level.items[&item.name].spawns[item.mesh_index];
+            let texture = &*data.mesh.material.texture.as_deref().unwrap();
+            let dark_texture = data
+                .mesh
+                .material
+                .dark_texture
+                .as_deref()
+                .unwrap_or(texture);
+
+            let mut matrix = Mat4::translate(item.pos);
+            if let Some(index) = item.parent_interactable {
+                matrix = self.assets.level.interactables[index]
+                    .typ
+                    .matrix(self.interactables[index].progress)
+                    * matrix;
+            }
+
+            let highlight = || -> bool {
+                let pos = (matrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz();
+                let t = Vec3::dot(pos - ray.from, ray.dir);
+                if t < 0.0 || t > look_at_t {
+                    return false;
+                }
+                Vec3::cross(pos - ray.from, ray.dir).len() < 0.1
+            }();
+
+            if false {
+                matrix = matrix
+                    * Mat4::rotate_z(self.camera.rot_h)
+                    * Mat4::rotate_x(self.camera.rot_v + f32::PI / 2.0);
+            }
+
+            let color = if highlight {
+                Rgba::new(0.8, 0.8, 1.0, 1.0)
+            } else {
+                Rgba::WHITE
+            };
+            ugli::draw(
+                framebuffer,
+                &self.assets.shaders.obj,
+                ugli::DrawMode::TriangleFan,
+                &data.mesh.geometry,
+                (
+                    ugli::uniforms! {
+                        u_flashdark_pos: self.player.flashdark_pos,
+                        u_flashdark_dir: self.player.flashdark_dir,
+                        u_flashdark_angle: f32::PI / 4.0,
+                        u_flashdark_strength: self.player.flashdark_strength,
+                        u_model_matrix: matrix,
+                        u_color: color,
+                        u_texture: texture,
+                        u_texture_matrix: Mat3::identity(), // data.texture_matrix,
+                        u_dark_texture: dark_texture,
+                    },
+                    geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
+                ),
+                ugli::DrawParameters {
+                    blend_mode: Some(ugli::BlendMode::default()),
+                    depth_func: Some(ugli::DepthFunc::Less),
+                    ..default()
+                },
+            );
+        }
+
         let camera2d = geng::Camera2d {
             center: Vec2::ZERO,
             rotation: 0.0,
@@ -84,6 +148,49 @@ impl Game {
                 AABB::point(vec2(-5.0, -4.2)).extend_uniform(2.0),
                 &self.assets.flashdark,
             ),
+        );
+        if let Some(name) = &self.player.item {
+            let data = &self.assets.level.items[name];
+            self.geng.draw_2d(
+                framebuffer,
+                &camera2d,
+                &draw_2d::TexturedPolygon::new(
+                    vec![
+                        draw_2d::TexturedVertex {
+                            a_pos: vec2(-1.0, -1.0),
+                            a_vt: data.texture_aabb.bottom_left(),
+                            a_color: Rgba::WHITE,
+                        },
+                        draw_2d::TexturedVertex {
+                            a_pos: vec2(1.0, -1.0),
+                            a_vt: data.texture_aabb.bottom_right(),
+                            a_color: Rgba::WHITE,
+                        },
+                        draw_2d::TexturedVertex {
+                            a_pos: vec2(1.0, 1.0),
+                            a_vt: data.texture_aabb.top_right(),
+                            a_color: Rgba::WHITE,
+                        },
+                        draw_2d::TexturedVertex {
+                            a_pos: vec2(-1.0, 1.0),
+                            a_vt: data.texture_aabb.top_left(),
+                            a_color: Rgba::WHITE,
+                        },
+                    ],
+                    data.spawns[0].mesh.material.texture.as_deref().unwrap(),
+                )
+                .scale(vec2(
+                    2.0 * data.texture_aabb.width() / data.texture_aabb.height(),
+                    2.0,
+                ))
+                .translate(vec2(5.0, -4.2)),
+            );
+        }
+
+        self.geng.draw_2d(
+            framebuffer,
+            &camera2d,
+            &draw_2d::Ellipse::circle(Vec2::ZERO, 0.02, Rgba::WHITE),
         );
     }
 
@@ -260,6 +367,7 @@ impl Game {
                         u_model_matrix: matrix,
                         u_color: color,
                         u_texture: texture,
+                        u_texture_matrix: Mat3::identity(),
                         u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
                     },
                     geng::camera3d_uniforms(&self.camera, self.framebuffer_size),

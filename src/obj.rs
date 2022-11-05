@@ -2,6 +2,7 @@ use super::*;
 
 #[derive(Clone)]
 pub struct Material {
+    pub name: String,
     pub texture: Option<Rc<ugli::Texture>>,
     pub dark_texture: Option<Rc<ugli::Texture>>,
     pub ambient_color: Rgba<f32>,
@@ -38,6 +39,7 @@ impl geng::LoadAsset for Obj {
             let mut vn = Vec::new();
             let mut vt = Vec::new();
             let mut current_material: Option<Material> = Some(Material {
+                name: "".to_owned(),
                 texture: None,
                 dark_texture: None,
                 ambient_color: Rgba::WHITE,
@@ -148,9 +150,11 @@ impl geng::LoadAsset for Obj {
                                 .ok();
                             }
                         } else if let Some(name) = line.strip_prefix("newmtl ") {
+                            let name = name.trim();
                             materials.insert(
                                 current_name.to_owned(),
                                 Material {
+                                    name: name.to_owned(),
                                     texture: current_texture.take().map(Rc::new),
                                     dark_texture: current_dark_texture.take().map(Rc::new),
                                     ambient_color: current_ambient_color,

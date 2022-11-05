@@ -83,9 +83,20 @@ pub struct Interactable {
     pub typ: InteractableType,
 }
 
+pub struct ItemSpawnData {
+    pub mesh: ObjMesh,
+    pub pos: Vec3<f32>,
+    pub parent_interactable: Option<usize>,
+}
+
+pub struct ItemData {
+    pub spawns: Vec<ItemSpawnData>,
+    pub texture_aabb: AABB<f32>,
+}
+
 pub struct LevelData {
     pub obj: Obj,
-    pub item_spawns: HashMap<String, Vec<Vec3<f32>>>,
+    pub items: HashMap<String, ItemData>,
     pub interactables: Vec<Interactable>,
     pub spawn_point: Vec3<f32>,
 }
@@ -96,6 +107,111 @@ impl geng::LoadAsset for LevelData {
         let path = path.to_owned();
         async move {
             let mut obj = <Obj as geng::LoadAsset>::load(&geng, &path.join("roomMVP.obj")).await?;
+
+            let mut interactables = Vec::new();
+            for i in (0..obj.meshes.len()).rev() {
+                if obj.meshes[i].name.starts_with("D_") || obj.meshes[i].name.starts_with("DR_") {
+                    let mesh = obj.meshes.remove(i);
+                    let pivot = mesh
+                        .geometry
+                        .iter()
+                        .max_by_key(|v| r32(v.a_vt.x))
+                        .unwrap()
+                        .a_v;
+                    interactables.push(Interactable {
+                        obj: Obj { meshes: vec![mesh] },
+                        typ: InteractableType::RDoor { pivot },
+                    });
+                }
+                if obj.meshes[i].name.starts_with("DL_") {
+                    let mesh = obj.meshes.remove(i);
+                    let pivot = mesh
+                        .geometry
+                        .iter()
+                        .min_by_key(|v| r32(v.a_vt.x))
+                        .unwrap()
+                        .a_v;
+                    interactables.push(Interactable {
+                        obj: Obj { meshes: vec![mesh] },
+                        typ: InteractableType::LDoor { pivot },
+                    });
+                }
+                if obj.meshes[i].name.starts_with("I_") {
+                    let mesh = obj.meshes.remove(i);
+                    let front_face = mesh
+                        .geometry
+                        .chunks(3)
+                        .max_by_key(|face| face.iter().map(|v| r32(v.a_vt.x)).max().unwrap())
+                        .unwrap();
+                    let shift = Vec3::cross(
+                        front_face[1].a_v - front_face[0].a_v,
+                        front_face[2].a_v - front_face[0].a_v,
+                    )
+                    .normalize_or_zero()
+                        * 0.3;
+                    interactables.push(Interactable {
+                        obj: Obj { meshes: vec![mesh] },
+                        typ: InteractableType::Drawer { shift },
+                    });
+                }
+            }
+
+            let mut items = HashMap::<String, ItemData>::new();
+            for i in (0..obj.meshes.len()).rev() {
+                if obj.meshes[i].name.starts_with("Spawn_") {
+                    let mut mesh = obj.meshes.remove(i);
+                    let mut sum = Vec3::ZERO;
+                    for v in mesh.geometry.iter() {
+                        sum += v.a_v;
+                    }
+                    let center = sum / mesh.geometry.len() as f32;
+                    for v in mesh.geometry.iter_mut() {
+                        v.a_v -= center;
+                    }
+                    items
+                        .entry(mesh.material.name.clone())
+                        .or_insert(ItemData {
+                            spawns: vec![],
+                            texture_aabb: AABB::points_bounding_box(
+                                mesh.geometry.iter().map(|v| v.a_vt),
+                            ),
+                        })
+                        .spawns
+                        .push(ItemSpawnData {
+                            mesh,
+                            pos: center,
+                            parent_interactable: interactables.iter().enumerate().find_map(
+                                |(index, inter)| {
+                                    let mesh = &inter.obj.meshes[0];
+                                    let mut min = mesh.geometry[0].a_v;
+                                    let mut max = mesh.geometry[0].a_v;
+                                    for v in mesh.geometry.iter() {
+                                        min.x = min.x.min(v.a_v.x);
+                                        min.y = min.y.min(v.a_v.y);
+                                        min.z = min.z.min(v.a_v.z);
+                                        max.x = max.x.max(v.a_v.x);
+                                        max.y = max.y.max(v.a_v.y);
+                                        max.z = max.z.max(v.a_v.z);
+                                    }
+                                    let off = 0.1;
+                                    min -= vec3(off, off, off);
+                                    max += vec3(off, off, off);
+                                    if min.x < center.x
+                                        && center.x < max.x
+                                        && min.y < center.y
+                                        && center.y < max.y
+                                        && min.z < center.z
+                                        && center.z < max.z
+                                    {
+                                        return Some(index);
+                                    }
+                                    None
+                                },
+                            ),
+                        });
+                }
+            }
+
             Ok(LevelData {
                 spawn_point: {
                     let index = obj
@@ -110,67 +226,8 @@ impl geng::LoadAsset for LevelData {
                     }
                     sum / mesh.geometry.len() as f32
                 },
-                interactables: {
-                    let mut result = Vec::new();
-                    for i in (0..obj.meshes.len()).rev() {
-                        if obj.meshes[i].name.starts_with("D_")
-                            || obj.meshes[i].name.starts_with("DR_")
-                        {
-                            let mesh = obj.meshes.remove(i);
-                            let pivot = mesh
-                                .geometry
-                                .iter()
-                                .max_by_key(|v| r32(v.a_vt.x))
-                                .unwrap()
-                                .a_v;
-                            result.push(Interactable {
-                                obj: Obj { meshes: vec![mesh] },
-                                typ: InteractableType::RDoor { pivot },
-                            });
-                        }
-                        if obj.meshes[i].name.starts_with("DL_") {
-                            let mesh = obj.meshes.remove(i);
-                            let pivot = mesh
-                                .geometry
-                                .iter()
-                                .min_by_key(|v| r32(v.a_vt.x))
-                                .unwrap()
-                                .a_v;
-                            result.push(Interactable {
-                                obj: Obj { meshes: vec![mesh] },
-                                typ: InteractableType::LDoor { pivot },
-                            });
-                        }
-                        if obj.meshes[i].name.starts_with("I_") {
-                            let mesh = obj.meshes.remove(i);
-                            let front_face = mesh
-                                .geometry
-                                .chunks(3)
-                                .max_by_key(|face| {
-                                    face.iter().map(|v| r32(v.a_vt.x)).max().unwrap()
-                                })
-                                .unwrap();
-                            let shift = Vec3::cross(
-                                front_face[1].a_v - front_face[0].a_v,
-                                front_face[2].a_v - front_face[0].a_v,
-                            )
-                            .normalize_or_zero()
-                                * 0.3;
-                            result.push(Interactable {
-                                obj: Obj { meshes: vec![mesh] },
-                                typ: InteractableType::Drawer { shift },
-                            });
-                        }
-                    }
-                    result
-                },
-                item_spawns: {
-                    let mut result = HashMap::new();
-                    for i in (0..obj.meshes.len()).rev() {
-                        if obj.meshes[i].name.starts_with("Spawn_") {}
-                    }
-                    result
-                },
+                interactables,
+                items,
                 obj,
             })
         }

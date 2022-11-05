@@ -9,8 +9,9 @@ attribute vec3 a_vn;
 uniform mat4 u_projection_matrix;
 uniform mat4 u_view_matrix;
 uniform mat4 u_model_matrix;
+uniform mat3 u_texture_matrix;
 void main() {
-    v_uv = a_vt;
+    v_uv = (u_texture_matrix * vec3(a_vt, 1.0)).xy;
     v_world_pos = (u_model_matrix * vec4(a_v, 1.0)).xyz;
     v_eye_pos = (u_view_matrix * vec4(v_world_pos, 1.0)).xyz;
     gl_Position = u_projection_matrix * vec4(v_eye_pos, 1.0);
