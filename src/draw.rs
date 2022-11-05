@@ -12,7 +12,6 @@ impl Game {
             Mat4::identity(),
             Rgba::WHITE,
         );
-        for (door_data, door_state) in izip![&self.assets.level.doors, &self.doors] {}
 
         let mut ray = self
             .camera
@@ -23,20 +22,20 @@ impl Game {
             .camera
             .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0);
         ray.dir = ray.dir.normalize_or_zero();
-        let max_t = intersect_ray_with_obj(&self.assets.level.obj, ray).unwrap_or(1e9);
-        for (door_data, door_state) in izip![&self.assets.level.doors, &self.doors] {
+        let max_t =
+            intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray).unwrap_or(1e9);
+        for (data, state) in izip![&self.assets.level.interactables, &self.interactables] {
             let mut highlight = false;
-            if let Some(t) = intersect_ray_with_obj(&door_data.obj, ray) {
+            if let Some(t) = intersect_ray_with_obj(&data.obj, data.typ.matrix(state.progress), ray)
+            {
                 if t < max_t {
                     highlight = true;
                 }
             }
             self.draw_obj(
                 framebuffer,
-                &door_data.obj,
-                Mat4::translate(door_data.pivot)
-                    * Mat4::rotate_z(door_state.rot * door_data.dir)
-                    * Mat4::translate(-door_data.pivot),
+                &data.obj,
+                data.typ.matrix(state.progress),
                 if highlight {
                     Rgba::new(0.8, 0.8, 1.0, 1.0)
                 } else {

@@ -44,15 +44,38 @@ pub struct Assets {
     pub level: LevelData,
 }
 
-pub struct Door {
+pub enum InteractableType {
+    LDoor { pivot: Vec3<f32> },
+    RDoor { pivot: Vec3<f32> },
+    Drawer { shift: Vec3<f32> },
+}
+
+impl InteractableType {
+    pub fn matrix(&self, progress: f32) -> Mat4<f32> {
+        match *self {
+            Self::LDoor { pivot } => {
+                Mat4::translate(pivot)
+                    * Mat4::rotate_z(-progress * f32::PI / 2.0)
+                    * Mat4::translate(-pivot)
+            }
+            Self::RDoor { pivot } => {
+                Mat4::translate(pivot)
+                    * Mat4::rotate_z(progress * f32::PI / 2.0)
+                    * Mat4::translate(-pivot)
+            }
+            Self::Drawer { shift } => Mat4::translate(progress * shift),
+        }
+    }
+}
+
+pub struct Interactable {
     pub obj: Obj,
-    pub dir: f32,
-    pub pivot: Vec3<f32>,
+    pub typ: InteractableType,
 }
 
 pub struct LevelData {
     pub obj: Obj,
-    pub doors: Vec<Door>,
+    pub interactables: Vec<Interactable>,
     pub spawn_point: Vec3<f32>,
 }
 
@@ -76,8 +99,8 @@ impl geng::LoadAsset for LevelData {
                     }
                     sum / mesh.geometry.len() as f32
                 },
-                doors: {
-                    let mut doors = Vec::new();
+                interactables: {
+                    let mut result = Vec::new();
                     for i in (0..obj.meshes.len()).rev() {
                         if obj.meshes[i].name.starts_with("D_")
                             || obj.meshes[i].name.starts_with("DR_")
@@ -89,10 +112,9 @@ impl geng::LoadAsset for LevelData {
                                 .max_by_key(|v| r32(v.a_vt.x))
                                 .unwrap()
                                 .a_v;
-                            doors.push(Door {
+                            result.push(Interactable {
                                 obj: Obj { meshes: vec![mesh] },
-                                dir: 1.0,
-                                pivot,
+                                typ: InteractableType::RDoor { pivot },
                             });
                         }
                         if obj.meshes[i].name.starts_with("DL_") {
@@ -103,14 +125,33 @@ impl geng::LoadAsset for LevelData {
                                 .min_by_key(|v| r32(v.a_vt.x))
                                 .unwrap()
                                 .a_v;
-                            doors.push(Door {
+                            result.push(Interactable {
                                 obj: Obj { meshes: vec![mesh] },
-                                dir: -1.0,
-                                pivot,
+                                typ: InteractableType::LDoor { pivot },
+                            });
+                        }
+                        if obj.meshes[i].name.starts_with("I_") {
+                            let mesh = obj.meshes.remove(i);
+                            let front_face = mesh
+                                .geometry
+                                .chunks(3)
+                                .max_by_key(|face| {
+                                    face.iter().map(|v| r32(v.a_vt.x)).max().unwrap()
+                                })
+                                .unwrap();
+                            let shift = Vec3::cross(
+                                front_face[1].a_v - front_face[0].a_v,
+                                front_face[2].a_v - front_face[0].a_v,
+                            )
+                            .normalize_or_zero()
+                                * 0.3;
+                            result.push(Interactable {
+                                obj: Obj { meshes: vec![mesh] },
+                                typ: InteractableType::Drawer { shift },
                             });
                         }
                     }
-                    doors
+                    result
                 },
                 obj,
             })

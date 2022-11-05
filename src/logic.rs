@@ -52,22 +52,29 @@ impl Game {
         self.player.pos += self.player.vel * delta_time;
 
         for _ in 0..3 {
-            let v = vector_from_obj(&self.assets.level.obj, self.player.pos);
-            let radius = 0.25;
-            if v.len() < radius {
-                let n = v.normalize_or_zero();
-                self.player.vel -= n * Vec3::dot(n, self.player.vel);
-                self.player.pos += v.normalize_or_zero() * (radius - v.len());
+            let mut check = |obj: &Obj, matrix: Mat4<f32>| {
+                let v = vector_from_obj(obj, matrix, self.player.pos);
+                let radius = 0.25;
+                if v.len() < radius {
+                    let n = v.normalize_or_zero();
+                    self.player.vel -= n * Vec3::dot(n, self.player.vel);
+                    self.player.pos += v.normalize_or_zero() * (radius - v.len());
+                }
+            };
+            check(&self.assets.level.obj, Mat4::identity());
+            for (data, state) in izip![&self.assets.level.interactables, &self.interactables] {
+                check(&data.obj, data.typ.matrix(state.progress));
             }
         }
 
-        for door_state in &mut self.doors {
-            if door_state.open {
-                door_state.rot += delta_time;
+        for state in &mut self.interactables {
+            let inter_time = 0.3;
+            if state.open {
+                state.progress += delta_time / inter_time;
             } else {
-                door_state.rot -= delta_time;
+                state.progress -= delta_time / inter_time;
             }
-            door_state.rot = door_state.rot.clamp(0.0, f32::PI / 2.0);
+            state.progress = state.progress.clamp(0.0, 1.0);
         }
     }
 }

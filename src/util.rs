@@ -25,12 +25,16 @@ pub fn intersect_ray_with_triangle(tri: [Vec3<f32>; 3], ray: geng::CameraRay) ->
     Some(t)
 }
 
-pub fn intersect_ray_with_obj(mesh: &Obj, ray: geng::CameraRay) -> Option<f32> {
+pub fn intersect_ray_with_obj(mesh: &Obj, matrix: Mat4<f32>, ray: geng::CameraRay) -> Option<f32> {
     mesh.meshes
         .iter()
         .flat_map(|mesh| {
             mesh.geometry.chunks(3).flat_map(|tri| {
-                intersect_ray_with_triangle([tri[0].a_v, tri[1].a_v, tri[2].a_v], ray)
+                intersect_ray_with_triangle(
+                    [tri[0].a_v, tri[1].a_v, tri[2].a_v]
+                        .map(|pos| (matrix * pos.extend(1.0)).xyz()),
+                    ray,
+                )
             })
         })
         .min_by_key(|&x| r32(x))
@@ -71,13 +75,17 @@ pub fn vector_from_triangle(tri: [Vec3<f32>; 3], p: Vec3<f32>) -> Vec3<f32> {
     options.into_iter().min_by_key(|v| r32(v.len())).unwrap()
 }
 
-pub fn vector_from_obj(mesh: &Obj, p: Vec3<f32>) -> Vec3<f32> {
+pub fn vector_from_obj(mesh: &Obj, matrix: Mat4<f32>, p: Vec3<f32>) -> Vec3<f32> {
     mesh.meshes
         .iter()
         .flat_map(|mesh| {
-            mesh.geometry
-                .chunks(3)
-                .map(|tri| vector_from_triangle([tri[0].a_v, tri[1].a_v, tri[2].a_v], p))
+            mesh.geometry.chunks(3).map(|tri| {
+                vector_from_triangle(
+                    [tri[0].a_v, tri[1].a_v, tri[2].a_v]
+                        .map(|pos| (matrix * pos.extend(1.0)).xyz()),
+                    p,
+                )
+            })
         })
         .min_by_key(|v| r32(v.len()))
         .unwrap()

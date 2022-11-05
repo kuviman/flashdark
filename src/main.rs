@@ -19,9 +19,9 @@ struct Player {
     vel: Vec3<f32>,
 }
 
-struct DoorState {
+struct InteractableState {
     open: bool,
-    rot: f32,
+    progress: f32,
 }
 
 pub struct Game {
@@ -33,57 +33,59 @@ pub struct Game {
     white_texture: ugli::Texture,
     player: Player,
     waypoints: Vec<Vec3<f32>>,
-    doors: Vec<DoorState>,
+    interactables: Vec<InteractableState>,
 }
 
 impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
-        geng.window().lock_cursor();
+        // geng.window().lock_cursor();
         let mut music = assets.music.effect();
         music.set_volume(0.5);
         music.play();
-        let waypoints = {
-            let obj = &assets.level.obj;
-            let mut points = Vec::new();
-            const HOR_GRID_SIZE: usize = 20;
-            const VER_GRID_SIZE: usize = 5;
-            let hor_range = -10.0..10.0;
-            let ver_range = 0.0..1.0;
-            for x in 0..=HOR_GRID_SIZE {
-                let x = hor_range.start
-                    + (hor_range.end - hor_range.start) * x as f32 / HOR_GRID_SIZE as f32;
-                for y in 0..=HOR_GRID_SIZE {
-                    let y = hor_range.start
-                        + (hor_range.end - hor_range.start) * y as f32 / HOR_GRID_SIZE as f32;
-                    for z in 0..=VER_GRID_SIZE {
-                        let z = ver_range.start
-                            + (ver_range.end - ver_range.start) * z as f32 / VER_GRID_SIZE as f32;
-                        let p = vec3(x, y, z);
-                        if let Some(t) = intersect_ray_with_obj(
-                            obj,
-                            geng::CameraRay {
-                                from: p,
-                                dir: vec3(0.0, 0.0, -1.0),
-                            },
-                        ) {
-                            if t > 0.1 {
-                                continue;
-                            }
-                        }
-                        points.push(p);
-                    }
-                }
-            }
-            points
-        };
+        // let waypoints = {
+        //     let obj = &assets.level.obj;
+        //     let mut points = Vec::new();
+        //     const HOR_GRID_SIZE: usize = 20;
+        //     const VER_GRID_SIZE: usize = 5;
+        //     let hor_range = -10.0..10.0;
+        //     let ver_range = 0.0..1.0;
+        //     for x in 0..=HOR_GRID_SIZE {
+        //         let x = hor_range.start
+        //             + (hor_range.end - hor_range.start) * x as f32 / HOR_GRID_SIZE as f32;
+        //         for y in 0..=HOR_GRID_SIZE {
+        //             let y = hor_range.start
+        //                 + (hor_range.end - hor_range.start) * y as f32 / HOR_GRID_SIZE as f32;
+        //             for z in 0..=VER_GRID_SIZE {
+        //                 let z = ver_range.start
+        //                     + (ver_range.end - ver_range.start) * z as f32 / VER_GRID_SIZE as f32;
+        //                 let p = vec3(x, y, z);
+        //                 if let Some(t) = intersect_ray_with_obj(
+        //                     obj,
+        //                     Mat4::identity(),
+        //                     geng::CameraRay {
+        //                         from: p,
+        //                         dir: vec3(0.0, 0.0, -1.0),
+        //                     },
+        //                 ) {
+        //                     if t > 0.1 {
+        //                         continue;
+        //                     }
+        //                 }
+        //                 points.push(p);
+        //             }
+        //         }
+        //     }
+        //     points
+        // };
+        let waypoints = vec![];
         Self {
-            doors: assets
+            interactables: assets
                 .level
-                .doors
+                .interactables
                 .iter()
-                .map(|_| DoorState {
+                .map(|_| InteractableState {
                     open: false,
-                    rot: 0.0,
+                    progress: 0.0,
                 })
                 .collect(),
             framebuffer_size: vec2(1.0, 1.0),
@@ -124,9 +126,16 @@ impl geng::State for Game {
                     .camera
                     .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0);
                 ray.dir = ray.dir.normalize_or_zero();
-                let max_t = intersect_ray_with_obj(&self.assets.level.obj, ray).unwrap_or(1e9);
-                for (door_data, door_state) in izip![&self.assets.level.doors, &mut self.doors] {
-                    if let Some(t) = intersect_ray_with_obj(&door_data.obj, ray) {
+                let max_t = intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray)
+                    .unwrap_or(1e9);
+                for (door_data, door_state) in
+                    izip![&self.assets.level.interactables, &mut self.interactables]
+                {
+                    if let Some(t) = intersect_ray_with_obj(
+                        &door_data.obj,
+                        door_data.typ.matrix(door_state.progress),
+                        ray,
+                    ) {
                         if t < max_t {
                             door_state.open = !door_state.open;
                         }
