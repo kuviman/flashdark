@@ -1,0 +1,73 @@
+use super::*;
+
+impl Game {
+    pub fn update_impl(&mut self, delta_time: f32) {
+        let delta_time = delta_time.min(1.0 / 30.0);
+        let walk_speed = 3.0;
+        self.geng
+            .audio()
+            .set_listener_position(self.camera.pos.map(|x| x as f64));
+        self.geng.audio().set_listener_orientation(
+            { Mat4::rotate_z(self.camera.rot_h) * vec4(0.0, 1.0, 0.0, 1.0) }
+                .xyz()
+                .map(|x| x as f64),
+            vec3(0.0, 0.0, 1.0),
+        );
+        let mut mov = vec2(0.0, 0.0);
+        if self.geng.window().is_key_pressed(geng::Key::W)
+            || self.geng.window().is_key_pressed(geng::Key::Up)
+        {
+            mov.y += 1.0;
+        }
+        if self.geng.window().is_key_pressed(geng::Key::A)
+            || self.geng.window().is_key_pressed(geng::Key::Left)
+        {
+            mov.x -= 1.0;
+        }
+        if self.geng.window().is_key_pressed(geng::Key::S)
+            || self.geng.window().is_key_pressed(geng::Key::Down)
+        {
+            mov.y -= 1.0;
+        }
+        if self.geng.window().is_key_pressed(geng::Key::D)
+            || self.geng.window().is_key_pressed(geng::Key::Right)
+        {
+            mov.x += 1.0;
+        }
+        let mov = mov.clamp_len(..=1.0);
+        let target_vel = mov.rotate(self.camera.rot_h) * walk_speed;
+        let accel = 50.0;
+        self.player.vel += (target_vel - self.player.vel.xy())
+            .clamp_len(..=accel * delta_time)
+            .extend(0.0);
+
+        // if self.geng.window().is_key_pressed(geng::Key::Space) {
+        //     self.player.pos.z += delta_time * walk_speed;
+        // }
+        // if self.geng.window().is_key_pressed(geng::Key::LCtrl) {
+        let gravity = 5.0;
+        self.player.vel.z -= gravity * delta_time;
+        // }
+
+        self.player.pos += self.player.vel * delta_time;
+
+        for _ in 0..3 {
+            let v = vector_from_obj(&self.assets.level.obj, self.player.pos);
+            let radius = 0.25;
+            if v.len() < radius {
+                let n = v.normalize_or_zero();
+                self.player.vel -= n * Vec3::dot(n, self.player.vel);
+                self.player.pos += v.normalize_or_zero() * (radius - v.len());
+            }
+        }
+
+        for door_state in &mut self.doors {
+            if door_state.open {
+                door_state.rot += delta_time;
+            } else {
+                door_state.rot -= delta_time;
+            }
+            door_state.rot = door_state.rot.clamp(0.0, f32::PI / 2.0);
+        }
+    }
+}
