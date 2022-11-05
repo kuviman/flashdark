@@ -18,6 +18,13 @@ pub fn loop_sound(sound: &mut geng::Sound) {
     sound.looped = true;
 }
 
+#[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
+#[asset(json)]
+pub struct Config {
+    pub parents: HashMap<String, String>,
+    pub open_interactables: HashSet<String>,
+}
+
 #[derive(geng::Assets)]
 pub struct Assets {
     pub shaders: Shaders,
@@ -44,6 +51,7 @@ pub struct Assets {
     #[asset(path = "MainCreepyToneAmbient.wav", postprocess = "loop_sound")]
     pub music: geng::Sound,
     pub level: LevelData,
+    pub config: Config,
 }
 
 pub enum InteractableType {
@@ -77,6 +85,7 @@ pub struct Interactable {
 
 pub struct LevelData {
     pub obj: Obj,
+    pub item_spawns: HashMap<String, Vec<Vec3<f32>>>,
     pub interactables: Vec<Interactable>,
     pub spawn_point: Vec3<f32>,
 }
@@ -152,6 +161,13 @@ impl geng::LoadAsset for LevelData {
                                 typ: InteractableType::Drawer { shift },
                             });
                         }
+                    }
+                    result
+                },
+                item_spawns: {
+                    let mut result = HashMap::new();
+                    for i in (0..obj.meshes.len()).rev() {
+                        if obj.meshes[i].name.starts_with("Spawn_") {}
                     }
                     result
                 },

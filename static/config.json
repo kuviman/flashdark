@@ -1,0 +1,8 @@
+{
+    "parents": {
+        "child": "parent"
+    },
+    "open_interactables": [
+        "D_DoorWithHandle"
+    ]
+}
