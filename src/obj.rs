@@ -1,7 +1,9 @@
 use super::*;
 
+#[derive(Clone)]
 pub struct Material {
     pub texture: Option<Rc<ugli::Texture>>,
+    pub dark_texture: Option<Rc<ugli::Texture>>,
     pub ambient_color: Rgba<f32>,
     pub diffuse_color: Rgba<f32>,
 }
@@ -9,63 +11,12 @@ pub struct Material {
 pub struct ObjMesh {
     pub name: String,
     pub geometry: ugli::VertexBuffer<geng::obj::Vertex>,
-    pub material: Rc<Material>,
+    pub material: Material,
 }
 
 pub struct Obj {
     pub meshes: Vec<ObjMesh>,
     // pub size: f32,
-}
-
-impl Obj {
-    pub fn plane(geng: &Geng, size: Vec2<f32>, texture: &Rc<ugli::Texture>) -> Self {
-        Self {
-            meshes: vec![ObjMesh {
-                name: "plane".to_owned(),
-                geometry: ugli::VertexBuffer::new_static(
-                    geng.ugli(),
-                    vec![
-                        geng::obj::Vertex {
-                            a_v: vec3(-size.x, -size.y, 0.0),
-                            a_vt: vec2(-1.0, -1.0),
-                            a_vn: vec3(0.0, 0.0, 1.0),
-                        },
-                        geng::obj::Vertex {
-                            a_v: vec3(size.x, -size.y, 0.0),
-                            a_vt: vec2(1.0, -1.0),
-                            a_vn: vec3(0.0, 0.0, 1.0),
-                        },
-                        geng::obj::Vertex {
-                            a_v: vec3(size.x, size.y, 0.0),
-                            a_vt: vec2(1.0, 1.0),
-                            a_vn: vec3(0.0, 0.0, 1.0),
-                        },
-                        geng::obj::Vertex {
-                            a_v: vec3(-size.x, -size.y, 0.0),
-                            a_vt: vec2(-1.0, -1.0),
-                            a_vn: vec3(0.0, 0.0, 1.0),
-                        },
-                        geng::obj::Vertex {
-                            a_v: vec3(size.x, size.y, 0.0),
-                            a_vt: vec2(1.0, 1.0),
-                            a_vn: vec3(0.0, 0.0, 1.0),
-                        },
-                        geng::obj::Vertex {
-                            a_v: vec3(-size.x, size.y, 0.0),
-                            a_vt: vec2(-1.0, 1.0),
-                            a_vn: vec3(0.0, 0.0, 1.0),
-                        },
-                    ],
-                ),
-                material: Rc::new(Material {
-                    texture: Some(texture.clone()),
-                    ambient_color: Rgba::WHITE,
-                    diffuse_color: Rgba::WHITE,
-                }),
-            }],
-            // size: 1.0,
-        }
-    }
 }
 
 #[derive(ugli::Vertex, Debug, Clone)]
@@ -86,13 +37,14 @@ impl geng::LoadAsset for Obj {
             let mut v = Vec::new();
             let mut vn = Vec::new();
             let mut vt = Vec::new();
-            let mut current_material: Option<Rc<Material>> = Some(Rc::new(Material {
+            let mut current_material: Option<Material> = Some(Material {
                 texture: None,
+                dark_texture: None,
                 ambient_color: Rgba::WHITE,
                 diffuse_color: Rgba::WHITE,
-            }));
+            });
             let mut current_geometry = Vec::new();
-            let mut materials = HashMap::<String, Rc<Material>>::new();
+            let mut materials = HashMap::<String, Material>::new();
             for line in obj_source.lines().chain(std::iter::once("o _")) {
                 if line.starts_with("v ") {
                     let mut parts = line.split_whitespace();
@@ -151,7 +103,13 @@ impl geng::LoadAsset for Obj {
                         meshes.push(ObjMesh {
                             name: current_name.clone(),
                             geometry: ugli::VertexBuffer::new_static(geng.ugli(), current_geometry),
-                            material: current_material.clone().unwrap(),
+                            material: {
+                                let mut result = current_material.clone().unwrap();
+                                if current_name.ends_with("_Dark") {
+                                    mem::swap(&mut result.texture, &mut result.dark_texture);
+                                }
+                                result
+                            },
                         });
                         current_geometry = Vec::new();
                     }
@@ -164,6 +122,7 @@ impl geng::LoadAsset for Obj {
                     let mtl_source =
                         <String as geng::LoadAsset>::load(&geng, &dir.join(mtl_path)).await?;
                     let mut current_texture = None;
+                    let mut current_dark_texture = None;
                     let mut current_name = "__unnamed__";
                     let mut current_ambient_color = Rgba::WHITE;
                     let mut current_diffuse_color = Rgba::WHITE;
@@ -178,15 +137,25 @@ impl geng::LoadAsset for Obj {
                                     )
                                     .await?,
                                 );
+                                current_dark_texture = <ugli::Texture as geng::LoadAsset>::load(
+                                    &geng,
+                                    &dir.join(
+                                        texture_path.strip_suffix(".png").unwrap().to_owned()
+                                            + "_Dark.png",
+                                    ),
+                                )
+                                .await
+                                .ok();
                             }
                         } else if let Some(name) = line.strip_prefix("newmtl ") {
                             materials.insert(
                                 current_name.to_owned(),
-                                Rc::new(Material {
+                                Material {
                                     texture: current_texture.take().map(Rc::new),
+                                    dark_texture: current_dark_texture.take().map(Rc::new),
                                     ambient_color: current_ambient_color,
                                     diffuse_color: current_diffuse_color,
-                                }),
+                                },
                             );
                             current_name = name;
                         } else if let Some(color) = line.strip_prefix("Ka ") {

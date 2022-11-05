@@ -21,6 +21,8 @@ pub struct Player {
     pub rot_v: f32,
     pub flashdark_strength: f32,
     pub flashdark_on: bool,
+    pub flashdark_dir: Vec3<f32>,
+    pub flashdark_pos: Vec3<f32>,
 }
 
 struct InteractableState {
@@ -35,6 +37,8 @@ pub struct Game {
     camera: Camera,
     sens: f32,
     white_texture: ugli::Texture,
+    black_texture: ugli::Texture,
+    transparent_black_texture: ugli::Texture,
     player: Player,
     waypoints: Vec<Vec3<f32>>,
     interactables: Vec<InteractableState>,
@@ -100,6 +104,8 @@ impl Game {
                 vel: Vec3::ZERO,
                 rot_h: 0.0,
                 rot_v: 0.0,
+                flashdark_pos: Vec3::ZERO,
+                flashdark_dir: vec3(0.0, 1.0, 0.0),
                 flashdark_on: false,
                 flashdark_strength: 0.0,
             },
@@ -111,6 +117,10 @@ impl Game {
             },
             sens: 0.001,
             white_texture: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| Rgba::WHITE),
+            black_texture: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| Rgba::BLACK),
+            transparent_black_texture: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| {
+                Rgba::TRANSPARENT_BLACK
+            }),
             waypoints,
         }
     }

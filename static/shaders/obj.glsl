@@ -24,15 +24,14 @@ uniform float u_flashdark_strength;
 uniform vec3 u_flashdark_dir;
 uniform vec3 u_flashdark_pos;
 uniform sampler2D u_texture;
+uniform sampler2D u_dark_texture;
 void main() {
     float d = length(v_eye_pos);
     float fog_factor = 1.0 - exp(-d * 0.2) / exp(0.0);
-    vec4 texture_color = texture2D(u_texture, v_uv) * u_color;
+    float flashdarked = smoothstep(cos(u_flashdark_angle), cos(u_flashdark_angle) + 0.1, dot(normalize(v_world_pos - u_flashdark_pos), u_flashdark_dir)) * u_flashdark_strength;
+    vec4 texture_color = (texture2D(u_dark_texture, v_uv) * flashdarked + texture2D(u_texture, v_uv) * (1.0 - flashdarked)) * u_color;
     vec4 fog_color = vec4(0.0, 0.0, 0.0, texture_color.w);
     gl_FragColor = texture_color * (1.0 - fog_factor) + fog_color * fog_factor;
-
-    float flashdarked = smoothstep(cos(u_flashdark_angle), cos(u_flashdark_angle) + 0.1, dot(normalize(v_world_pos - u_flashdark_pos), u_flashdark_dir)) * u_flashdark_strength;
-    gl_FragColor = gl_FragColor * (1.0 - flashdarked) + vec4(1.0 - gl_FragColor.xyz, gl_FragColor.w) * flashdarked;
 
     if (gl_FragColor.w < 0.5) {
         discard;

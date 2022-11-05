@@ -80,5 +80,41 @@ impl Game {
         self.player.flashdark_strength = (self.player.flashdark_strength
             + if self.player.flashdark_on { 1.0 } else { -1.0 } * delta_time / 0.3)
             .clamp(0.0, 1.0);
+
+        self.camera.pos = self.player.pos + vec3(0.0, 0.0, 1.0);
+        self.camera.rot_h = self.player.rot_h;
+        self.camera.rot_v = self.player.rot_v;
+
+        let mut ray = self
+            .camera
+            .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0);
+        ray.dir = ray.dir.normalize_or_zero();
+
+        let mut look_at_t =
+            intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray).unwrap_or(1e9);
+        for (data, state) in izip![&self.assets.level.interactables, &self.interactables] {
+            let mut highlight = false;
+            if let Some(t) = intersect_ray_with_obj(&data.obj, data.typ.matrix(state.progress), ray)
+            {
+                if t < look_at_t {
+                    look_at_t = t;
+                }
+            }
+        }
+
+        fn nlerp(a: Vec3<f32>, b: Vec3<f32>, t: f32) -> Vec3<f32> {
+            (a * (1.0 - t) + b * t).normalize_or_zero()
+        }
+        let new_dir =
+            (ray.from + ray.dir * look_at_t - self.player.flashdark_pos).normalize_or_zero();
+        if Vec3::dot(new_dir, self.player.flashdark_dir) < 0.0 {
+            self.player.flashdark_dir = new_dir;
+        } else {
+            self.player.flashdark_dir = nlerp(
+                self.player.flashdark_dir,
+                new_dir,
+                (delta_time / 0.1).min(1.0),
+            );
+        }
     }
 }
