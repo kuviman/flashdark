@@ -91,8 +91,11 @@ impl Game {
                 .level
                 .interactables
                 .iter()
-                .map(|_| InteractableState {
-                    open: false,
+                .map(|interactable| InteractableState {
+                    open: assets
+                        .config
+                        .open_interactables
+                        .contains(&interactable.obj.meshes[0].name),
                     progress: 0.0,
                 })
                 .collect(),
