@@ -41,7 +41,7 @@ pub fn intersect_ray_with_obj(mesh: &Obj, matrix: Mat4<f32>, ray: geng::CameraRa
 }
 
 pub fn vector_from_triangle(tri: [Vec3<f32>; 3], p: Vec3<f32>) -> Vec3<f32> {
-    let mut options = vec![];
+    let mut options = vec![]; // TODO: optimize
     for v in tri {
         options.push(p - v);
     }

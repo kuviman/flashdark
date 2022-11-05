@@ -14,9 +14,13 @@ use logic::*;
 use obj::*;
 use util::*;
 
-struct Player {
-    pos: Vec3<f32>,
-    vel: Vec3<f32>,
+pub struct Player {
+    pub pos: Vec3<f32>,
+    pub vel: Vec3<f32>,
+    pub rot_h: f32,
+    pub rot_v: f32,
+    pub flashdark_strength: f32,
+    pub flashdark_on: bool,
 }
 
 struct InteractableState {
@@ -94,6 +98,10 @@ impl Game {
             player: Player {
                 pos: assets.level.spawn_point,
                 vel: Vec3::ZERO,
+                rot_h: 0.0,
+                rot_v: 0.0,
+                flashdark_on: false,
+                flashdark_strength: 0.0,
             },
             camera: Camera {
                 pos: assets.level.spawn_point,
@@ -119,33 +127,42 @@ impl geng::State for Game {
 
     fn handle_event(&mut self, event: geng::Event) {
         match event {
-            geng::Event::MouseDown { .. } => {
+            geng::Event::MouseDown { button, .. } => {
                 self.geng.window().lock_cursor();
 
-                let mut ray = self
-                    .camera
-                    .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0);
-                ray.dir = ray.dir.normalize_or_zero();
-                let max_t = intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray)
-                    .unwrap_or(1e9);
-                for (door_data, door_state) in
-                    izip![&self.assets.level.interactables, &mut self.interactables]
-                {
-                    if let Some(t) = intersect_ray_with_obj(
-                        &door_data.obj,
-                        door_data.typ.matrix(door_state.progress),
-                        ray,
-                    ) {
-                        if t < max_t {
-                            door_state.open = !door_state.open;
+                match button {
+                    geng::MouseButton::Left => {
+                        let mut ray = self
+                            .camera
+                            .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0);
+                        ray.dir = ray.dir.normalize_or_zero();
+                        let max_t =
+                            intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray)
+                                .unwrap_or(1e9);
+                        for (door_data, door_state) in
+                            izip![&self.assets.level.interactables, &mut self.interactables]
+                        {
+                            if let Some(t) = intersect_ray_with_obj(
+                                &door_data.obj,
+                                door_data.typ.matrix(door_state.progress),
+                                ray,
+                            ) {
+                                if t < max_t {
+                                    door_state.open = !door_state.open;
+                                }
+                            }
                         }
                     }
+                    geng::MouseButton::Right => {
+                        self.player.flashdark_on = !self.player.flashdark_on;
+                    }
+                    _ => {}
                 }
             }
             geng::Event::MouseMove { position, delta } => {
                 let delta = delta.map(|x| x as f32);
-                self.camera.rot_h -= delta.x * self.sens;
-                self.camera.rot_v = (self.camera.rot_v + delta.y * self.sens)
+                self.player.rot_h -= delta.x * self.sens;
+                self.player.rot_v = (self.player.rot_v + delta.y * self.sens)
                     .clamp(Camera::MIN_ROT_V, Camera::MAX_ROT_V);
             }
             geng::Event::KeyDown { key: geng::Key::J } => {

@@ -1,5 +1,6 @@
 varying vec2 v_uv;
 varying vec3 v_eye_pos;
+varying vec3 v_world_pos;
 
 #ifdef VERTEX_SHADER
 attribute vec3 a_v;
@@ -10,13 +11,18 @@ uniform mat4 u_view_matrix;
 uniform mat4 u_model_matrix;
 void main() {
     v_uv = a_vt;
-    v_eye_pos = (u_view_matrix * u_model_matrix * vec4(a_v, 1.0)).xyz;
+    v_world_pos = (u_model_matrix * vec4(a_v, 1.0)).xyz;
+    v_eye_pos = (u_view_matrix * vec4(v_world_pos, 1.0)).xyz;
     gl_Position = u_projection_matrix * vec4(v_eye_pos, 1.0);
 }
 #endif
 
 #ifdef FRAGMENT_SHADER
 uniform vec4 u_color;
+uniform float u_flashdark_angle;
+uniform float u_flashdark_strength;
+uniform vec3 u_flashdark_dir;
+uniform vec3 u_flashdark_pos;
 uniform sampler2D u_texture;
 void main() {
     float d = length(v_eye_pos);
@@ -24,6 +30,9 @@ void main() {
     vec4 texture_color = texture2D(u_texture, v_uv) * u_color;
     vec4 fog_color = vec4(0.0, 0.0, 0.0, texture_color.w);
     gl_FragColor = texture_color * (1.0 - fog_factor) + fog_color * fog_factor;
+
+    float flashdarked = smoothstep(cos(u_flashdark_angle), cos(u_flashdark_angle) + 0.1, dot(normalize(v_world_pos - u_flashdark_pos), u_flashdark_dir)) * u_flashdark_strength;
+    gl_FragColor = gl_FragColor * (1.0 - flashdarked) + vec4(1.0 - gl_FragColor.xyz, gl_FragColor.w) * flashdarked;
 
     if (gl_FragColor.w < 0.5) {
         discard;

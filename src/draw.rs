@@ -6,6 +6,8 @@ impl Game {
         ugli::clear(framebuffer, Some(Rgba::BLACK), Some(1.0), None);
 
         self.camera.pos = self.player.pos + vec3(0.0, 0.0, 1.0);
+        self.camera.rot_h = self.player.rot_h;
+        self.camera.rot_v = self.player.rot_v;
         self.draw_obj(
             framebuffer,
             &self.assets.level.obj,
@@ -202,6 +204,10 @@ impl Game {
                 &mesh.geometry,
                 (
                     ugli::uniforms! {
+                        u_flashdark_pos: self.player.pos + vec2(-0.2, 0.0).rotate(self.player.rot_h).extend(0.8),
+                        u_flashdark_dir: (Mat4::rotate_z(self.player.rot_h) * Mat4::rotate_x(self.player.rot_v) * vec4(0.0, 1.0, 0.0, 1.0)).xyz(),
+                        u_flashdark_angle: f32::PI / 6.0,
+                        u_flashdark_strength: self.player.flashdark_strength,
                         u_model_matrix: matrix,
                         u_color: color,
                         u_texture: mesh.material.texture.as_deref().unwrap_or(&self.white_texture),

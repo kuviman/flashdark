@@ -51,14 +51,14 @@ impl Game {
 
         self.player.pos += self.player.vel * delta_time;
 
-        for _ in 0..3 {
+        for _ in 0..1 {
             let mut check = |obj: &Obj, matrix: Mat4<f32>| {
                 let v = vector_from_obj(obj, matrix, self.player.pos);
                 let radius = 0.25;
                 if v.len() < radius {
                     let n = v.normalize_or_zero();
                     self.player.vel -= n * Vec3::dot(n, self.player.vel);
-                    self.player.pos += v.normalize_or_zero() * (radius - v.len());
+                    self.player.pos += n * (radius - v.len());
                 }
             };
             check(&self.assets.level.obj, Mat4::identity());
@@ -76,5 +76,9 @@ impl Game {
             }
             state.progress = state.progress.clamp(0.0, 1.0);
         }
+
+        self.player.flashdark_strength = (self.player.flashdark_strength
+            + if self.player.flashdark_on { 1.0 } else { -1.0 } * delta_time / 0.3)
+            .clamp(0.0, 1.0);
     }
 }
