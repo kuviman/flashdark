@@ -333,7 +333,7 @@ fn main() {
         geng::LoadingScreen::new(
             &geng,
             geng::EmptyLoadingScreen,
-            <Assets as geng::LoadAsset>::load(&geng, &static_path()),
+            <Assets as geng::LoadAsset>::load(&geng, &static_path().join("assets")),
             {
                 let geng = geng.clone();
                 move |assets| Game::new(&geng, &Rc::new(assets.unwrap()))
