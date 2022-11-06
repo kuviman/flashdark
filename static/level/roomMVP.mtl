@@ -1,5 +1,5 @@
 # Blender MTL File: 'roomMVP.blend'
-# Material Count: 11
+# Material Count: 12
 
 newmtl CeilingMat
 Ns 225.000000
@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd CeilingTexture.png
+map_Kd -s 0.500000 0.500000 0.500000 CeilingTexture.png
 
 newmtl ClosetMat
 Ns 225.000000
@@ -68,6 +68,17 @@ d 1.000000
 illum 2
 map_Kd FridgeTexture.png
 
+newmtl GrassMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 20.000000 20.000000 20.000000 GrassTexture.png
+
 newmtl Item2DMat1
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
@@ -119,4 +130,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd MuddyWallTexture.png
+map_Kd -s 1.000000 1.000000 0.500000 MuddyWallTexture.png
