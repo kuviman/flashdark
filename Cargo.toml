@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 geng = { git = "https://github.com/kuviman/geng" }
-serde = { version = "1", features = ["rc"] }
+serde = { version = "1" }
 noise = "0.7"
 
 [build-dependencies]
