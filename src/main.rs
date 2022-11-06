@@ -29,6 +29,7 @@ pub struct Player {
 struct InteractableState {
     open: bool,
     progress: f32,
+    data: Rc<InteractableData>,
 }
 
 pub struct Game {
@@ -50,7 +51,7 @@ pub struct Game {
 pub struct Item {
     pub name: String,
     pub mesh_index: usize,
-    pub parent_interactable: Option<usize>,
+    pub parent_interactable: Option<String>,
     pub pos: Vec3<f32>,
 }
 
@@ -108,7 +109,7 @@ impl Game {
                 .flat_map(|(name, data)| {
                     data.spawns.iter().enumerate().map(|(index, data)| Item {
                         name: name.clone(),
-                        parent_interactable: data.parent_interactable,
+                        parent_interactable: data.parent_interactable.clone(),
                         mesh_index: index,
                         pos: data.pos,
                     })
@@ -143,12 +144,19 @@ impl Game {
                 .level
                 .interactables
                 .iter()
-                .map(|interactable| InteractableState {
-                    open: assets
-                        .config
-                        .open_interactables
-                        .contains(&interactable.obj.meshes[0].name),
-                    progress: 0.0,
+                .filter_map(|data| {
+                    let config = assets.config.interactables.get(&data.obj.meshes[0].name);
+                    if config.map_or(false, |config| config.hidden) {
+                        return None;
+                    }
+                    Some(InteractableState {
+                        open: assets
+                            .config
+                            .open_interactables
+                            .contains(&data.obj.meshes[0].name),
+                        progress: 0.0,
+                        data: data.clone(),
+                    })
                 })
                 .collect(),
             framebuffer_size: vec2(1.0, 1.0),
@@ -205,12 +213,10 @@ impl geng::State for Game {
                         let mut look_at_t =
                             intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray)
                                 .unwrap_or(1e9);
-                        for (data, state) in
-                            izip![&self.assets.level.interactables, &self.interactables]
-                        {
+                        for interactable in &self.interactables {
                             if let Some(t) = intersect_ray_with_obj(
-                                &data.obj,
-                                data.typ.matrix(state.progress),
+                                &interactable.data.obj,
+                                interactable.data.typ.matrix(interactable.progress),
                                 ray,
                             ) {
                                 if t < look_at_t {
@@ -223,11 +229,13 @@ impl geng::State for Game {
                             // TODO: copypasta
                             let data = &self.assets.level.items[&item.name].spawns[item.mesh_index];
                             let mut matrix = Mat4::translate(item.pos);
-                            if let Some(index) = item.parent_interactable {
-                                matrix = self.assets.level.interactables[index]
-                                    .typ
-                                    .matrix(self.interactables[index].progress)
-                                    * matrix;
+                            if let Some(parent) = &item.parent_interactable {
+                                let parent = self
+                                    .interactables
+                                    .iter()
+                                    .find(|inter| inter.data.obj.meshes[0].name == *parent)
+                                    .unwrap();
+                                matrix = parent.data.typ.matrix(parent.progress) * matrix;
                             }
                             let see = || -> bool {
                                 let pos = (matrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz();
@@ -250,16 +258,47 @@ impl geng::State for Game {
                                 return;
                             }
                         }
-                        for (door_data, door_state) in
-                            izip![&self.assets.level.interactables, &mut self.interactables]
-                        {
+                        for (index, interactable) in self.interactables.iter_mut().enumerate() {
+                            let config = self
+                                .assets
+                                .config
+                                .interactables
+                                .get(&interactable.data.obj.meshes[0].name);
+                            if let Some(config) = config {
+                                if let Some(requirement) = &config.require_item {
+                                    if self.player.item.as_ref() != Some(requirement) {
+                                        continue;
+                                    }
+                                }
+                            }
                             if let Some(t) = intersect_ray_with_obj(
-                                &door_data.obj,
-                                door_data.typ.matrix(door_state.progress),
+                                &interactable.data.obj,
+                                interactable.data.typ.matrix(interactable.progress),
                                 ray,
                             ) {
                                 if t <= look_at_t + EPS {
-                                    door_state.open = !door_state.open;
+                                    interactable.open = !interactable.open;
+                                    if config.map_or(false, |config| config.use_item) {
+                                        self.player.item = None;
+                                    }
+                                    if let Some(transform) =
+                                        config.and_then(|config| config.transform_on_use.as_deref())
+                                    {
+                                        self.interactables.remove(index);
+                                        let new_object = self
+                                            .assets
+                                            .level
+                                            .interactables
+                                            .iter()
+                                            .find(|data| data.obj.meshes[0].name == transform)
+                                            .unwrap();
+                                        self.interactables.push(InteractableState {
+                                            open: false,
+                                            progress: 0.0,
+                                            data: new_object.clone(),
+                                        });
+                                        break;
+                                    }
                                 }
                             }
                         }

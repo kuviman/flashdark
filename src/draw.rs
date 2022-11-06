@@ -16,9 +16,12 @@ impl Game {
 
         let mut look_at_t =
             intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray).unwrap_or(1e9);
-        for (data, state) in izip![&self.assets.level.interactables, &self.interactables] {
-            if let Some(t) = intersect_ray_with_obj(&data.obj, data.typ.matrix(state.progress), ray)
-            {
+        for interactable in &self.interactables {
+            if let Some(t) = intersect_ray_with_obj(
+                &interactable.data.obj,
+                interactable.data.typ.matrix(interactable.progress),
+                ray,
+            ) {
                 if t < look_at_t {
                     look_at_t = t;
                 }
@@ -51,18 +54,21 @@ impl Game {
             .camera
             .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0);
         ray.dir = ray.dir.normalize_or_zero();
-        for (data, state) in izip![&self.assets.level.interactables, &self.interactables] {
+        for interactable in &self.interactables {
             let mut highlight = false;
-            if let Some(t) = intersect_ray_with_obj(&data.obj, data.typ.matrix(state.progress), ray)
-            {
+            if let Some(t) = intersect_ray_with_obj(
+                &interactable.data.obj,
+                interactable.data.typ.matrix(interactable.progress),
+                ray,
+            ) {
                 if t <= look_at_t + EPS {
                     highlight = true;
                 }
             }
             self.draw_obj(
                 framebuffer,
-                &data.obj,
-                data.typ.matrix(state.progress),
+                &interactable.data.obj,
+                interactable.data.typ.matrix(interactable.progress),
                 if highlight {
                     Rgba::new(0.8, 0.8, 1.0, 1.0)
                 } else {
@@ -82,11 +88,13 @@ impl Game {
                 .unwrap_or(texture);
 
             let mut matrix = Mat4::translate(item.pos);
-            if let Some(index) = item.parent_interactable {
-                matrix = self.assets.level.interactables[index]
-                    .typ
-                    .matrix(self.interactables[index].progress)
-                    * matrix;
+            if let Some(parent) = &item.parent_interactable {
+                let parent = self
+                    .interactables
+                    .iter()
+                    .find(|inter| inter.data.obj.meshes[0].name == *parent) // TODO: this is slow
+                    .unwrap();
+                matrix = parent.data.typ.matrix(parent.progress) * matrix;
             }
 
             let highlight = || -> bool {

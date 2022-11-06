@@ -62,8 +62,11 @@ impl Game {
                 }
             };
             check(&self.assets.level.obj, Mat4::identity());
-            for (data, state) in izip![&self.assets.level.interactables, &self.interactables] {
-                check(&data.obj, data.typ.matrix(state.progress));
+            for interactable in &self.interactables {
+                check(
+                    &interactable.data.obj,
+                    interactable.data.typ.matrix(interactable.progress),
+                );
             }
         }
 

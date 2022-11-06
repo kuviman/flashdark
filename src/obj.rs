@@ -130,6 +130,7 @@ impl geng::LoadAsset for Obj {
                     let mut current_diffuse_color = Rgba::WHITE;
                     for line in mtl_source.lines().chain(std::iter::once("newmtl _")) {
                         if let Some(texture_path) = line.strip_prefix("map_Kd ") {
+                            let texture_path = texture_path.split_whitespace().last().unwrap();
                             // WTF .
                             if texture_path != "." {
                                 current_texture = Some(
@@ -139,6 +140,9 @@ impl geng::LoadAsset for Obj {
                                     )
                                     .await?,
                                 );
+                                if let Some(texture) = &mut current_texture {
+                                    make_repeated(texture);
+                                }
                                 current_dark_texture = <ugli::Texture as geng::LoadAsset>::load(
                                     &geng,
                                     &dir.join(
@@ -148,6 +152,9 @@ impl geng::LoadAsset for Obj {
                                 )
                                 .await
                                 .ok();
+                                if let Some(texture) = &mut current_dark_texture {
+                                    make_repeated(texture);
+                                }
                             }
                         } else if let Some(name) = line.strip_prefix("newmtl ") {
                             let name = name.trim();

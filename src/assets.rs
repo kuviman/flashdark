@@ -11,11 +11,24 @@ pub struct Shaders {
 }
 
 pub fn make_repeated(texture: &mut ugli::Texture) {
-    texture.set_wrap_mode(ugli::WrapMode::Repeat);
+    if texture.is_pot() {
+        texture.set_wrap_mode(ugli::WrapMode::Repeat);
+    }
 }
 
 pub fn loop_sound(sound: &mut geng::Sound) {
     sound.looped = true;
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct InteractableConfig {
+    pub require_item: Option<String>,
+    #[serde(default)]
+    pub use_item: bool,
+    pub transform_on_use: Option<String>,
+    pub give_item: Option<String>,
+    #[serde(default)]
+    pub hidden: bool,
 }
 
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
@@ -23,6 +36,7 @@ pub fn loop_sound(sound: &mut geng::Sound) {
 pub struct Config {
     pub parents: HashMap<String, String>,
     pub open_interactables: HashSet<String>,
+    pub interactables: HashMap<String, InteractableConfig>,
 }
 
 #[derive(geng::Assets)]
@@ -78,7 +92,7 @@ impl InteractableType {
     }
 }
 
-pub struct Interactable {
+pub struct InteractableData {
     pub obj: Obj,
     pub typ: InteractableType,
 }
@@ -86,7 +100,7 @@ pub struct Interactable {
 pub struct ItemSpawnData {
     pub mesh: ObjMesh,
     pub pos: Vec3<f32>,
-    pub parent_interactable: Option<usize>,
+    pub parent_interactable: Option<String>,
 }
 
 pub struct ItemData {
@@ -97,7 +111,7 @@ pub struct ItemData {
 pub struct LevelData {
     pub obj: Obj,
     pub items: HashMap<String, ItemData>,
-    pub interactables: Vec<Interactable>,
+    pub interactables: Vec<Rc<InteractableData>>,
     pub spawn_point: Vec3<f32>,
 }
 
@@ -107,6 +121,19 @@ impl geng::LoadAsset for LevelData {
         let path = path.to_owned();
         async move {
             let mut obj = <Obj as geng::LoadAsset>::load(&geng, &path.join("roomMVP.obj")).await?;
+
+            for mesh in &mut obj.meshes {
+                if mesh.name == "S_Grass_Plane" {
+                    for v in mesh.geometry.iter_mut() {
+                        v.a_vt = v.a_v.xy() / 2.0;
+                    }
+                }
+                if mesh.name == "S_Walls" {
+                    for v in mesh.geometry.iter_mut() {
+                        v.a_vt = vec2((v.a_v.x + v.a_v.y) / 2.0, v.a_v.z / 2.0);
+                    }
+                }
+            }
 
             let mut interactables = Vec::new();
             for i in (0..obj.meshes.len()).rev() {
@@ -118,7 +145,7 @@ impl geng::LoadAsset for LevelData {
                         .max_by_key(|v| r32(v.a_vt.x))
                         .unwrap()
                         .a_v;
-                    interactables.push(Interactable {
+                    interactables.push(InteractableData {
                         obj: Obj { meshes: vec![mesh] },
                         typ: InteractableType::RDoor { pivot },
                     });
@@ -131,7 +158,7 @@ impl geng::LoadAsset for LevelData {
                         .min_by_key(|v| r32(v.a_vt.x))
                         .unwrap()
                         .a_v;
-                    interactables.push(Interactable {
+                    interactables.push(InteractableData {
                         obj: Obj { meshes: vec![mesh] },
                         typ: InteractableType::LDoor { pivot },
                     });
@@ -149,7 +176,7 @@ impl geng::LoadAsset for LevelData {
                     )
                     .normalize_or_zero()
                         * 0.3;
-                    interactables.push(Interactable {
+                    interactables.push(InteractableData {
                         obj: Obj { meshes: vec![mesh] },
                         typ: InteractableType::Drawer { shift },
                     });
@@ -158,7 +185,11 @@ impl geng::LoadAsset for LevelData {
 
             let mut items = HashMap::<String, ItemData>::new();
             for i in (0..obj.meshes.len()).rev() {
-                if obj.meshes[i].name.starts_with("Spawn_") {
+                if let Some(mut name) = obj.meshes[i].name.strip_prefix("Spawn_") {
+                    if let Some(index) = name.find('.') {
+                        name = &name[..index];
+                    }
+                    let name = name.to_owned();
                     let mut mesh = obj.meshes.remove(i);
                     let mut sum = Vec3::ZERO;
                     for v in mesh.geometry.iter() {
@@ -169,7 +200,7 @@ impl geng::LoadAsset for LevelData {
                         v.a_v -= center;
                     }
                     items
-                        .entry(mesh.material.name.clone())
+                        .entry(name)
                         .or_insert(ItemData {
                             spawns: vec![],
                             texture_aabb: AABB::points_bounding_box(
@@ -203,7 +234,7 @@ impl geng::LoadAsset for LevelData {
                                         && min.z < center.z
                                         && center.z < max.z
                                     {
-                                        return Some(index);
+                                        return Some(inter.obj.meshes[0].name.clone());
                                     }
                                     None
                                 },
@@ -226,7 +257,7 @@ impl geng::LoadAsset for LevelData {
                     }
                     sum / mesh.geometry.len() as f32
                 },
-                interactables,
+                interactables: interactables.into_iter().map(Rc::new).collect(),
                 items,
                 obj,
             })
