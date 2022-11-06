@@ -25,18 +25,26 @@ pub fn intersect_ray_with_triangle(tri: [Vec3<f32>; 3], ray: geng::CameraRay) ->
     Some(t)
 }
 
-pub fn intersect_ray_with_obj(mesh: &Obj, matrix: Mat4<f32>, ray: geng::CameraRay) -> Option<f32> {
-    mesh.meshes
-        .iter()
-        .flat_map(|mesh| {
-            mesh.geometry.chunks(3).flat_map(|tri| {
-                intersect_ray_with_triangle(
-                    [tri[0].a_v, tri[1].a_v, tri[2].a_v]
-                        .map(|pos| (matrix * pos.extend(1.0)).xyz()),
-                    ray,
-                )
-            })
+pub fn intersect_ray_with_mesh(
+    mesh: &ObjMesh,
+    matrix: Mat4<f32>,
+    ray: geng::CameraRay,
+) -> Option<f32> {
+    mesh.geometry
+        .chunks(3)
+        .flat_map(|tri| {
+            intersect_ray_with_triangle(
+                [tri[0].a_v, tri[1].a_v, tri[2].a_v].map(|pos| (matrix * pos.extend(1.0)).xyz()),
+                ray,
+            )
         })
+        .min_by_key(|&x| r32(x))
+}
+
+pub fn intersect_ray_with_obj(obj: &Obj, matrix: Mat4<f32>, ray: geng::CameraRay) -> Option<f32> {
+    obj.meshes
+        .iter()
+        .flat_map(|mesh| intersect_ray_with_mesh(mesh, matrix, ray))
         .min_by_key(|&x| r32(x))
 }
 
