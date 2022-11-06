@@ -92,6 +92,9 @@ impl Game {
     }
 
     pub fn handle_event_camera(&mut self, event: &geng::Event) {
+        if !self.geng.window().cursor_locked() {
+            return;
+        }
         if let geng::Event::MouseMove { delta, .. } = *event {
             let delta = delta.map(|x| x as f32);
             self.player.rot_h -= delta.x * self.sens;
