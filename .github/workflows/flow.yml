@@ -2,7 +2,7 @@ name: CI
 on: push
 
 jobs:
-  build:
+  build-web:
     name: Build
     runs-on: ubuntu-latest
     container: kuviman/geng
@@ -16,12 +16,49 @@ jobs:
           name: web
           path: target/geng
 
+  build-native:
+    name: Build (Native)
+    runs-on: ${{ matrix.platform.runs-on }}
+    strategy:
+      matrix:
+        platform:
+          - runs-on: ubuntu-latest
+            channel: linux
+          - runs-on: macos-latest
+            channel: mac
+          - runs-on: windows-latest
+            channel: windows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install things
+        if: matrix.platform.channel == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      - name: Install cargo-geng
+        run: cargo install cargo-geng --git https://github.com/kuviman/geng
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: geng
+          args: build --release
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.platform.channel }}
+          path: target/geng
+
   deploy:
     name: Deploy
     if: github.ref == 'refs/heads/main' && github.repository_owner == 'kuviman'
     runs-on: ubuntu-latest
     needs:
-      - build
+      - build-web
+      - build-native
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
@@ -33,3 +70,27 @@ jobs:
           itchUsername: kuviman
           itchGameId: flashdark
           buildChannel: html5
+      - name: Upload itch.io (Windows)
+        uses: KikimoraGames/itch-publish@v0.0.3
+        with:
+          butlerApiKey: ${{secrets.BUTLER_CREDENTIALS}}
+          gameData: windows
+          itchUsername: kuviman
+          itchGameId: flashdark
+          buildChannel: windows
+      - name: Upload itch.io (Linux)
+        uses: KikimoraGames/itch-publish@v0.0.3
+        with:
+          butlerApiKey: ${{secrets.BUTLER_CREDENTIALS}}
+          gameData: linux
+          itchUsername: kuviman
+          itchGameId: flashdark
+          buildChannel: linux
+      - name: Upload itch.io (MacOS)
+        uses: KikimoraGames/itch-publish@v0.0.3
+        with:
+          butlerApiKey: ${{secrets.BUTLER_CREDENTIALS}}
+          gameData: mac
+          itchUsername: kuviman
+          itchGameId: flashdark
+          buildChannel: mac
