@@ -147,7 +147,10 @@ impl geng::State for Game {
         // TODO: remove
         match event {
             geng::Event::KeyDown { key: geng::Key::J } => {
-                self.assets.jumpscare.play();
+                let mut effect = self.assets.jumpscare.effect();
+                effect.set_position(Vec3::ZERO);
+                effect.set_max_distance(5.0);
+                effect.play();
             }
             _ => {}
         }
