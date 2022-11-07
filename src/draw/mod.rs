@@ -78,7 +78,7 @@ impl Game {
 
         self.draw_monster(framebuffer);
 
-        // self.draw_debug_navmesh(framebuffer);
+        self.draw_debug_navmesh(framebuffer);
 
         let camera2d = geng::Camera2d {
             center: Vec2::ZERO,

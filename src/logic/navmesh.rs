@@ -140,15 +140,33 @@ impl Game {
                 edges[u].push(v);
             }
         }
+        let result = NavMesh {
+            waypoints,
+            edges,
+            // debug_obj,
+        };
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            serde_json::to_writer(
+                std::fs::File::create(static_path().join("assets").join("navmesh.json")).unwrap(),
+                &result,
+            )
+            .unwrap();
+        }
+        result
+    }
+
+    pub fn draw_debug_navmesh(&self, framebuffer: &mut ugli::Framebuffer) {
+        return;
         let debug_obj = Obj {
             meshes: vec![ObjMesh {
                 name: "debug navmesh".to_owned(),
-                geometry: ugli::VertexBuffer::new_static(geng.ugli(), {
+                geometry: ugli::VertexBuffer::new_static(self.geng.ugli(), {
                     let mut vs = Vec::new();
-                    for v in 0..waypoints.len() {
-                        for u in edges[v].iter().copied() {
-                            let v = waypoints[v];
-                            let u = waypoints[u];
+                    for v in 0..self.navmesh.waypoints.len() {
+                        for u in self.navmesh.edges[v].iter().copied() {
+                            let v = self.navmesh.waypoints[v];
+                            let u = self.navmesh.waypoints[u];
                             let n = (v.xy() - u.xy())
                                 .rotate_90()
                                 .normalize_or_zero()
@@ -180,28 +198,11 @@ impl Game {
                 },
             }],
         };
-        let result = NavMesh {
-            waypoints,
-            edges,
-            // debug_obj,
-        };
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            serde_json::to_writer(
-                std::fs::File::create(static_path().join("assets").join("navmesh.json")).unwrap(),
-                &result,
-            )
-            .unwrap();
-        }
-        result
-    }
-
-    pub fn draw_debug_navmesh(&self, framebuffer: &mut ugli::Framebuffer) {
-        // self.draw_obj(
-        //     framebuffer,
-        //     &self.navmesh.debug_obj,
-        //     Mat4::identity(),
-        //     Rgba::new(1.0, 1.0, 1.0, 0.3),
-        // );
+        self.draw_obj(
+            framebuffer,
+            &debug_obj,
+            Mat4::identity(),
+            Rgba::new(1.0, 1.0, 1.0, 0.3),
+        );
     }
 }
