@@ -7,8 +7,10 @@ impl geng::LoadAsset for LevelData {
         async move {
             let mut obj = <Obj as geng::LoadAsset>::load(&geng, &path.join("roomMVP.obj")).await?;
 
+            obj.meshes.retain(|mesh| !mesh.name.starts_with("RDC_")); // TODO rooms
+
             for mesh in &mut obj.meshes {
-                if mesh.name == "S_Grass_Plane" {
+                if mesh.name == "S_Grass" {
                     for v in mesh.geometry.iter_mut() {
                         v.a_vt = v.a_v.xy() / 2.0;
                     }

@@ -46,19 +46,19 @@
     },
     "rooms": {
         "RDC_Bathroom": {
-            "connections":[
+            "connections": [
                 "RDC_LivingRoom1"
             ]
         },
         "RDC_DiningRoom": {
-            "connections":[
+            "connections": [
                 "RDC_LivingRoom1",
                 "RDC_LivingRoom2",
                 "RDC_Kitchen"
             ]
         },
         "RDC_EastCorridor1": {
-            "connections":[
+            "connections": [
                 "RDC_PlayRoom",
                 "RDC_Storage",
                 "RDC_StairsLevel1",
@@ -66,28 +66,28 @@
             ]
         },
         "RDC_Entrance": {
-            "connections":[
+            "connections": [
                 "RDC_LivingRoom1"
             ]
         },
         "RDC_GuestRoom": {
-            "connections":[
+            "connections": [
                 "RDC_WestCorridor1"
             ]
         },
         "RDC_Kitchen": {
-            "connections":[
+            "connections": [
                 "RDC_DiningRoom",
                 "RDC_StairsLevel1"
             ]
         },
         "RDC_Library": {
-            "connections":[
+            "connections": [
                 "RDC_WestCorridor1"
             ]
         },
         "RDC_LivingRoom1": {
-            "connections":[
+            "connections": [
                 "RDC_Entrance",
                 "RDC_DiningRoom",
                 "RDC_Bathroom",
@@ -95,7 +95,7 @@
             ]
         },
         "RDC_LivingRoom2": {
-            "connections":[
+            "connections": [
                 "RDC_DiningRoom",
                 "RDC_LivingRoom1",
                 "RDC_EastCorridor1",
@@ -103,33 +103,29 @@
             ]
         },
         "RDC_PlayRoom": {
-            "connections":[
+            "connections": [
                 "RDC_EastCorridor1"
             ]
         },
         "RDC_StairsLevel1": {
-            "connections":[
+            "connections": [
                 "RDC_Kitchen",
                 "RDC_EastCorridor1"
             ]
         },
         "RDC_Storage": {
-            "connections":[
-                "RDC_EastCorridor1"
-            ]
-        },
-        "RDC_Storage": {
-            "connections":[
+            "connections": [
+                "RDC_EastCorridor1",
                 "RDC_WestCorridor1"
             ]
         },
         "RDC_WestCorridor1": {
-            "connections":[
+            "connections": [
                 "RDC_GuestRoom",
                 "RDC_StudyRoom",
                 "RDC_Library",
                 "RDC_LivingRoom2"
             ]
-        },
+        }
     }
 }
