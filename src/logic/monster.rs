@@ -5,6 +5,7 @@ pub struct Monster {
     pub dir: Vec3<f32>,
     pub next_pathfind_pos: Vec3<f32>,
     pub next_target_pos: Vec3<f32>,
+    pub speed: f32,
 }
 
 impl Monster {
@@ -15,6 +16,7 @@ impl Monster {
             dir: vec3(0.0, -1.0, 0.0),
             next_pathfind_pos: pos,
             next_target_pos: pos,
+            speed: 1.0,
         }
     }
 }
@@ -42,24 +44,38 @@ impl Game {
         }
         true
     }
+    pub fn monster_walk_to(&mut self, pos: Vec3<f32>, player: bool) {
+        self.monster.next_target_pos = self.navmesh.waypoints[self.navmesh.closest_waypoint(pos)];
+        self.monster.next_pathfind_pos = self.monster.pos;
+        if player {
+            let s = 0.5;
+            let s_speed = 5.0;
+            let t = 3.0;
+            let t_speed = 1.0;
+            let k = (((pos - self.monster.pos).len() - s) / (t - s)).clamp(0.0, 1.0);
+            self.monster.speed = s_speed * (1.0 - k) + t_speed * k;
+        } else {
+            self.monster.speed = 1.0;
+        }
+    }
     pub fn update_monster(&mut self, delta_time: f32) {
         if (self.monster.pos - self.monster.next_target_pos).len() < 0.1 {
-            self.monster.next_target_pos =
-                *self.navmesh.waypoints.choose(&mut global_rng()).unwrap();
-            self.monster.next_pathfind_pos = self.monster.pos;
+            self.monster_walk_to(
+                *self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
+                false,
+            );
         }
         if self.player.flashdark_on {
-            self.monster.next_target_pos =
-                self.navmesh.waypoints[self.navmesh.closest_waypoint(self.player.pos)];
-            self.monster.next_pathfind_pos = self.monster.pos;
+            self.monster_walk_to(self.player.pos, true);
         }
         if self.monster_sees_player() {
-            self.monster.next_target_pos =
-                self.navmesh.waypoints[self.navmesh.closest_waypoint(self.player.pos)];
-            self.monster.next_pathfind_pos = self.monster.pos;
+            self.monster_walk_to(self.player.pos, true);
         }
         if (self.monster.pos - self.player.pos).len() < 0.5 {
-            self.monster = Monster::new(&self.assets, &self.navmesh);
+            self.transision = Some(geng::Transition::Switch(Box::new(Game::new(
+                &self.geng,
+                &self.assets,
+            ))));
         }
         if (self.monster.pos - self.monster.next_pathfind_pos).len() < 0.1 {
             self.monster.next_pathfind_pos = self
@@ -67,13 +83,13 @@ impl Game {
                 .pathfind(self.monster.pos, self.monster.next_target_pos);
         }
         let dv = self.monster.next_pathfind_pos - self.monster.pos;
-        self.monster.pos += dv.clamp_len(..=delta_time);
+        self.monster.pos += dv.clamp_len(..=delta_time * self.monster.speed);
         if dv.len() > EPS {
             self.monster.dir = dv.xy().normalize().extend(0.0);
         }
     }
     pub fn draw_monster(&mut self, framebuffer: &mut ugli::Framebuffer) {
-        let mut texture = if Vec2::dot(
+        let texture = if Vec2::dot(
             self.monster.dir.xy(),
             vec2(0.0, 1.0).rotate(self.camera.rot_h),
         ) > 0.0
@@ -86,12 +102,12 @@ impl Game {
             // texture = &self.assets.hand;
         }
         self.draw_billboard(framebuffer, texture, self.monster.pos, 1.5, 0.0);
-        self.draw_sprite(
-            framebuffer,
-            texture,
-            self.monster.pos + self.monster.dir * 0.4,
-            0.3,
-            0.0,
-        );
+        // self.draw_sprite(
+        //     framebuffer,
+        //     texture,
+        //     self.monster.pos + self.monster.dir * 0.4,
+        //     0.3,
+        //     0.0,
+        // );
     }
 }

@@ -29,6 +29,7 @@ pub struct Game {
     interactables: Vec<InteractableState>,
     items: Vec<Item>,
     monster: Monster,
+    transision: Option<geng::Transition>,
 }
 
 impl Game {
@@ -95,6 +96,7 @@ impl Game {
             }),
             monster: Monster::new(assets, &navmesh),
             navmesh,
+            transision: None,
         }
     }
 }
@@ -125,6 +127,9 @@ impl geng::State for Game {
             }
             _ => {}
         }
+    }
+    fn transition(&mut self) -> Option<geng::Transition> {
+        self.transision.take()
     }
 }
 
