@@ -26,6 +26,11 @@ impl Game {
                 *self.navmesh.waypoints.choose(&mut global_rng()).unwrap();
             self.monster.next_pathfind_pos = self.monster.pos;
         }
+        if self.player.flashdark_on {
+            self.monster.next_target_pos =
+                self.navmesh.waypoints[self.navmesh.closest_waypoint(self.player.pos)];
+            self.monster.next_pathfind_pos = self.monster.pos;
+        }
         if (self.monster.pos - self.monster.next_pathfind_pos).len() < 0.1 {
             self.monster.next_pathfind_pos = self
                 .navmesh
