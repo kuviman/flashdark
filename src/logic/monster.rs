@@ -20,6 +20,28 @@ impl Monster {
 }
 
 impl Game {
+    pub fn monster_sees_player(&self) -> bool {
+        if Vec2::dot(
+            self.monster.dir.xy(),
+            (self.player.pos - self.monster.pos).xy(),
+        ) < 0.0
+        {
+            return false;
+        }
+        if let Some(ray_t) = intersect_ray_with_obj(
+            &self.assets.level.obj,
+            Mat4::identity(),
+            geng::CameraRay {
+                from: self.monster.pos,
+                dir: (self.player.pos - self.monster.pos).normalize_or_zero(),
+            },
+        ) {
+            if ray_t < (self.player.pos - self.monster.pos).len() {
+                return false;
+            }
+        }
+        true
+    }
     pub fn update_monster(&mut self, delta_time: f32) {
         if (self.monster.pos - self.monster.next_target_pos).len() < 0.1 {
             self.monster.next_target_pos =
@@ -30,6 +52,14 @@ impl Game {
             self.monster.next_target_pos =
                 self.navmesh.waypoints[self.navmesh.closest_waypoint(self.player.pos)];
             self.monster.next_pathfind_pos = self.monster.pos;
+        }
+        if self.monster_sees_player() {
+            self.monster.next_target_pos =
+                self.navmesh.waypoints[self.navmesh.closest_waypoint(self.player.pos)];
+            self.monster.next_pathfind_pos = self.monster.pos;
+        }
+        if (self.monster.pos - self.player.pos).len() < 0.5 {
+            self.monster = Monster::new(&self.assets, &self.navmesh);
         }
         if (self.monster.pos - self.monster.next_pathfind_pos).len() < 0.1 {
             self.monster.next_pathfind_pos = self
@@ -43,15 +73,25 @@ impl Game {
         }
     }
     pub fn draw_monster(&mut self, framebuffer: &mut ugli::Framebuffer) {
-        let texture = if Vec2::dot(
+        let mut texture = if Vec2::dot(
             self.monster.dir.xy(),
-            vec2(0.0, -1.0).rotate(self.camera.rot_h),
+            vec2(0.0, 1.0).rotate(self.camera.rot_h),
         ) > 0.0
         {
-            &self.assets.ghost_front
-        } else {
             &self.assets.ghost
+        } else {
+            &self.assets.ghost_front
         };
+        if self.monster_sees_player() {
+            // texture = &self.assets.hand;
+        }
         self.draw_billboard(framebuffer, texture, self.monster.pos, 1.5, 0.0);
+        self.draw_sprite(
+            framebuffer,
+            texture,
+            self.monster.pos + self.monster.dir * 0.4,
+            0.3,
+            0.0,
+        );
     }
 }
