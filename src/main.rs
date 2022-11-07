@@ -38,8 +38,11 @@ impl Game {
         let mut music = assets.music.effect();
         music.set_volume(0.5);
         music.play();
-        // let navmesh = Self::init_navmesh(geng, &assets.level);
-        let navmesh = assets.navmesh.clone();
+        let navmesh = if false {
+            Self::init_navmesh(geng, &assets.level)
+        } else {
+            assets.navmesh.clone()
+        };
         Self {
             items: Self::initialize_items(assets),
             quad_geometry: ugli::VertexBuffer::new_static(
