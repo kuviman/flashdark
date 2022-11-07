@@ -1,112 +1,133 @@
-# Blender 3.3.1 MTL File: 'roomMVP.blend'
-# www.blender.org
+# Blender MTL File: 'roomMVP.blend'
+# Material Count: 12
 
 newmtl CeilingMat
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 0.5 0.5 0.5 C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/CeilingTexture.png
+map_Kd -s 0.500000 0.500000 0.500000 CeilingTexture.png
 
 newmtl ClosetMat
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/ClosetTexture.png
+map_Kd ClosetTexture.png
 
 newmtl DarkItemsMat1
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
+d 1.000000
 illum 2
-map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/DarkItems1.png
-map_d C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/DarkItems1.png
+map_Kd DarkItems1.png
+map_d DarkItems1.png
 
 newmtl DoorMat
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/DoorTextures.png
+map_Kd DoorTextures.png
 
 newmtl DrawerMat
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/DrawerTexture.png
+map_Kd DrawerTexture.png
 
 newmtl FridgeMat
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/FridgeTexture.png
+map_Kd FridgeTexture.png
 
 newmtl GrassMat
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 20 20 20 C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/GrassTexture.png
+map_Kd -s 20.000000 20.000000 20.000000 GrassTexture.png
 
 newmtl Item2DMat1
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
+d 1.000000
 illum 2
-map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/ItemTextures1.png
-map_d C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/ItemTextures1.png
+map_Kd ItemTextures1.png
+map_d ItemTextures1.png
 
 newmtl KitchenCounter
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/KitchenCounterTexture.png
+map_Kd KitchenCounterTexture.png
+
+newmtl None
+Ns 500
+Ka 0.8 0.8 0.8
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
+illum 2
 
 newmtl RefFloor
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/FlashDarkMVPLevelRef.png
+map_Kd FlashDarkMVPLevelRef.png
 
 newmtl WallMat
-Ns 250.000000
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1 1 0.5 C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/MuddyWallTexture.png
+map_Kd -s 1.000000 1.000000 0.500000 MuddyWallTexture.png
