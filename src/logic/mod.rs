@@ -4,14 +4,18 @@ mod camera;
 mod flashdark;
 mod interactables;
 mod items;
+mod monster;
 mod movement;
+mod navmesh;
 mod player;
 
 pub use camera::*;
 pub use flashdark::*;
 pub use interactables::*;
 pub use items::*;
+pub use monster::*;
 pub use movement::*;
+pub use navmesh::*;
 pub use player::*;
 
 impl Game {
@@ -21,6 +25,7 @@ impl Game {
         self.update_camera(delta_time);
         self.update_flashdark(delta_time);
         self.update_interactables(delta_time);
+        self.update_monster(delta_time);
     }
 
     pub fn handle_clicks(&mut self, event: &geng::Event) {

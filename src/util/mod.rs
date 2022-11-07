@@ -1,5 +1,9 @@
 use super::*;
 
+mod spatial_map;
+
+pub use spatial_map::*;
+
 pub const EPS: f32 = 1e-7;
 
 pub fn intersect_ray_with_triangle(tri: [Vec3<f32>; 3], ray: geng::CameraRay) -> Option<f32> {

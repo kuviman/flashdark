@@ -5,8 +5,8 @@ pub struct Material {
     pub name: String,
     pub texture: Option<Rc<ugli::Texture>>,
     pub dark_texture: Option<Rc<ugli::Texture>>,
-    pub ambient_color: Rgba<f32>,
-    pub diffuse_color: Rgba<f32>,
+    // pub ambient_color: Rgba<f32>,
+    // pub diffuse_color: Rgba<f32>,
 }
 
 pub struct ObjMesh {
@@ -42,8 +42,8 @@ impl geng::LoadAsset for Obj {
                 name: "".to_owned(),
                 texture: None,
                 dark_texture: None,
-                ambient_color: Rgba::WHITE,
-                diffuse_color: Rgba::WHITE,
+                // ambient_color: Rgba::WHITE,
+                // diffuse_color: Rgba::WHITE,
             });
             let mut current_geometry = Vec::new();
             let mut materials = HashMap::<String, Material>::new();
@@ -164,8 +164,8 @@ impl geng::LoadAsset for Obj {
                                     name: name.to_owned(),
                                     texture: current_texture.take().map(Rc::new),
                                     dark_texture: current_dark_texture.take().map(Rc::new),
-                                    ambient_color: current_ambient_color,
-                                    diffuse_color: current_diffuse_color,
+                                    // ambient_color: current_ambient_color,
+                                    // diffuse_color: current_diffuse_color,
                                 },
                             );
                             current_name = name;

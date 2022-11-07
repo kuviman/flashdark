@@ -28,6 +28,7 @@ pub struct Assets {
     #[asset(postprocess = "make_repeated")]
     pub ceiling: ugli::Texture,
     pub ghost: ugli::Texture,
+    pub ghost_front: ugli::Texture,
     pub key: ugli::Texture,
     pub table_top: ugli::Texture,
     pub table_leg: ugli::Texture,
@@ -45,6 +46,7 @@ pub struct Assets {
     pub music: geng::Sound,
     pub level: LevelData,
     pub config: Config,
+    pub navmesh: NavMesh,
 }
 
 #[derive(geng::Assets)]

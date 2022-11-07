@@ -19,7 +19,7 @@ impl Game {
         );
 
         for (id, interactable) in self.interactables.iter().enumerate() {
-            let mut highlight =
+            let highlight =
                 look.target.as_ref().map(|target| target.object) == Some(Object::Interactable(id));
             self.draw_obj(
                 framebuffer,
@@ -75,6 +75,10 @@ impl Game {
                 },
             );
         }
+
+        self.draw_monster(framebuffer);
+
+        // self.draw_debug_navmesh(framebuffer);
 
         let camera2d = geng::Camera2d {
             center: Vec2::ZERO,

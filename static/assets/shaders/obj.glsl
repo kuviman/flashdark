@@ -30,14 +30,14 @@ void main() {
     float d = length(v_eye_pos);
     float fog_factor = 1.0 - exp(-d * 0.2) / exp(0.0);
     float flashdarked = smoothstep(cos(u_flashdark_angle), cos(u_flashdark_angle) + 0.1, dot(normalize(v_world_pos - u_flashdark_pos), u_flashdark_dir)) * u_flashdark_strength;
-    vec4 texture_color = (texture2D(u_dark_texture, v_uv) * flashdarked + texture2D(u_texture, v_uv) * (1.0 - flashdarked)) * u_color;
+    vec4 texture_color = (texture2D(u_dark_texture, v_uv) * flashdarked + texture2D(u_texture, v_uv) * (1.0 - flashdarked)) * vec4(u_color.xyz, 1.0);
     vec4 fog_color = vec4(0.0, 0.0, 0.0, texture_color.w);
     gl_FragColor = texture_color * (1.0 - fog_factor) + fog_color * fog_factor;
 
     if (gl_FragColor.w < 0.5) {
         discard;
     } else {
-        gl_FragColor.w = 1.0;
+        gl_FragColor.w = u_color.w;
     }
 }
 #endif

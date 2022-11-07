@@ -25,9 +25,10 @@ pub struct Game {
     black_texture: ugli::Texture,
     transparent_black_texture: ugli::Texture,
     player: Player,
-    waypoints: Vec<Vec3<f32>>,
+    navmesh: NavMesh,
     interactables: Vec<InteractableState>,
     items: Vec<Item>,
+    monster: Monster,
 }
 
 impl Game {
@@ -36,42 +37,8 @@ impl Game {
         let mut music = assets.music.effect();
         music.set_volume(0.5);
         music.play();
-        // let waypoints = {
-        //     let obj = &assets.level.obj;
-        //     let mut points = Vec::new();
-        //     const HOR_GRID_SIZE: usize = 20;
-        //     const VER_GRID_SIZE: usize = 5;
-        //     let hor_range = -10.0..10.0;
-        //     let ver_range = 0.0..1.0;
-        //     for x in 0..=HOR_GRID_SIZE {
-        //         let x = hor_range.start
-        //             + (hor_range.end - hor_range.start) * x as f32 / HOR_GRID_SIZE as f32;
-        //         for y in 0..=HOR_GRID_SIZE {
-        //             let y = hor_range.start
-        //                 + (hor_range.end - hor_range.start) * y as f32 / HOR_GRID_SIZE as f32;
-        //             for z in 0..=VER_GRID_SIZE {
-        //                 let z = ver_range.start
-        //                     + (ver_range.end - ver_range.start) * z as f32 / VER_GRID_SIZE as f32;
-        //                 let p = vec3(x, y, z);
-        //                 if let Some(t) = intersect_ray_with_obj(
-        //                     obj,
-        //                     Mat4::identity(),
-        //                     geng::CameraRay {
-        //                         from: p,
-        //                         dir: vec3(0.0, 0.0, -1.0),
-        //                     },
-        //                 ) {
-        //                     if t > 0.1 {
-        //                         continue;
-        //                     }
-        //                 }
-        //                 points.push(p);
-        //             }
-        //         }
-        //     }
-        //     points
-        // };
-        let waypoints = vec![];
+        // let navmesh = Self::init_navmesh(geng, &assets.level);
+        let navmesh = assets.navmesh.clone();
         Self {
             items: Self::initialize_items(assets),
             quad_geometry: ugli::VertexBuffer::new_static(
@@ -126,7 +93,8 @@ impl Game {
             transparent_black_texture: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| {
                 Rgba::TRANSPARENT_BLACK
             }),
-            waypoints,
+            monster: Monster::new(assets, &navmesh),
+            navmesh,
         }
     }
 }
@@ -151,6 +119,9 @@ impl geng::State for Game {
                 effect.set_position(Vec3::ZERO);
                 effect.set_max_distance(5.0);
                 effect.play();
+            }
+            geng::Event::KeyDown { key: geng::Key::P } => {
+                self.monster.next_target_pos = self.player.pos;
             }
             _ => {}
         }
