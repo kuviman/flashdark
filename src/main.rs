@@ -35,9 +35,12 @@ pub struct Game {
 impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
         // geng.window().lock_cursor();
-        let mut music = assets.music.effect();
-        music.set_volume(0.5);
-        music.play();
+
+        if false {
+            let mut music = assets.music.effect();
+            music.set_volume(0.5);
+            music.play();
+        }
         let navmesh = if false {
             Self::init_navmesh(geng, &assets.level)
         } else {

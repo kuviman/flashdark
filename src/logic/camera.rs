@@ -60,6 +60,13 @@ impl Game {
         let mut update_target = |t: Option<f32>, object: Object| {
             if let Some(t) = t {
                 if t < target.as_ref().map_or(f32::INFINITY, |target| target.t) {
+                    let pos = ray.from + ray.dir * t;
+                    if (pos - ray.from).xy().len() > self.assets.config.arms_horizontal_length {
+                        return;
+                    }
+                    if (pos - ray.from).z.abs() > self.assets.config.arms_vertical_length {
+                        return;
+                    }
                     target = Some(LookAtTarget { object, t });
                 }
             }

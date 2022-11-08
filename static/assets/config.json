@@ -1,4 +1,7 @@
 {
+    "max_sound_distance": 10.0,
+    "arms_horizontal_length": 1.0,
+    "arms_vertical_length": 1.0,
     "parents": {
         "child": "parent"
     },
@@ -9,39 +12,14 @@
         "D_BrokenDoor": {
             "require_item": "Keyhole",
             "use_item": true,
-            "transform_on_use": "D_FixedDoor"
+            "transform_on_use": "D_FixedDoor",
+            "sfx": "doorLocked.wav"
         },
         "D_FixedDoor": {
             "require_item": "MainKey",
             "use_item": true,
-            "hidden": true
-        },
-        "D_DoorWithHandle": {
-            "start_open": true,
-            "require_item": "Key",
-            "transform_on_use": "D_DoorWithHandleTransformed",
-            "give_item": "Note"
-        },
-        "BrokenDoor": {
-            "require_item": "Doorknob",
-            "use_item": true,
-            "transform_on_use": "DoorWithoutKeyhole"
-        },
-        "DoorWithoutKeyhole": {
-            "require_item": "Keyhole",
-            "use_item": true,
-            "transform_on_use": "FixedDoor"
-        },
-        "FusePlaceholder": {
-            "require_item": "Fuse",
-            "use_item": true,
-            "transform_on_use": "FixedFuse"
-        },
-        "Knob": {
-            "rotate": {
-                "around": "x",
-                "angle": 90
-            }
+            "hidden": true,
+            "sfx": "doorUnlocked.wav"
         }
     },
     "rooms": {

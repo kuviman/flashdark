@@ -6,6 +6,22 @@ pub use spatial_map::*;
 
 pub const EPS: f32 = 1e-7;
 
+pub fn nlerp2(a: Vec2<f32>, b: Vec2<f32>, t: f32) -> Vec2<f32> {
+    (a * (1.0 - t) + b * t).normalize_or_zero()
+}
+
+pub fn nlerp3(a: Vec3<f32>, b: Vec3<f32>, t: f32) -> Vec3<f32> {
+    (a * (1.0 - t) + b * t).normalize_or_zero()
+}
+
+pub fn find_center(mesh: &[geng::obj::Vertex]) -> Vec3<f32> {
+    let mut sum = Vec3::ZERO;
+    for v in mesh {
+        sum += v.a_v;
+    }
+    sum / mesh.len() as f32
+}
+
 pub fn intersect_ray_with_triangle(tri: [Vec3<f32>; 3], ray: geng::CameraRay) -> Option<f32> {
     let n = Vec3::cross(tri[1] - tri[0], tri[2] - tri[0]).normalize_or_zero();
     // dot(ray.from + ray.dir * t - tri[0], n) = 0

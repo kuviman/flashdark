@@ -56,14 +56,18 @@ impl Game {
     }
 
     pub fn update_interactables(&mut self, delta_time: f32) {
-        for state in &mut self.interactables {
-            let inter_time = 0.3;
-            if state.open {
-                state.progress += delta_time / inter_time;
+        for interactable in &mut self.interactables {
+            let inter_time = if interactable.data.obj.meshes[0].name.starts_with("D") {
+                0.6
             } else {
-                state.progress -= delta_time / inter_time;
+                0.3
+            };
+            if interactable.open {
+                interactable.progress += delta_time / inter_time;
+            } else {
+                interactable.progress -= delta_time / inter_time;
             }
-            state.progress = state.progress.clamp(0.0, 1.0);
+            interactable.progress = interactable.progress.clamp(0.0, 1.0);
         }
     }
 
@@ -75,6 +79,30 @@ impl Game {
                 return;
             }
         }
+
+        let sfx_position = find_center(&interactable.data.obj.meshes[0].geometry);
+
+        let sfx = if let Some(sfx) = interactable.config.sfx.as_deref() {
+            self.assets.sfx.get_by_name(sfx)
+        } else if interactable.data.obj.meshes[0].name.starts_with("D") {
+            if interactable.open {
+                &self.assets.sfx.doorClose
+            } else {
+                &self.assets.sfx.doorOpen
+            }
+        } else if interactable.data.obj.meshes[0].name.starts_with("I_") {
+            if interactable.open {
+                &self.assets.sfx.drawerClose
+            } else {
+                &self.assets.sfx.drawerOpen
+            }
+        } else {
+            unreachable!()
+        };
+        let mut effect = sfx.effect();
+        effect.set_position(sfx_position.map(|x| x as f64));
+        effect.set_max_distance(self.assets.config.max_sound_distance);
+        effect.play();
 
         interactable.open = !interactable.open;
         if interactable.config.use_item {
@@ -103,5 +131,7 @@ impl Game {
                     .unwrap_or_default(),
             });
         }
+
+        self.check_monster_sfx(sfx_position);
     }
 }

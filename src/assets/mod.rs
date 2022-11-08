@@ -47,6 +47,43 @@ pub struct Assets {
     pub level: LevelData,
     pub config: Config,
     pub navmesh: NavMesh,
+    #[asset(path = "SFX")]
+    pub sfx: SfxAssets,
+}
+#[derive(geng::Assets)]
+pub struct SfxAssets {
+    pub doorClose: geng::Sound,
+    pub doorLocked: geng::Sound,
+    pub doorOpen: geng::Sound,
+    pub doorUnlocked: geng::Sound,
+    pub drawerClose: geng::Sound,
+    pub drawerOpen: geng::Sound,
+    pub flashOff: geng::Sound,
+    pub flashOn: geng::Sound,
+    pub fusePlaced: geng::Sound,
+    pub genericPickup: geng::Sound,
+    #[asset(postprocess = "loop_sound")]
+    pub ghostLoop: geng::Sound,
+    pub ghostScream: geng::Sound,
+    pub placeObject: geng::Sound,
+    pub tvStatic: geng::Sound,
+    #[asset(path = "ghostAlarmed*.wav", range = "1..=3")]
+    pub ghostAlarmed: Vec<geng::Sound>,
+    #[asset(path = "footstep*.wav", range = "1..=4")]
+    pub footsteps: Vec<geng::Sound>,
+    #[asset(path = "footstepCreak*.wav", range = "1..=4")]
+    pub footstepCreaks: Vec<geng::Sound>,
+}
+
+impl SfxAssets {
+    pub fn get_by_name(&self, name: &str) -> &geng::Sound {
+        match name {
+            "placeObject.wav" => &self.placeObject,
+            "doorLocked.wav" => &self.doorLocked,
+            "doorUnlocked.wav" => &self.doorUnlocked,
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[derive(geng::Assets)]
