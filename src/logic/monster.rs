@@ -149,8 +149,13 @@ impl Game {
                 .navmesh
                 .pathfind(self.monster.pos, self.monster.next_target_pos);
         }
-        self.monster.pos += (self.monster.next_pathfind_pos - self.monster.pos)
-            .clamp_len(..=delta_time * self.monster.speed);
+        let next_pos = if self.can_see(self.monster.pos, self.monster.next_target_pos) {
+            self.monster.next_target_pos
+        } else {
+            self.monster.next_pathfind_pos
+        };
+        self.monster.pos +=
+            (next_pos - self.monster.pos).clamp_len(..=delta_time * self.monster.speed);
 
         for (id, interactable) in self.interactables.iter().enumerate() {
             if !interactable.data.obj.meshes[0].name.starts_with("D") {
