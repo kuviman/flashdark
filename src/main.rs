@@ -89,6 +89,7 @@ impl Game {
                 flashdark_strength: 0.0,
                 item: None,
                 next_footstep: 0.0,
+                god_mode: false,
             },
             camera: Camera {
                 pos: assets.level.spawn_point,
@@ -132,6 +133,9 @@ impl geng::State for Game {
             }
             geng::Event::KeyDown { key: geng::Key::P } => {
                 self.monster.next_target_pos = self.player.pos;
+            }
+            geng::Event::KeyDown { key: geng::Key::G } => {
+                self.player.god_mode = !self.player.god_mode;
             }
             _ => {}
         }

@@ -77,6 +77,9 @@ impl Game {
         true
     }
     pub fn monster_sees_player(&self) -> bool {
+        if self.player.god_mode {
+            return false;
+        }
         if Vec2::dot(
             self.monster.dir.xy(),
             (self.player.pos - self.monster.pos).xy(),
@@ -159,16 +162,19 @@ impl Game {
 
         self.monster.scream_time -= delta_time;
         if self.monster.scream_time < 0.0 {
-            let next_pos = if self.can_see(self.monster.pos, self.monster.next_target_pos) {
-                self.monster
+            let target = self.monster.next_target_pos;
+            let target = target
+                .xy()
+                .extend(self.navmesh.waypoints[self.navmesh.closest_waypoint(target)].z);
+            if self.can_see(self.monster.pos, target) {
+                self.monster.next_pathfind_pos = self
+                    .monster
                     .next_target_pos
                     .xy()
-                    .extend(self.monster.next_pathfind_pos.z)
-            } else {
-                self.monster.next_pathfind_pos
+                    .extend(self.monster.next_pathfind_pos.z);
             };
-            self.monster.pos +=
-                (next_pos - self.monster.pos).clamp_len(..=delta_time * self.monster.speed);
+            self.monster.pos += (self.monster.next_pathfind_pos - self.monster.pos)
+                .clamp_len(..=delta_time * self.monster.speed);
         }
 
         for (id, interactable) in self.interactables.iter().enumerate() {
@@ -200,10 +206,11 @@ impl Game {
         let dv = look_at_pos - self.monster.pos;
         if dv.len() > EPS {
             let target_dir = dv.xy().normalize();
+            // self.monster.dir = target_dir.extend(0.0);
             self.monster.dir = nlerp2(
                 self.monster.dir.xy(),
                 target_dir,
-                (delta_time / 0.5).min(1.0),
+                (delta_time / 0.2).min(1.0),
             )
             .extend(0.0);
         }
@@ -233,5 +240,10 @@ impl Game {
         //     0.3,
         //     0.0,
         // );
+        // let look_at_pos = match self.monster.target_type {
+        //     TargetType::Player => self.monster.next_target_pos,
+        //     _ => self.monster.next_pathfind_pos,
+        // };
+        // self.draw_sprite(framebuffer, &self.assets.hand, look_at_pos, 0.3, 0.0);
     }
 }
