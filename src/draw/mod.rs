@@ -136,5 +136,37 @@ impl Game {
             &camera2d,
             &draw_2d::Ellipse::circle(Vec2::ZERO, 0.02, Rgba::WHITE),
         );
+
+        // Lighting
+        let mut shadow_map =
+            ugli::Texture::new_with(self.geng.ugli(), framebuffer.size(), |_| Rgba::BLACK);
+        let mut shadow_buffer = ugli::Renderbuffer::new(self.geng.ugli(), framebuffer.size());
+        let mut shadow_framebuffer = ugli::Framebuffer::new(
+            self.geng.ugli(),
+            ugli::ColorAttachment::Texture(&mut shadow_map),
+            ugli::DepthAttachment::Renderbuffer(&mut shadow_buffer),
+        );
+        ugli::clear(&mut shadow_framebuffer, Some(Rgba::BLACK), Some(1.0), None);
+
+        let light = Light {
+            fov: 1.0,
+            pos: self.player.flashdark_pos,
+            rot_h: self.camera.rot_h, // self.player.rot_h,
+            rot_v: self.camera.rot_v, // self.player.rot_v,
+        };
+        self.obj_shadow(
+            &light,
+            &mut shadow_framebuffer,
+            &self.assets.level.obj,
+            Mat4::identity(),
+        );
+        // self.geng.draw_2d(
+        //     framebuffer,
+        //     &geng::PixelPerfectCamera,
+        //     &draw_2d::TexturedQuad::new(
+        //         AABB::ZERO.extend_positive(framebuffer.size().map(|x| x as f32)),
+        //         shadow_map,
+        //     ),
+        // );
     }
 }
