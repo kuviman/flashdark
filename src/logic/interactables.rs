@@ -135,6 +135,8 @@ impl Game {
             });
         }
 
-        self.check_monster_sfx(sfx_position);
+        if player {
+            self.check_monster_sfx(sfx_position);
+        }
     }
 }

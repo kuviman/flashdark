@@ -16,6 +16,7 @@ pub struct Monster {
     pub next_target_pos: Vec3<f32>,
     pub speed: f32,
     pub loop_sound: geng::SoundEffect,
+    pub scream_time: f32,
 }
 
 impl Drop for Monster {
@@ -28,6 +29,7 @@ impl Monster {
     pub fn new(assets: &Assets, navmesh: &NavMesh) -> Self {
         let pos = *navmesh.waypoints.choose(&mut global_rng()).unwrap();
         Self {
+            scream_time: 0.0,
             pos,
             target_type: TargetType::Rng,
             dir: vec3(0.0, -1.0, 0.0),
@@ -55,7 +57,7 @@ impl Game {
                     dir: (target - pos).normalize_or_zero(),
                 },
             ) {
-                if ray_t < (target - self.monster.pos).len() {
+                if ray_t < (target - pos).len() {
                     return false;
                 }
             }
@@ -83,29 +85,34 @@ impl Game {
             return false;
         }
         self.can_see(
-            self.monster.pos + vec3(0.0, 0.0, 0.7),
-            self.player.pos + vec3(0.0, 0.0, 0.7),
+            self.monster.pos + vec3(0.0, 0.0, 1.3),
+            self.player.pos + vec3(0.0, 0.0, 1.0),
         )
     }
     pub fn monster_walk_to(&mut self, pos: Vec3<f32>, target_type: TargetType) {
         if target_type != self.monster.target_type {
-            let sfx = match target_type {
-                TargetType::Player => Some(&self.assets.sfx.ghostScream),
-                TargetType::Noise | TargetType::Flashdark => Some(
-                    self.assets
+            match target_type {
+                TargetType::Player => {
+                    self.monster.scream_time = 1.0;
+                    let mut effect = self.assets.sfx.ghostScream.effect();
+                    effect.set_position(self.monster.pos.map(|x| x as f64));
+                    effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
+                    effect.play();
+                }
+                TargetType::Noise | TargetType::Flashdark => {
+                    let mut effect = self
+                        .assets
                         .sfx
                         .ghostAlarmed
                         .choose(&mut global_rng())
-                        .unwrap(),
-                ),
-                TargetType::Rng => None,
+                        .unwrap()
+                        .effect();
+                    effect.set_position(self.monster.pos.map(|x| x as f64));
+                    effect.set_max_distance(self.assets.config.max_sound_distance);
+                    effect.play();
+                }
+                TargetType::Rng => {}
             };
-            if let Some(sfx) = sfx {
-                let mut effect = sfx.effect();
-                effect.set_position(self.monster.pos.map(|x| x as f64));
-                effect.set_max_distance(self.assets.config.max_sound_distance);
-                effect.play();
-            }
             self.monster.target_type = target_type;
         }
         self.monster.next_target_pos = pos; // TODO ??? self.navmesh.waypoints[self.navmesh.closest_waypoint(pos)];
@@ -114,7 +121,7 @@ impl Game {
             let s = 0.5;
             let s_speed = 5.0;
             let t = 3.0;
-            let t_speed = 1.0;
+            let t_speed = 3.0;
             let k = (((pos - self.monster.pos).len() - s) / (t - s)).clamp(0.0, 1.0);
             self.monster.speed = s_speed * (1.0 - k) + t_speed * k;
         } else {
@@ -127,7 +134,7 @@ impl Game {
         }
     }
     pub fn update_monster(&mut self, delta_time: f32) {
-        if (self.monster.pos - self.monster.next_target_pos).len() < 0.1 {
+        if (self.monster.pos - self.monster.next_target_pos).xy().len() < 0.1 {
             self.monster_walk_to(
                 *self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
                 TargetType::Rng,
@@ -149,16 +156,20 @@ impl Game {
                 .navmesh
                 .pathfind(self.monster.pos, self.monster.next_target_pos);
         }
-        let next_pos = if self.can_see(self.monster.pos, self.monster.next_target_pos) {
-            self.monster
-                .next_target_pos
-                .xy()
-                .extend(self.monster.next_pathfind_pos.z)
-        } else {
-            self.monster.next_pathfind_pos
-        };
-        self.monster.pos +=
-            (next_pos - self.monster.pos).clamp_len(..=delta_time * self.monster.speed);
+
+        self.monster.scream_time -= delta_time;
+        if self.monster.scream_time < 0.0 {
+            let next_pos = if self.can_see(self.monster.pos, self.monster.next_target_pos) {
+                self.monster
+                    .next_target_pos
+                    .xy()
+                    .extend(self.monster.next_pathfind_pos.z)
+            } else {
+                self.monster.next_pathfind_pos
+            };
+            self.monster.pos +=
+                (next_pos - self.monster.pos).clamp_len(..=delta_time * self.monster.speed);
+        }
 
         for (id, interactable) in self.interactables.iter().enumerate() {
             if !interactable.data.obj.meshes[0].name.starts_with("D") {
