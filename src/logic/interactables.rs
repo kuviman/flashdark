@@ -71,10 +71,13 @@ impl Game {
         }
     }
 
-    pub fn click_interactable(&mut self, id: Id) {
+    pub fn click_interactable(&mut self, id: Id, player: bool) {
         let interactable = &mut self.interactables[id];
 
         if let Some(requirement) = &interactable.config.require_item {
+            if !player {
+                return;
+            }
             if self.player.item.as_ref() != Some(requirement) {
                 return;
             }

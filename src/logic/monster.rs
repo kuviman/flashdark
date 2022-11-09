@@ -45,6 +45,35 @@ impl Monster {
 }
 
 impl Game {
+    pub fn can_see(&self, pos: Vec3<f32>, target: Vec3<f32>) -> bool {
+        let check = |obj: &Obj, matrix: Mat4<f32>| -> bool {
+            if let Some(ray_t) = intersect_ray_with_obj(
+                obj,
+                matrix,
+                geng::CameraRay {
+                    from: pos,
+                    dir: (target - pos).normalize_or_zero(),
+                },
+            ) {
+                if ray_t < (target - self.monster.pos).len() {
+                    return false;
+                }
+            }
+            true
+        };
+        if !check(&self.assets.level.obj, Mat4::identity()) {
+            return false;
+        }
+        for interactable in &self.interactables {
+            if !check(
+                &interactable.data.obj,
+                interactable.data.typ.matrix(interactable.progress),
+            ) {
+                return false;
+            }
+        }
+        true
+    }
     pub fn monster_sees_player(&self) -> bool {
         if Vec2::dot(
             self.monster.dir.xy(),
@@ -53,19 +82,10 @@ impl Game {
         {
             return false;
         }
-        if let Some(ray_t) = intersect_ray_with_obj(
-            &self.assets.level.obj,
-            Mat4::identity(),
-            geng::CameraRay {
-                from: self.monster.pos,
-                dir: (self.player.pos - self.monster.pos).normalize_or_zero(),
-            },
-        ) {
-            if ray_t < (self.player.pos - self.monster.pos).len() {
-                return false;
-            }
-        }
-        true
+        self.can_see(
+            self.monster.pos + vec3(0.0, 0.0, 0.7),
+            self.player.pos + vec3(0.0, 0.0, 0.7),
+        )
     }
     pub fn monster_walk_to(&mut self, pos: Vec3<f32>, target_type: TargetType) {
         if target_type != self.monster.target_type {
@@ -131,6 +151,28 @@ impl Game {
         }
         self.monster.pos += (self.monster.next_pathfind_pos - self.monster.pos)
             .clamp_len(..=delta_time * self.monster.speed);
+
+        for (id, interactable) in self.interactables.iter().enumerate() {
+            if !interactable.data.obj.meshes[0].name.starts_with("D") {
+                continue;
+            }
+            if interactable.open {
+                continue;
+            }
+            let v = vector_from_obj(
+                &interactable.data.obj,
+                interactable.data.typ.matrix(interactable.progress),
+                self.monster.pos,
+            );
+            let radius = 0.25;
+            if v.len() < radius {
+                self.click_interactable(id, false);
+                break;
+                // let n = v.normalize_or_zero();
+                // self.player.vel -= n * Vec3::dot(n, self.player.vel);
+                // self.player.pos += n * (radius - v.len());
+            }
+        }
 
         let look_at_pos = match self.monster.target_type {
             TargetType::Player => self.monster.next_target_pos,

@@ -38,7 +38,7 @@ impl Game {
                         match target.object {
                             Object::StaticLevel => {}
                             Object::Interactable(id) => {
-                                self.click_interactable(id);
+                                self.click_interactable(id, true);
                             }
                             Object::Item(id) => {
                                 self.click_item(id);
