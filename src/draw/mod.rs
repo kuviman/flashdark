@@ -9,11 +9,30 @@ impl Game {
         self.framebuffer_size = framebuffer.size().map(|x| x as f32);
         ugli::clear(framebuffer, Some(Rgba::BLACK), Some(1.0), None);
 
+        self.update_shadow_map(framebuffer);
+
+        // self.geng.draw_2d(
+        //     framebuffer,
+        //     &geng::PixelPerfectCamera,
+        //     &draw_2d::TexturedQuad::new(
+        //         AABB::ZERO.extend_positive(framebuffer.size().map(|x| x as f32)),
+        //         &self.shadow_map.as_ref().unwrap().0,
+        //     ),
+        // );
+        // return;
+
         let look = self.look();
 
+        let light = Light {
+            fov: self.camera.fov, // 1.0,
+            pos: self.player.flashdark_pos,
+            rot_h: self.camera.rot_h, // self.player.rot_h,
+            rot_v: self.camera.rot_v, // self.player.rot_v,
+        };
         self.draw_obj(
             framebuffer,
             &self.assets.level.obj,
+            &light,
             Mat4::identity(),
             Rgba::WHITE,
         );
@@ -24,6 +43,7 @@ impl Game {
             self.draw_obj(
                 framebuffer,
                 &interactable.data.obj,
+                &light,
                 interactable.data.typ.matrix(interactable.progress),
                 if highlight {
                     Rgba::new(0.8, 0.8, 1.0, 1.0)
@@ -65,6 +85,9 @@ impl Game {
                         u_texture: texture,
                         u_texture_matrix: Mat3::identity(), // data.texture_matrix,
                         u_dark_texture: dark_texture,
+                        u_shadow_map: &self.shadow_map.as_ref().unwrap().0,
+                        u_shadow_size: self.shadow_map.as_ref().unwrap().0.size(),
+                        u_light_matrix: light.matrix(self.framebuffer_size),
                     },
                     geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
                 ),
@@ -137,10 +160,35 @@ impl Game {
             &draw_2d::Ellipse::circle(Vec2::ZERO, 0.02, Rgba::WHITE),
         );
 
-        // Lighting
-        let mut shadow_map =
-            ugli::Texture::new_with(self.geng.ugli(), framebuffer.size(), |_| Rgba::BLACK);
-        let mut shadow_buffer = ugli::Renderbuffer::new(self.geng.ugli(), framebuffer.size());
+        // Draw shadow map
+        let aabb = AABB::point(vec2(50.0, 500.0)).extend_positive(self.framebuffer_size * 0.2);
+        self.geng.draw_2d(
+            framebuffer,
+            &geng::PixelPerfectCamera,
+            &draw_2d::Quad::new(aabb, Rgba::WHITE),
+        );
+        self.geng.draw_2d(
+            framebuffer,
+            &geng::PixelPerfectCamera,
+            &draw_2d::TexturedQuad::new(aabb, &self.shadow_map.as_ref().unwrap().0),
+        );
+    }
+
+    fn update_shadow_map(&mut self, framebuffer: &mut ugli::Framebuffer) {
+        // Update resolution
+        let (mut shadow_map, mut shadow_buffer) = self
+            .shadow_map
+            .take()
+            .filter(|(sm, _buf)| sm.size() == framebuffer.size())
+            .unwrap_or_else(|| {
+                (
+                    ugli::Texture::new_with(self.geng.ugli(), framebuffer.size(), |_| Rgba::BLACK),
+                    ugli::Renderbuffer::new(self.geng.ugli(), framebuffer.size()),
+                )
+            });
+        shadow_map.set_filter(ugli::Filter::Nearest);
+
+        // Create a temprorary framebuffer
         let mut shadow_framebuffer = ugli::Framebuffer::new(
             self.geng.ugli(),
             ugli::ColorAttachment::Texture(&mut shadow_map),
@@ -148,8 +196,9 @@ impl Game {
         );
         ugli::clear(&mut shadow_framebuffer, Some(Rgba::BLACK), Some(1.0), None);
 
+        // Render lights
         let light = Light {
-            fov: 1.0,
+            fov: self.camera.fov, // 1.0,
             pos: self.player.flashdark_pos,
             rot_h: self.camera.rot_h, // self.player.rot_h,
             rot_v: self.camera.rot_v, // self.player.rot_v,
@@ -160,13 +209,8 @@ impl Game {
             &self.assets.level.obj,
             Mat4::identity(),
         );
-        // self.geng.draw_2d(
-        //     framebuffer,
-        //     &geng::PixelPerfectCamera,
-        //     &draw_2d::TexturedQuad::new(
-        //         AABB::ZERO.extend_positive(framebuffer.size().map(|x| x as f32)),
-        //         shadow_map,
-        //     ),
-        // );
+
+        // Update the field
+        self.shadow_map = Some((shadow_map, shadow_buffer));
     }
 }

@@ -7,7 +7,7 @@ impl Game {
             .clamp(0.0, 1.0);
 
         self.player.flashdark_pos =
-            self.player.pos + vec2(-0.2, 0.0).rotate(self.player.rot_h).extend(0.8);
+            self.player.pos + vec2(-1.2, 0.0).rotate(self.player.rot_h).extend(0.8);
 
         fn nlerp(a: Vec3<f32>, b: Vec3<f32>, t: f32) -> Vec3<f32> {
             (a * (1.0 - t) + b * t).normalize_or_zero()

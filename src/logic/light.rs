@@ -8,6 +8,13 @@ pub struct Light {
     pub rot_v: f32,
 }
 
+impl Light {
+    pub fn matrix(&self, framebuffer_size: Vec2<f32>) -> Mat4<f32> {
+        use geng::AbstractCamera3d;
+        self.projection_matrix(framebuffer_size) * self.view_matrix()
+    }
+}
+
 impl geng::AbstractCamera3d for Light {
     fn view_matrix(&self) -> Mat4<f32> {
         Mat4::rotate_x(-self.rot_v)
@@ -17,11 +24,6 @@ impl geng::AbstractCamera3d for Light {
     }
 
     fn projection_matrix(&self, framebuffer_size: Vec2<f32>) -> Mat4<f32> {
-        Mat4::perspective(
-            self.fov,
-            framebuffer_size.x / framebuffer_size.y,
-            0.1,
-            100.0,
-        )
+        Mat4::perspective(self.fov, framebuffer_size.x / framebuffer_size.y, 0.1, 10.0)
     }
 }

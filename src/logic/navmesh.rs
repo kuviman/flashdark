@@ -198,11 +198,11 @@ impl Game {
                 },
             }],
         };
-        self.draw_obj(
-            framebuffer,
-            &debug_obj,
-            Mat4::identity(),
-            Rgba::new(1.0, 1.0, 1.0, 0.3),
-        );
+        // self.draw_obj(
+        //     framebuffer,
+        //     &debug_obj,
+        //     Mat4::identity(),
+        //     Rgba::new(1.0, 1.0, 1.0, 0.3),
+        // );
     }
 }

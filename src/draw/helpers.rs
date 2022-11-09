@@ -131,6 +131,7 @@ impl Game {
         &self,
         framebuffer: &mut ugli::Framebuffer,
         obj: &Obj,
+        light: &Light,
         matrix: Mat4<f32>,
         color: Rgba<f32>,
     ) {
@@ -176,6 +177,9 @@ impl Game {
                         u_texture: texture,
                         u_texture_matrix: Mat3::identity(),
                         u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
+                        u_shadow_map: &self.shadow_map.as_ref().unwrap().0,
+                        u_shadow_size: self.shadow_map.as_ref().unwrap().0.size(),
+                        u_light_matrix: light.matrix(self.framebuffer_size),
                     },
                     geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
                 ),
