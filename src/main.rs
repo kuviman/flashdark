@@ -41,11 +41,12 @@ impl Game {
             music.set_volume(0.5);
             music.play();
         }
-        let navmesh = if false {
+        let mut navmesh = if false {
             Self::init_navmesh(geng, &assets.level)
         } else {
             assets.navmesh.clone()
         };
+        navmesh.remove_unreachable_from(assets.level.spawn_point);
         Self {
             items: Self::initialize_items(assets),
             quad_geometry: ugli::VertexBuffer::new_static(
