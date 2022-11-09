@@ -150,7 +150,10 @@ impl Game {
                 .pathfind(self.monster.pos, self.monster.next_target_pos);
         }
         let next_pos = if self.can_see(self.monster.pos, self.monster.next_target_pos) {
-            self.monster.next_target_pos
+            self.monster
+                .next_target_pos
+                .xy()
+                .extend(self.monster.next_pathfind_pos.z)
         } else {
             self.monster.next_pathfind_pos
         };
