@@ -10,4 +10,5 @@ pub struct Player {
     pub flashdark_dir: Vec3<f32>,
     pub flashdark_pos: Vec3<f32>,
     pub item: Option<String>,
+    pub next_footstep: f32,
 }

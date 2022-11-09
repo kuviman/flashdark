@@ -88,6 +88,7 @@ impl Game {
                 flashdark_on: false,
                 flashdark_strength: 0.0,
                 item: None,
+                next_footstep: 0.0,
             },
             camera: Camera {
                 pos: assets.level.spawn_point,

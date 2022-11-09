@@ -15,6 +15,7 @@ pub struct InteractableConfig {
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
 #[asset(json)]
 pub struct Config {
+    pub footstep_dist: f32,
     pub max_sound_distance: f64,
     pub arms_horizontal_length: f32,
     pub arms_vertical_length: f32,
