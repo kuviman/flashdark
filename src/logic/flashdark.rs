@@ -34,5 +34,11 @@ impl Game {
         } else {
             self.assets.sfx.flashOff.play();
         }
+
+        // Key puzzle
+        if self.key_puzzle_state == KeyPuzzleState::LightOut {
+            self.key_puzzle_state = KeyPuzzleState::Finish;
+            self.ambient_light = self.assets.config.ambient_light_inside_house;
+        }
     }
 }

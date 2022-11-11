@@ -163,7 +163,7 @@ impl Game {
             }
         }
 
-        if (self.monster.pos - self.player.pos).len() < 0.5 {
+        if (self.monster.pos - self.player.pos).len() < 0.5 && !self.player.god_mode {
             self.transision = Some(geng::Transition::Switch(Box::new(Game::new(
                 &self.geng,
                 &self.assets,

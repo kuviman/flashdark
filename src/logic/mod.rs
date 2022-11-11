@@ -147,6 +147,23 @@ impl Game {
                 self.ambient_light = self.assets.config.ambient_light_inside_house;
             }
         }
+
+        // Enter study room
+        if self.assets.level.trigger_cubes["TriggerStudyEntrance"]
+            .horizontal_aabb()
+            .contains(self.player.pos.xy())
+            && self.key_puzzle_state == KeyPuzzleState::Begin
+        {
+            let door_id = self
+                .interactables
+                .iter()
+                .position(|interactable| interactable.data.obj.meshes[0].name == "D_DoorStudy")
+                .unwrap();
+            if self.interactables[door_id].open {
+                self.click_interactable(door_id, false);
+            }
+            self.key_puzzle_state = KeyPuzzleState::Entered;
+        }
     }
 
     pub fn handle_clicks(&mut self, event: &geng::Event) {

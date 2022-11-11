@@ -27,6 +27,14 @@
         "I_FusePlaced": {
             "disabled": true,
             "hidden": true
+        },
+        "I_HintKey": {
+            "disabled": true
+        },
+        "I_StudyClosetLock": {
+            "require_item": "TheStudyKeyPuzzleSolution",
+            "use_item": true,
+            "dissapear_on_use": true
         }
     },
     "rooms": {

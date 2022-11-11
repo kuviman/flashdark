@@ -12,6 +12,8 @@ pub struct InteractableConfig {
     #[serde(default)]
     pub transparent: bool,
     #[serde(default)]
+    pub dissapear_on_use: bool,
+    #[serde(default)]
     pub disabled: bool,
     pub sfx: Option<String>,
 }

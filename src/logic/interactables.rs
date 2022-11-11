@@ -74,6 +74,10 @@ impl Game {
     pub fn click_interactable(&mut self, id: Id, player: bool) {
         let interactable = &mut self.interactables[id];
 
+        if self.key_puzzle_state == KeyPuzzleState::LightOut {
+            return;
+        }
+
         if let Some(requirement) = &interactable.config.require_item {
             if !player {
                 return;
@@ -95,6 +99,16 @@ impl Game {
             self.swing_sfx.take().unwrap().stop();
             self.tv_noise = Some(tv_noise);
             self.ambient_light = self.assets.config.ambient_light_after_fuse;
+        }
+
+        // Key puzzle
+        if interactable.data.obj.meshes[0].name == "D_DoorStudy" {
+            if self.key_puzzle_state == KeyPuzzleState::Entered {
+                self.key_puzzle_state = KeyPuzzleState::LightOut;
+                self.ambient_light = Rgba::BLACK;
+                self.player.flashdark_on = false;
+                return;
+            }
         }
 
         let sfx_position = find_center(&interactable.data.obj.meshes[0].geometry);
@@ -147,6 +161,8 @@ impl Game {
                     .cloned()
                     .unwrap_or_default(),
             });
+        } else if interactable.config.dissapear_on_use {
+            self.interactables.remove(id);
         }
 
         if player {

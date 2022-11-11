@@ -1,4 +1,4 @@
-use geng::prelude::*;
+use geng::{prelude::*, Key};
 
 mod assets;
 mod camera;
@@ -14,7 +14,35 @@ pub use id::*;
 pub use logic::*;
 pub use util::*;
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub enum KeyPuzzleState {
+    Begin,
+    Entered,
+    LightOut,
+    Finish,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub struct KeyConfiguration {
+    top_color: usize,
+    bottom_color: usize,
+    top_shape: usize,
+    bottom_shape: usize,
+}
+
+impl KeyConfiguration {
+    pub fn random() -> Self {
+        Self {
+            top_color: global_rng().gen_range(0..4),
+            bottom_color: global_rng().gen_range(0..4),
+            top_shape: global_rng().gen_range(0..4),
+            bottom_shape: global_rng().gen_range(0..4),
+        }
+    }
+}
+
 pub struct Game {
+    key_puzzle_state: KeyPuzzleState,
     monster_spawned: bool,
     framebuffer_size: Vec2<f32>,
     quad_geometry: ugli::VertexBuffer<geng::obj::Vertex>,
@@ -58,6 +86,7 @@ impl Game {
         };
         navmesh.remove_unreachable_from(assets.level.spawn_point);
         Self {
+            key_puzzle_state: KeyPuzzleState::Begin,
             monster_spawned: false,
             cutscene_t: 0.0,
             lock_controls: false,
