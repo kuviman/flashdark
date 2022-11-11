@@ -1,5 +1,5 @@
 # Blender MTL File: 'roomMVP.blend'
-# Material Count: 18
+# Material Count: 19
 
 newmtl CeilingMat
 Ns 225.000000
@@ -114,6 +114,18 @@ d 1.000000
 illum 2
 map_Kd ItemTextures1.png
 map_d ItemTextures1.png
+
+newmtl KeysMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd KeysPuzzleTexture.png
+map_d KeysPuzzleTexture.png
 
 newmtl KitchenCounter
 Ns 225.000000
