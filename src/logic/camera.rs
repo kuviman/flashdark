@@ -82,7 +82,11 @@ impl Game {
                     interactable.data.typ.matrix(interactable.progress),
                     ray,
                 ),
-                Object::Interactable(id),
+                if interactable.config.disabled {
+                    Object::StaticLevel
+                } else {
+                    Object::Interactable(id)
+                },
             );
         }
         for (id, item) in self.items.iter().enumerate() {

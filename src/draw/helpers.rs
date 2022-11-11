@@ -199,6 +199,7 @@ impl Game {
                         u_texture: texture,
                         u_texture_matrix: Mat3::identity(),
                         u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
+                        u_darkness: if self.fuse_placed { 1000.0 } else { -6.0 },
                     },
                     geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
                 ),

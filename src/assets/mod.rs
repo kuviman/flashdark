@@ -62,12 +62,15 @@ pub struct SfxAssets {
     pub drawerOpen: geng::Sound,
     pub flashOff: geng::Sound,
     pub flashOn: geng::Sound,
+    #[asset(postprocess = "loop_sound")]
+    pub swingLoop: geng::Sound,
     pub fusePlaced: geng::Sound,
     pub genericPickup: geng::Sound,
     #[asset(postprocess = "loop_sound")]
     pub ghostLoop: geng::Sound,
     pub ghostScream: geng::Sound,
     pub placeObject: geng::Sound,
+    #[asset(postprocess = "loop_sound")]
     pub tvStatic: geng::Sound,
     #[asset(path = "ghostAlarmed*.wav", range = "1..=3")]
     pub ghostAlarmed: Vec<geng::Sound>,

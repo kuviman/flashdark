@@ -53,7 +53,15 @@ impl geng::LoadAsset for LevelData {
             let mut trigger_cubes = HashMap::new();
             for i in (0..obj.meshes.len()).rev() {
                 // info!("{:?}", obj.meshes[i].name);
-                if let Some(name) = obj.meshes[i].name.strip_prefix("TC_") {
+                let name = &obj.meshes[i].name;
+                let trigger_name = if let Some(name) = name.strip_prefix("TC_") {
+                    Some(name)
+                } else if name == "GhostSpawn" {
+                    Some(name.as_str())
+                } else {
+                    None
+                };
+                if let Some(name) = trigger_name {
                     let name = name.to_owned();
                     info!("Found trigger cube: {:?}", name);
                     let mesh = obj.meshes.remove(i);

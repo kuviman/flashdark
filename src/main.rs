@@ -31,6 +31,10 @@ pub struct Game {
     monster: Monster,
     time: f32,
     fuse_spawned: bool,
+    fuse_placed: bool,
+    tv_noise: Option<geng::SoundEffect>,
+    swing_sfx: Option<geng::SoundEffect>,
+    current_swing_ref_distance: f32,
     transision: Option<geng::Transition>,
 }
 
@@ -50,6 +54,10 @@ impl Game {
         };
         navmesh.remove_unreachable_from(assets.level.spawn_point);
         Self {
+            tv_noise: None,
+            swing_sfx: None,
+            current_swing_ref_distance: 10000.0,
+            fuse_placed: false,
             time: 0.0,
             items: Self::initialize_items(assets),
             quad_geometry: ugli::VertexBuffer::new_static(

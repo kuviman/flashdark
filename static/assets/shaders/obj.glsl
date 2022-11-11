@@ -24,6 +24,7 @@ uniform float u_flashdark_angle;
 uniform float u_flashdark_strength;
 uniform vec3 u_flashdark_dir;
 uniform vec3 u_flashdark_pos;
+uniform float u_darkness;
 uniform sampler2D u_texture;
 uniform sampler2D u_dark_texture;
 void main() {
@@ -39,5 +40,6 @@ void main() {
     } else {
         gl_FragColor.w = u_color.w;
     }
+    gl_FragColor.xyz *= 1.0 - smoothstep(u_darkness, u_darkness + 3.0, v_world_pos.y);
 }
 #endif

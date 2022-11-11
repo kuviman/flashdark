@@ -39,7 +39,16 @@ impl Game {
                         let data = &self.assets.level.items[name];
                         let spawn_index = global_rng().gen_range(0..data.spawns.len());
                         let spawn = &data.spawns[spawn_index];
-                        self.assets.sfx.drawerOpen.play(); // TODO: swing
+                        let mut swing_sfx = self.assets.sfx.swingLoop.effect();
+                        swing_sfx.set_position(
+                            self.assets.level.trigger_cubes["SwingingSwing"]
+                                .center()
+                                .xy()
+                                .extend(self.camera.pos.z)
+                                .map(|x| x as f64),
+                        );
+                        swing_sfx.play(); // TODO: swing
+                        self.swing_sfx = Some(swing_sfx);
                         self.items.push(Item {
                             name: name.to_owned(),
                             mesh_index: spawn_index,
@@ -49,6 +58,19 @@ impl Game {
                     }
                 }
             }
+        }
+        if let Some(sfx) = &mut self.swing_sfx {
+            let pos = self.assets.level.trigger_cubes["SwingingSwing"]
+                .center()
+                .xy()
+                .extend(self.camera.pos.z);
+            let ref_distance = (pos - self.camera.pos)
+                .len()
+                .max(1.0)
+                .min(self.current_swing_ref_distance);
+            self.current_swing_ref_distance = ref_distance;
+            sfx.set_ref_distance(ref_distance as f64);
+            sfx.set_max_distance(ref_distance as f64 + self.assets.config.max_sound_distance - 1.0);
         }
     }
 
