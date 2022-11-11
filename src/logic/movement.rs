@@ -2,7 +2,20 @@ use super::*;
 
 impl Game {
     pub fn update_movement(&mut self, delta_time: f32) {
-        let walk_speed = 3.0;
+        if self.lock_controls {
+            return;
+        }
+        while self.player.rot_h > f32::PI {
+            self.player.rot_h -= 2.0 * f32::PI;
+        }
+        while self.player.rot_h < -f32::PI {
+            self.player.rot_h += 2.0 * f32::PI;
+        }
+        let mut walk_speed = 3.0;
+        if self.geng.window().is_key_pressed(geng::Key::LShift) {
+            // TODO: disable
+            walk_speed *= 3.0;
+        }
         let mut mov = vec2(0.0, 0.0);
         if self.geng.window().is_key_pressed(geng::Key::W)
             || self.geng.window().is_key_pressed(geng::Key::Up)

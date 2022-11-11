@@ -126,6 +126,90 @@ impl Game {
             rot,
         );
     }
+    pub fn draw_mesh(
+        &self,
+        framebuffer: &mut ugli::Framebuffer,
+        mesh: &ObjMesh,
+        matrix: Mat4<f32>,
+        color: Rgba<f32>,
+    ) {
+        let mut matrix = matrix;
+        if mesh.name == "PlayerSpawn" {
+            return;
+        }
+        if self.fuse_spawned && mesh.name.contains("SwingingSwing") {
+            let center = self.assets.level.trigger_cubes["SwingingSwing"].center();
+            matrix = matrix
+                * Mat4::translate(center)
+                * Mat4::rotate_x(self.time.sin() * 0.5)
+                * Mat4::translate(-center);
+        }
+        if mesh.name.starts_with("B_") {
+            // TODO: only once
+            let mut sum = Vec3::ZERO;
+            for v in &*mesh.geometry {
+                sum += v.a_v;
+            }
+            let center = sum / mesh.geometry.len() as f32;
+            matrix = matrix
+                * Mat4::translate(center)
+                * Mat4::rotate_z(self.camera.rot_h)
+                * Mat4::translate(-center);
+        }
+        if mesh.name.starts_with("HB_") {
+            // TODO: only once
+            let mut sum = Vec3::ZERO;
+            for v in &*mesh.geometry {
+                sum += v.a_v;
+            }
+            let center = sum / mesh.geometry.len() as f32;
+            matrix = matrix
+                * Mat4::translate(center)
+                * Mat4::rotate_x(if center.y > self.camera.pos.y {
+                    self.camera.rot_v
+                } else {
+                    -self.camera.rot_v
+                })
+                * Mat4::translate(-center);
+        }
+        let texture = mesh
+            .material
+            .texture
+            .as_deref()
+            .unwrap_or(if mesh.name.ends_with("_Dark") {
+                &self.transparent_black_texture
+            } else {
+                &self.white_texture
+            });
+        ugli::draw(
+            framebuffer,
+            &self.assets.shaders.obj,
+            ugli::DrawMode::Triangles,
+            &mesh.geometry,
+            (
+                ugli::uniforms! {
+                    u_flashdark_pos: self.player.flashdark_pos,
+                    u_flashdark_dir: self.player.flashdark_dir,
+                    u_flashdark_angle: f32::PI / 4.0,
+                    u_flashdark_strength: self.player.flashdark_strength,
+                    u_flashdark_dark: self.player.flashdark_dark,
+                    u_ambient_light_color: self.ambient_light,
+                    u_model_matrix: matrix,
+                    u_color: color,
+                    u_texture: texture,
+                    u_texture_matrix: Mat3::identity(),
+                    u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
+                    u_darkness: if self.fuse_placed { 1000.0 } else { -6.0 },
+                },
+                geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
+            ),
+            ugli::DrawParameters {
+                blend_mode: Some(ugli::BlendMode::default()),
+                depth_func: Some(ugli::DepthFunc::Less),
+                ..default()
+            },
+        );
+    }
 
     pub fn draw_obj(
         &self,
@@ -135,80 +219,7 @@ impl Game {
         color: Rgba<f32>,
     ) {
         for mesh in &obj.meshes {
-            let mut matrix = matrix;
-            if mesh.name == "PlayerSpawn" {
-                continue;
-            }
-            if self.fuse_spawned && mesh.name.contains("SwingingSwing") {
-                let center = self.assets.level.trigger_cubes["SwingingSwing"].center();
-                matrix = matrix
-                    * Mat4::translate(center)
-                    * Mat4::rotate_x(self.time.sin() * 0.5)
-                    * Mat4::translate(-center);
-            }
-            if mesh.name.starts_with("B_") {
-                // TODO: only once
-                let mut sum = Vec3::ZERO;
-                for v in &*mesh.geometry {
-                    sum += v.a_v;
-                }
-                let center = sum / mesh.geometry.len() as f32;
-                matrix = matrix
-                    * Mat4::translate(center)
-                    * Mat4::rotate_z(self.camera.rot_h)
-                    * Mat4::translate(-center);
-            }
-            if mesh.name.starts_with("HB_") {
-                // TODO: only once
-                let mut sum = Vec3::ZERO;
-                for v in &*mesh.geometry {
-                    sum += v.a_v;
-                }
-                let center = sum / mesh.geometry.len() as f32;
-                matrix = matrix
-                    * Mat4::translate(center)
-                    * Mat4::rotate_x(if center.y > self.camera.pos.y {
-                        self.camera.rot_v
-                    } else {
-                        -self.camera.rot_v
-                    })
-                    * Mat4::translate(-center);
-            }
-            let texture =
-                mesh.material
-                    .texture
-                    .as_deref()
-                    .unwrap_or(if mesh.name.ends_with("_Dark") {
-                        &self.transparent_black_texture
-                    } else {
-                        &self.white_texture
-                    });
-            ugli::draw(
-                framebuffer,
-                &self.assets.shaders.obj,
-                ugli::DrawMode::Triangles,
-                &mesh.geometry,
-                (
-                    ugli::uniforms! {
-                        u_flashdark_pos: self.player.flashdark_pos,
-                        u_flashdark_dir: self.player.flashdark_dir,
-                        u_flashdark_angle: f32::PI / 4.0,
-                        u_flashdark_strength: self.player.flashdark_strength,
-                        u_model_matrix: matrix,
-                        u_color: color,
-                        u_texture: texture,
-                        u_texture_matrix: Mat3::identity(),
-                        u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
-                        u_darkness: if self.fuse_placed { 1000.0 } else { -6.0 },
-                    },
-                    geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
-                ),
-                ugli::DrawParameters {
-                    blend_mode: Some(ugli::BlendMode::default()),
-                    depth_func: Some(ugli::DepthFunc::Less),
-                    ..default()
-                },
-            );
+            self.draw_mesh(framebuffer, mesh, matrix, color);
         }
     }
 }

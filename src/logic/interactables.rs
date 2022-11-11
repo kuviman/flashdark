@@ -94,6 +94,7 @@ impl Game {
             tv_noise.play();
             self.swing_sfx.take().unwrap().stop();
             self.tv_noise = Some(tv_noise);
+            self.ambient_light = self.assets.config.ambient_light_after_fuse;
         }
 
         let sfx_position = find_center(&interactable.data.obj.meshes[0].geometry);

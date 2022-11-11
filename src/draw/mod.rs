@@ -53,36 +53,27 @@ impl Game {
             // } else {
             //     Rgba::WHITE
             // };
-            ugli::draw(
-                framebuffer,
-                &self.assets.shaders.obj,
-                ugli::DrawMode::TriangleFan,
-                &data.mesh.geometry,
-                (
-                    ugli::uniforms! {
-                        u_flashdark_pos: self.player.flashdark_pos,
-                        u_flashdark_dir: self.player.flashdark_dir,
-                        u_flashdark_angle: f32::PI / 4.0,
-                        u_flashdark_strength: self.player.flashdark_strength,
-                        u_model_matrix: self.item_matrix(item),
-                        u_color: Rgba::WHITE,
-                        u_texture: texture,
-                        u_texture_matrix: Mat3::identity(), // data.texture_matrix,
-                        u_dark_texture: dark_texture,
-                    },
-                    geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
-                ),
-                ugli::DrawParameters {
-                    blend_mode: Some(ugli::BlendMode::default()),
-                    depth_func: Some(ugli::DepthFunc::Less),
-                    ..default()
-                },
-            );
+            self.draw_mesh(framebuffer, &data.mesh, self.item_matrix(item), Rgba::WHITE);
         }
 
         self.draw_monster(framebuffer);
 
+        // TV cutscene
+        if self.fuse_placed && self.cutscene_t < 3.0 && self.lock_controls {
+            let t = self.cutscene_t / 3.0;
+            self.draw_billboard(
+                framebuffer,
+                &self.assets.ghost_crawling,
+                self.assets.level.trigger_cubes["GhostSpawn"].center()
+                    + vec3(1.0 - t, 0.0, 0.0) * 0.5,
+                t,
+                0.0,
+            );
+        }
+
         self.draw_debug_navmesh(framebuffer);
+
+        // UI ---
 
         let camera2d = geng::Camera2d {
             center: Vec2::ZERO,

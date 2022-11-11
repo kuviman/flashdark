@@ -28,6 +28,7 @@ pub struct Assets {
     #[asset(postprocess = "make_repeated")]
     pub ceiling: ugli::Texture,
     pub ghost: ugli::Texture,
+    pub ghost_crawling: ugli::Texture,
     pub ghost_front: ugli::Texture,
     pub key: ugli::Texture,
     pub table_top: ugli::Texture,

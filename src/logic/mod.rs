@@ -29,6 +29,7 @@ impl Game {
         self.update_interactables(delta_time);
         self.update_monster(delta_time);
 
+        // Activating the swing
         if let Some(target) = self.look().target {
             if let Object::Interactable(id) = target.object {
                 let interactable = &self.interactables[id];
@@ -71,6 +72,80 @@ impl Game {
             self.current_swing_ref_distance = ref_distance;
             sfx.set_ref_distance(ref_distance as f64);
             sfx.set_max_distance(ref_distance as f64 + self.assets.config.max_sound_distance - 1.0);
+        }
+
+        // Activate the monster cutscene
+        if self.fuse_placed && self.cutscene_t < 3.0 {
+            let tv_pos = self.assets.level.trigger_cubes["GhostSpawn"].center();
+            let camera_dir = self
+                .camera
+                .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0)
+                .dir
+                .normalize_or_zero();
+            let tv_dir = (tv_pos - self.camera.pos).normalize_or_zero();
+            let trigger_box = &self.assets.level.trigger_cubes["TVLookTrigger"];
+            if trigger_box.horizontal_aabb().contains(self.player.pos.xy())
+                && Vec3::dot(camera_dir, tv_dir)
+                    > (self.assets.config.tv_detection_angle * f32::PI / 180.0).cos()
+            {
+                self.cutscene_t += delta_time;
+
+                if self.cutscene_t < 0.2 {
+                    self.player.flashdark_on = false;
+                } else if self.cutscene_t < 0.6 {
+                    self.player.flashdark_on = true;
+                } else if self.cutscene_t < 0.8 {
+                    self.player.flashdark_on = false;
+                } else if self.cutscene_t < 1.2 {
+                    self.player.flashdark_on = true;
+                } else if self.cutscene_t < 1.4 {
+                    self.player.flashdark_on = false;
+                } else if self.cutscene_t < 1.8 {
+                    self.player.flashdark_on = true;
+                }
+                if self.cutscene_t > 1.4 {
+                    self.player.flashdark_dark = 1.0;
+                }
+                self.lock_controls = true;
+                let target_rot_h = tv_dir.xy().arg() - f32::PI / 2.0;
+                let target_rot_v = vec2(tv_dir.xy().len(), tv_dir.z).arg();
+                let t = (delta_time / 0.3).min(1.0);
+                self.player.rot_h += (target_rot_h - self.player.rot_h) * t;
+                self.player.rot_v += (target_rot_v - self.player.rot_v) * t;
+                self.player.pos +=
+                    (trigger_box.center().xy().extend(self.player.pos.z) - self.player.pos) * t;
+
+                // End of the cutscene
+                if self.cutscene_t >= 3.0 {
+                    self.lock_controls = false;
+                    self.click_interactable(
+                        self.interactables
+                            .iter()
+                            .position(|interactable| {
+                                interactable.data.obj.meshes[0].name == "D_DoorMain"
+                            })
+                            .unwrap(),
+                        false,
+                    );
+                    self.monster_spawned = true;
+                }
+            }
+        }
+
+        // Entering the house
+        if self.assets.level.trigger_cubes["HouseEntrance"]
+            .horizontal_aabb()
+            .contains(self.player.pos.xy())
+        {
+            let door_id = self
+                .interactables
+                .iter()
+                .position(|interactable| interactable.data.obj.meshes[0].name == "D_DoorMain")
+                .unwrap();
+            if self.interactables[door_id].open {
+                self.click_interactable(door_id, false);
+                self.ambient_light = self.assets.config.ambient_light_inside_house;
+            }
         }
     }
 

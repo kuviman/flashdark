@@ -9,8 +9,13 @@ impl Game {
         self.player.flashdark_pos =
             self.player.pos + vec2(-0.2, 0.0).rotate(self.player.rot_h).extend(0.8);
 
-        let new_dir =
-            (self.look().position_or_inf() - self.player.flashdark_pos).normalize_or_zero();
+        // let new_dir =
+        //     (self.look().position_or_inf() - self.player.flashdark_pos).normalize_or_zero();
+        let new_dir = self
+            .camera
+            .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0)
+            .dir
+            .normalize_or_zero();
         if Vec3::dot(new_dir, self.player.flashdark_dir) < 0.0 {
             self.player.flashdark_dir = new_dir;
         } else {

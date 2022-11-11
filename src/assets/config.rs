@@ -19,7 +19,11 @@ pub struct InteractableConfig {
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
 #[asset(json)]
 pub struct Config {
+    pub tv_detection_angle: f32,
     pub sky_color: Rgba<f32>,
+    pub ambient_light: Rgba<f32>,
+    pub ambient_light_after_fuse: Rgba<f32>,
+    pub ambient_light_inside_house: Rgba<f32>,
     pub footstep_dist: f32,
     pub max_sound_distance: f64,
     pub arms_horizontal_length: f32,

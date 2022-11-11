@@ -9,6 +9,7 @@ pub struct Player {
     pub flashdark_on: bool,
     pub flashdark_dir: Vec3<f32>,
     pub flashdark_pos: Vec3<f32>,
+    pub flashdark_dark: f32,
     pub item: Option<String>,
     pub next_footstep: f32,
     pub god_mode: bool,

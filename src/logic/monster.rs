@@ -26,8 +26,8 @@ impl Drop for Monster {
 }
 
 impl Monster {
-    pub fn new(assets: &Assets, navmesh: &NavMesh) -> Self {
-        let pos = *navmesh.waypoints.choose(&mut global_rng()).unwrap();
+    pub fn new(assets: &Assets) -> Self {
+        let pos = assets.level.trigger_cubes["GhostSpawn"].center();
         Self {
             scream_time: 0.0,
             pos,
@@ -137,18 +137,32 @@ impl Game {
         }
     }
     pub fn update_monster(&mut self, delta_time: f32) {
-        return; // TODO
+        let player_inside_house = {
+            let door_id = self
+                .interactables
+                .iter()
+                .position(|interactable| interactable.data.obj.meshes[0].name == "D_DoorMain")
+                .unwrap();
+            !self.interactables[door_id].open
+        };
+        if !self.monster_spawned {
+            return;
+        }
         if (self.monster.pos - self.monster.next_target_pos).xy().len() < 0.1 {
             self.monster_walk_to(
                 *self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
                 TargetType::Rng,
             );
         }
-        if self.monster_sees_player() {
-            self.monster_walk_to(self.player.pos, TargetType::Player);
-        } else if self.player.flashdark_on {
-            self.monster_walk_to(self.player.pos, TargetType::Flashdark);
+
+        if player_inside_house {
+            if self.monster_sees_player() {
+                self.monster_walk_to(self.player.pos, TargetType::Player);
+            } else if self.player.flashdark_on {
+                self.monster_walk_to(self.player.pos, TargetType::Flashdark);
+            }
         }
+
         if (self.monster.pos - self.player.pos).len() < 0.5 {
             self.transision = Some(geng::Transition::Switch(Box::new(Game::new(
                 &self.geng,
@@ -179,7 +193,8 @@ impl Game {
         }
 
         for (id, interactable) in self.interactables.iter().enumerate() {
-            if !interactable.data.obj.meshes[0].name.starts_with("D") {
+            let name = &interactable.data.obj.meshes[0].name;
+            if !name.starts_with("D") {
                 continue;
             }
             if interactable.open {
@@ -192,11 +207,18 @@ impl Game {
             );
             let radius = 0.25;
             if v.len() < radius {
-                self.click_interactable(id, false);
-                break;
-                // let n = v.normalize_or_zero();
-                // self.player.vel -= n * Vec3::dot(n, self.player.vel);
-                // self.player.pos += n * (radius - v.len());
+                let mut can_open = true;
+                if name == "D_DoorStudy" && !player_inside_house {
+                    can_open = false;
+                }
+                if can_open {
+                    self.click_interactable(id, false);
+                    break;
+                } else {
+                    self.monster.next_target_pos = self.monster.pos;
+                    let n = v.normalize_or_zero();
+                    self.monster.pos += n * (radius - v.len());
+                }
             }
         }
 
@@ -221,7 +243,9 @@ impl Game {
             .set_position(self.monster.pos.map(|x| x as f64));
     }
     pub fn draw_monster(&mut self, framebuffer: &mut ugli::Framebuffer) {
-        return; // TODO
+        if !self.monster_spawned {
+            return;
+        }
         let texture = if Vec2::dot(
             self.monster.dir.xy(),
             vec2(0.0, 1.0).rotate(self.camera.rot_h),

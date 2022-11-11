@@ -15,6 +15,7 @@ pub use logic::*;
 pub use util::*;
 
 pub struct Game {
+    monster_spawned: bool,
     framebuffer_size: Vec2<f32>,
     quad_geometry: ugli::VertexBuffer<geng::obj::Vertex>,
     geng: Geng,
@@ -25,6 +26,7 @@ pub struct Game {
     black_texture: ugli::Texture,
     transparent_black_texture: ugli::Texture,
     player: Player,
+    ambient_light: Rgba<f32>,
     navmesh: NavMesh,
     interactables: Vec<InteractableState>,
     items: Vec<Item>,
@@ -32,6 +34,8 @@ pub struct Game {
     time: f32,
     fuse_spawned: bool,
     fuse_placed: bool,
+    lock_controls: bool,
+    cutscene_t: f32,
     tv_noise: Option<geng::SoundEffect>,
     swing_sfx: Option<geng::SoundEffect>,
     current_swing_ref_distance: f32,
@@ -54,6 +58,10 @@ impl Game {
         };
         navmesh.remove_unreachable_from(assets.level.spawn_point);
         Self {
+            monster_spawned: false,
+            cutscene_t: 0.0,
+            lock_controls: false,
+            ambient_light: assets.config.ambient_light,
             tv_noise: None,
             swing_sfx: None,
             current_swing_ref_distance: 10000.0,
@@ -97,8 +105,9 @@ impl Game {
                 rot_v: 0.0,
                 flashdark_pos: Vec3::ZERO,
                 flashdark_dir: vec3(0.0, 1.0, 0.0),
-                flashdark_on: false,
+                flashdark_on: true,
                 flashdark_strength: 0.0,
+                flashdark_dark: 0.0,
                 item: None,
                 next_footstep: 0.0,
                 god_mode: false,
@@ -115,7 +124,7 @@ impl Game {
             transparent_black_texture: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| {
                 Rgba::TRANSPARENT_BLACK
             }),
-            monster: Monster::new(assets, &navmesh),
+            monster: Monster::new(assets),
             navmesh,
             transision: None,
         }
@@ -132,8 +141,10 @@ impl geng::State for Game {
     }
 
     fn handle_event(&mut self, event: geng::Event) {
-        self.handle_event_camera(&event);
-        self.handle_clicks(&event);
+        if !self.lock_controls {
+            self.handle_event_camera(&event);
+            self.handle_clicks(&event);
+        }
 
         // TODO: remove
         match event {

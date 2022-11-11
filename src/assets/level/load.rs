@@ -16,6 +16,14 @@ impl TriggerCube {
             self.min_z + self.max_z,
         ) / 2.0
     }
+    pub fn horizontal_aabb(&self) -> AABB<f32> {
+        AABB {
+            x_min: self.min_x,
+            x_max: self.max_x,
+            y_min: self.min_y,
+            y_max: self.max_y,
+        }
+    }
 }
 
 impl geng::LoadAsset for LevelData {
