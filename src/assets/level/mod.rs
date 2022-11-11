@@ -25,4 +25,5 @@ pub struct LevelData {
     pub items: HashMap<String, ItemData>,
     pub interactables: Vec<Rc<InteractableData>>,
     pub spawn_point: Vec3<f32>,
+    pub trigger_cubes: HashMap<String, TriggerCube>,
 }

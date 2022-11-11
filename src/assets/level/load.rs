@@ -1,5 +1,23 @@
 use super::*;
 
+pub struct TriggerCube {
+    pub min_x: f32,
+    pub min_y: f32,
+    pub min_z: f32,
+    pub max_x: f32,
+    pub max_y: f32,
+    pub max_z: f32,
+}
+impl TriggerCube {
+    pub fn center(&self) -> Vec3<f32> {
+        vec3(
+            self.min_x + self.max_x,
+            self.min_y + self.max_y,
+            self.min_z + self.max_z,
+        ) / 2.0
+    }
+}
+
 impl geng::LoadAsset for LevelData {
     fn load(geng: &Geng, path: &std::path::Path) -> geng::AssetFuture<Self> {
         let geng = geng.clone();
@@ -7,18 +25,59 @@ impl geng::LoadAsset for LevelData {
         async move {
             let mut obj = <Obj as geng::LoadAsset>::load(&geng, &path.join("roomMVP.obj")).await?;
 
-            obj.meshes.retain(|mesh| !mesh.name.starts_with("RDC_")); // TODO rooms
+            obj.meshes.retain(|mesh| {
+                if mesh.name.starts_with("RDC_") {
+                    // TODO rooms
+                    return false;
+                }
+                if mesh.name.starts_with("H_") {
+                    // TODO window holes?
+                    return false;
+                }
+                true
+            });
 
             for mesh in &mut obj.meshes {
-                if mesh.name == "S_Grass" {
+                if mesh.name.starts_with("S_Grass") || mesh.name.starts_with("S_Ceiling") {
                     for v in mesh.geometry.iter_mut() {
                         v.a_vt = v.a_v.xy() / 2.0;
                     }
                 }
-                if mesh.name == "S_Walls" {
+                if mesh.name.starts_with("S_Walls") {
                     for v in mesh.geometry.iter_mut() {
                         v.a_vt = vec2((v.a_v.x + v.a_v.y) / 2.0, v.a_v.z / 2.0);
                     }
+                }
+            }
+
+            let mut trigger_cubes = HashMap::new();
+            for i in (0..obj.meshes.len()).rev() {
+                // info!("{:?}", obj.meshes[i].name);
+                if let Some(name) = obj.meshes[i].name.strip_prefix("TC_") {
+                    let name = name.to_owned();
+                    info!("Found trigger cube: {:?}", name);
+                    let mesh = obj.meshes.remove(i);
+                    let mut min = mesh.geometry[0].a_v;
+                    let mut max = mesh.geometry[0].a_v;
+                    for v in mesh.geometry.iter() {
+                        min.x = min.x.min(v.a_v.x);
+                        min.y = min.y.min(v.a_v.y);
+                        min.z = min.z.min(v.a_v.z);
+                        max.x = max.x.max(v.a_v.x);
+                        max.y = max.y.max(v.a_v.y);
+                        max.z = max.z.max(v.a_v.z);
+                    }
+                    trigger_cubes.insert(
+                        name,
+                        TriggerCube {
+                            min_x: min.x,
+                            min_y: min.y,
+                            min_z: min.z,
+                            max_x: max.x,
+                            max_y: max.y,
+                            max_z: max.z,
+                        },
+                    );
                 }
             }
 
@@ -147,6 +206,7 @@ impl geng::LoadAsset for LevelData {
                 interactables: interactables.into_iter().map(Rc::new).collect(),
                 items,
                 obj,
+                trigger_cubes,
             })
         }
         .boxed_local()

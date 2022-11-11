@@ -1,8 +1,9 @@
 {
+    "sky_color": "#0F1E70",
     "footstep_dist": 1.0,
     "max_sound_distance": 10.0,
     "arms_horizontal_length": 1.0,
-    "arms_vertical_length": 1.0,
+    "arms_vertical_length": 1.5,
     "parents": {
         "child": "parent"
     },
@@ -21,6 +22,16 @@
             "use_item": true,
             "hidden": true,
             "sfx": "doorUnlocked.wav"
+        },
+        "I_FusePlaceholder": {
+            "require_item": "Fuse",
+            "transparent": true,
+            "use_item": true,
+            "transform_on_use": "I_FusePlaced"
+        },
+        "I_FusePlaced": {
+            "disabled": true,
+            "hidden": true
         }
     },
     "rooms": {

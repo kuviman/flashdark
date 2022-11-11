@@ -137,6 +137,7 @@ impl Game {
         }
     }
     pub fn update_monster(&mut self, delta_time: f32) {
+        return; // TODO
         if (self.monster.pos - self.monster.next_target_pos).xy().len() < 0.1 {
             self.monster_walk_to(
                 *self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
@@ -220,6 +221,7 @@ impl Game {
             .set_position(self.monster.pos.map(|x| x as f64));
     }
     pub fn draw_monster(&mut self, framebuffer: &mut ugli::Framebuffer) {
+        return; // TODO
         let texture = if Vec2::dot(
             self.monster.dir.xy(),
             vec2(0.0, 1.0).rotate(self.camera.rot_h),

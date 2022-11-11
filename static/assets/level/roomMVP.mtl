@@ -1,192 +1,172 @@
-# Blender MTL File: 'roomMVP.blend'
-# Material Count: 17
+# Blender 3.3.1 MTL File: 'roomMVP.blend'
+# www.blender.org
 
 newmtl CeilingMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 0.500000 0.500000 0.500000 CeilingTexture.png
+map_Kd -s 0.5 0.5 0.5 C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/CeilingTexture.png
 
 newmtl ClosetMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd ClosetTexture.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/ClosetTexture.png
 
 newmtl DarkItemsMat1
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
-d 1.000000
 illum 2
-map_Kd DarkItems1.png
-map_d DarkItems1.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/DarkItems1.png
+map_d C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/DarkItems1.png
 
 newmtl DoorMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd DoorTextures.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/DoorTextures.png
 
 newmtl DrawerMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd DrawerTexture.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/DrawerTexture.png
 
 newmtl FridgeMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd FridgeTexture.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/FridgeTexture.png
 
 newmtl FuseboxMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
-d 1.000000
 illum 2
-map_Kd FuseboxTexture.png
-map_d FuseboxTexture.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/FuseboxTexture.png
+map_d C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/FuseboxTexture.png
+
+newmtl FuseboxMat.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/FuseboxTexture.png
+map_d C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/FuseboxTexture.png
 
 newmtl GrassMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 20.000000 20.000000 20.000000 GrassTexture.png
+map_Kd -s 20 20 20 C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/GrassTexture.png
 
 newmtl Item2DMat1
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
-d 1.000000
 illum 2
-map_Kd ItemTextures1.png
-map_d ItemTextures1.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/ItemTextures1.png
+map_d C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/ItemTextures1.png
 
 newmtl KitchenCounter
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd KitchenCounterTexture.png
-
-newmtl None
-Ns 500
-Ka 0.8 0.8 0.8
-Kd 0.8 0.8 0.8
-Ks 0.8 0.8 0.8
-d 1
-illum 2
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/KitchenCounterTexture.png
 
 newmtl RefFloor
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd FlashDarkMVPLevelRef.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/FlashDarkMVPLevelRef.png
 
 newmtl SofaMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
-d 1.000000
 illum 2
-map_Kd SofaTexture.png
-map_d SofaTexture.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/SofaTexture.png
+map_d C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/SofaTexture.png
 
 newmtl SwingMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
-d 1.000000
 illum 2
-map_Kd SwingTexture.png
-map_d SwingTexture.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/SwingTexture.png
+map_d C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/SwingTexture.png
 
 newmtl TVMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd TVTexture.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/TVTexture.png
 
 newmtl WallMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1.000000 1.000000 0.500000 MuddyWallTexture.png
+map_Kd -s 1 1 0.5 C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/MuddyWallTexture.png
 
 newmtl WindowMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
-d 1.000000
 illum 2
-map_Kd WindowTexture.png
-map_d WindowTexture.png
+map_Kd C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/WindowTexture.png
+map_d C:/Users/kuviman/Projects/flashdark/blender/Output/RoomMVP/WindowTexture.png

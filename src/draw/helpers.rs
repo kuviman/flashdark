@@ -139,6 +139,13 @@ impl Game {
             if mesh.name == "PlayerSpawn" {
                 continue;
             }
+            if self.fuse_spawned && mesh.name.contains("SwingingSwing") {
+                let center = self.assets.level.trigger_cubes["SwingingSwing"].center();
+                matrix = matrix
+                    * Mat4::translate(center)
+                    * Mat4::rotate_x(self.time.sin() * 0.5)
+                    * Mat4::translate(-center);
+            }
             if mesh.name.starts_with("B_") {
                 // TODO: only once
                 let mut sum = Vec3::ZERO;
@@ -149,6 +156,22 @@ impl Game {
                 matrix = matrix
                     * Mat4::translate(center)
                     * Mat4::rotate_z(self.camera.rot_h)
+                    * Mat4::translate(-center);
+            }
+            if mesh.name.starts_with("HB_") {
+                // TODO: only once
+                let mut sum = Vec3::ZERO;
+                for v in &*mesh.geometry {
+                    sum += v.a_v;
+                }
+                let center = sum / mesh.geometry.len() as f32;
+                matrix = matrix
+                    * Mat4::translate(center)
+                    * Mat4::rotate_x(if center.y > self.camera.pos.y {
+                        self.camera.rot_v
+                    } else {
+                        -self.camera.rot_v
+                    })
                     * Mat4::translate(-center);
             }
             let texture =

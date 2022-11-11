@@ -9,12 +9,15 @@ pub struct InteractableConfig {
     pub give_item: Option<String>,
     #[serde(default)]
     pub hidden: bool,
+    #[serde(default)]
+    pub transparent: bool,
     pub sfx: Option<String>,
 }
 
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
 #[asset(json)]
 pub struct Config {
+    pub sky_color: Rgba<f32>,
     pub footstep_dist: f32,
     pub max_sound_distance: f64,
     pub arms_horizontal_length: f32,

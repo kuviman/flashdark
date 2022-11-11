@@ -35,6 +35,8 @@ pub struct Assets {
     pub bed_bottom: ugli::Texture,
     pub bed_back: ugli::Texture,
     pub hand: ugli::Texture,
+    pub reticle: ugli::Texture,
+    pub require_item: ugli::Texture,
     pub flashdark: ugli::Texture,
     #[asset(path = "box.png")]
     pub box_texture: ugli::Texture,

@@ -29,6 +29,8 @@ pub struct Game {
     interactables: Vec<InteractableState>,
     items: Vec<Item>,
     monster: Monster,
+    time: f32,
+    fuse_spawned: bool,
     transision: Option<geng::Transition>,
 }
 
@@ -48,6 +50,7 @@ impl Game {
         };
         navmesh.remove_unreachable_from(assets.level.spawn_point);
         Self {
+            time: 0.0,
             items: Self::initialize_items(assets),
             quad_geometry: ugli::VertexBuffer::new_static(
                 geng.ugli(),
@@ -74,6 +77,7 @@ impl Game {
                     },
                 ],
             ),
+            fuse_spawned: false,
             interactables: Self::initialize_interactables(assets),
             framebuffer_size: vec2(1.0, 1.0),
             geng: geng.clone(),

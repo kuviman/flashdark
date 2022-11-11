@@ -17,6 +17,12 @@ impl Game {
             //     name: name.clone(),
             //     pos: spawns.choose(&mut global_rng()).unwrap().clone(),
             // })
+            .filter(|(name, _data)| {
+                if name.contains("Fuse") {
+                    return false;
+                }
+                true
+            })
             .flat_map(|(name, data)| {
                 data.spawns.iter().enumerate().map(|(index, data)| Item {
                     name: name.clone(),
