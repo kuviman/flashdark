@@ -42,6 +42,7 @@ impl KeyConfiguration {
 }
 
 pub struct Game {
+    storage_unlocked: bool,
     key_puzzle_state: KeyPuzzleState,
     monster_spawned: bool,
     framebuffer_size: Vec2<f32>,
@@ -86,6 +87,7 @@ impl Game {
         };
         navmesh.remove_unreachable_from(assets.level.spawn_point);
         Self {
+            storage_unlocked: false,
             key_puzzle_state: KeyPuzzleState::Begin,
             monster_spawned: false,
             cutscene_t: 0.0,

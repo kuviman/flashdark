@@ -51,6 +51,13 @@ fn update_key_uvs(mesh: &mut ObjMesh, config: KeyConfiguration) {
     );
 }
 
+fn update_storage_lock_uvs(mesh: &mut ObjMesh, num: u8) {
+    let mid = mesh.geometry.iter().map(|v| v.a_vt.x).sum::<f32>() / mesh.geometry.len() as f32;
+    for v in mesh.geometry.iter_mut() {
+        v.a_vt.x = 0.25 * num as f32 + if v.a_vt.x < mid { 0.0 } else { 0.25 };
+    }
+}
+
 impl geng::LoadAsset for LevelData {
     fn load(geng: &Geng, path: &std::path::Path) -> geng::AssetFuture<Self> {
         let geng = geng.clone();
@@ -70,6 +77,8 @@ impl geng::LoadAsset for LevelData {
                 true
             });
 
+            let storage_lock_combination = std::array::from_fn(|_| global_rng().gen_range(0..4));
+
             for mesh in &mut obj.meshes {
                 if mesh.name.starts_with("S_Grass") || mesh.name.starts_with("S_Ceiling") {
                     for v in mesh.geometry.iter_mut() {
@@ -80,6 +89,19 @@ impl geng::LoadAsset for LevelData {
                     for v in mesh.geometry.iter_mut() {
                         v.a_vt = vec2((v.a_v.x + v.a_v.y) / 2.0, v.a_v.z / 2.0);
                     }
+                }
+
+                if mesh.name == "S_StudySymbol2" {
+                    update_storage_lock_uvs(mesh, storage_lock_combination[0]);
+                }
+                if mesh.name == "S_LivingSymbol1" {
+                    update_storage_lock_uvs(mesh, storage_lock_combination[1]);
+                }
+                if mesh.name == "S_LivingSymbol2" {
+                    update_storage_lock_uvs(mesh, storage_lock_combination[2]);
+                }
+                if mesh.name == "S_StudySymbol1" {
+                    update_storage_lock_uvs(mesh, storage_lock_combination[3]);
                 }
             }
 
@@ -163,10 +185,28 @@ impl geng::LoadAsset for LevelData {
                     )
                     .normalize_or_zero()
                         * 0.3;
-                    interactables.push(InteractableData {
-                        obj: Obj { meshes: vec![mesh] },
-                        typ: InteractableType::Drawer { shift },
-                    });
+                    if mesh.name.starts_with("I_StorageButtonIcon") {
+                        for n in 0..4 {
+                            let mut mesh = ObjMesh {
+                                name: format!("{}{}", mesh.name, n),
+                                geometry: ugli::VertexBuffer::new_static(
+                                    geng.ugli(),
+                                    mesh.geometry.clone(),
+                                ),
+                                material: mesh.material.clone(),
+                            };
+                            update_storage_lock_uvs(&mut mesh, n);
+                            interactables.push(InteractableData {
+                                obj: Obj { meshes: vec![mesh] },
+                                typ: InteractableType::Drawer { shift },
+                            });
+                        }
+                    } else {
+                        interactables.push(InteractableData {
+                            obj: Obj { meshes: vec![mesh] },
+                            typ: InteractableType::Drawer { shift },
+                        });
+                    }
                 }
             }
 
@@ -264,6 +304,7 @@ impl geng::LoadAsset for LevelData {
 
             Ok(LevelData {
                 key_configs,
+                storage_lock_combination,
                 hint_key_config,
                 spawn_point: {
                     let index = obj

@@ -33,6 +33,12 @@ impl InteractableType {
 
 impl Game {
     pub fn initialize_interactables(assets: &Assets) -> Vec<InteractableState> {
+        let initial_storage_lock_config: [u8; 4] = loop {
+            let config = std::array::from_fn(|_| global_rng().gen_range(0..4));
+            if config != assets.level.storage_lock_combination {
+                break config;
+            }
+        };
         assets
             .level
             .interactables
@@ -41,6 +47,14 @@ impl Game {
                 let name = &data.obj.meshes[0].name;
                 if name == "I_HintKey" {
                     return None;
+                }
+                if let Some(numbers) = name.strip_prefix("I_StorageButtonIcon") {
+                    let mut numbers = numbers.chars().map(|c| c.to_digit(10).unwrap());
+                    let index = numbers.next().unwrap() as usize - 1;
+                    let value = numbers.next().unwrap() as u8;
+                    if initial_storage_lock_config[index] != value {
+                        return None;
+                    }
                 }
                 let config = assets.config.interactables.get(name);
                 if config.map_or(false, |config| config.hidden) {
@@ -141,7 +155,24 @@ impl Game {
             self.player.item = None;
         }
         // TODO: clone not needed
-        if let Some(transform) = interactable.config.transform_on_use.clone() {
+        let mut transform = interactable.config.transform_on_use.clone();
+        // Storage lock puzzle
+        let mut check_storage_lock = false;
+        if let Some(numbers) = interactable.data.obj.meshes[0]
+            .name
+            .strip_prefix("I_StorageButtonIcon")
+        {
+            let mut numbers = numbers.chars().map(|c| c.to_digit(10).unwrap());
+            let _index = numbers.next().unwrap() as usize;
+            let value = numbers.next().unwrap() as u8;
+            let value = (value + 1) % 4;
+            let mut new_name = interactable.data.obj.meshes[0].name.clone();
+            new_name.pop();
+            new_name += &value.to_string();
+            transform = Some(new_name);
+            check_storage_lock = true;
+        }
+        if let Some(transform) = transform {
             self.interactables.remove(id);
             self.interactables.push(InteractableState {
                 open: false,
@@ -168,6 +199,30 @@ impl Game {
 
         if player {
             self.check_monster_sfx(sfx_position);
+        }
+
+        if check_storage_lock {
+            let current_lock_combination = std::array::from_fn(|i| {
+                self.interactables
+                    .iter()
+                    .filter_map(|interactable| {
+                        interactable.data.obj.meshes[0]
+                            .name
+                            .strip_prefix(&format!("I_StorageButtonIcon{}", i + 1))
+                    })
+                    .next()
+                    .unwrap()
+                    .chars()
+                    .next()
+                    .unwrap()
+                    .to_digit(10)
+                    .unwrap() as u8
+            });
+            if current_lock_combination == self.assets.level.storage_lock_combination {
+                self.interactables
+                    .retain(|i| !i.data.obj.meshes[0].name.contains("StorageButton"));
+                self.storage_unlocked = true;
+            }
         }
     }
 }

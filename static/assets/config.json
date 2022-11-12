@@ -35,6 +35,18 @@
             "require_item": "TheStudyKeyPuzzleSolution",
             "use_item": true,
             "dissapear_on_use": true
+        },
+        "I_StorageButton1": {
+            "disabled": true
+        },
+        "I_StorageButton2": {
+            "disabled": true
+        },
+        "I_StorageButton3": {
+            "disabled": true
+        },
+        "I_StorageButton4": {
+            "disabled": true
         }
     },
     "rooms": {

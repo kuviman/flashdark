@@ -82,7 +82,10 @@ impl Game {
                     interactable.data.typ.matrix(interactable.progress),
                     ray,
                 ),
-                if interactable.config.disabled {
+                if interactable.config.disabled
+                    || (interactable.data.obj.meshes[0].name == "D_DoorStorage"
+                        && !self.storage_unlocked)
+                {
                     Object::StaticLevel
                 } else {
                     Object::Interactable(id)

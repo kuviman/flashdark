@@ -25,6 +25,7 @@ pub struct LevelData {
     pub items: HashMap<String, ItemData>,
     pub key_configs: HashMap<String, KeyConfiguration>,
     pub hint_key_config: KeyConfiguration,
+    pub storage_lock_combination: [u8; 4],
     pub interactables: Vec<Rc<InteractableData>>,
     pub spawn_point: Vec3<f32>,
     pub trigger_cubes: HashMap<String, TriggerCube>,
