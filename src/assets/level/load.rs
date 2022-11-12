@@ -248,6 +248,9 @@ impl geng::LoadAsset for LevelData {
                             parent_interactable: interactables.iter().enumerate().find_map(
                                 |(index, inter)| {
                                     let mesh = &inter.obj.meshes[0];
+                                    if mesh.name.starts_with("I_LoosePlank") {
+                                        return None;
+                                    }
                                     let mut min = mesh.geometry[0].a_v;
                                     let mut max = mesh.geometry[0].a_v;
                                     for v in mesh.geometry.iter() {

@@ -190,6 +190,10 @@ impl geng::State for Game {
             }
             geng::Event::KeyDown { key: geng::Key::G } => {
                 self.player.god_mode = !self.player.god_mode;
+                self.ambient_light = self.assets.config.ambient_light_inside_house;
+                self.player.flashdark_dark = 1.0;
+                self.player.flashdark_dark = 1.0;
+                self.fuse_placed = true;
             }
             _ => {}
         }

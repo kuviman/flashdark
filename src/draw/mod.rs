@@ -138,8 +138,18 @@ impl Game {
                     Object::StaticLevel => &self.assets.reticle,
                     Object::Interactable(id) => {
                         let interactable = &self.interactables[id];
-                        if let Some(requirement) = &interactable.config.require_item {
-                            if self.player.item.as_ref() != Some(requirement) {
+
+                        // Copypasta mmmm
+                        let mut requirement = interactable.config.require_item.as_deref();
+                        if interactable.data.obj.meshes[0]
+                            .name
+                            .starts_with("I_LoosePlank")
+                        {
+                            requirement = Some("Crowbar");
+                        }
+
+                        if let Some(requirement) = requirement {
+                            if self.player.item.as_deref() != Some(requirement) {
                                 return &self.assets.require_item;
                                 // self.assets.level.items[requirement].spawns[0]
                                 //     .mesh

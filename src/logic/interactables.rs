@@ -93,11 +93,18 @@ impl Game {
             return;
         }
 
-        if let Some(requirement) = &interactable.config.require_item {
+        let mut requirement = interactable.config.require_item.as_deref();
+        if interactable.data.obj.meshes[0]
+            .name
+            .starts_with("I_LoosePlank")
+        {
+            requirement = Some("Crowbar");
+        }
+        if let Some(requirement) = requirement {
             if !player {
                 return;
             }
-            if self.player.item.as_ref() != Some(requirement) {
+            if self.player.item.as_deref() != Some(requirement) {
                 return;
             }
         }
@@ -193,7 +200,11 @@ impl Game {
                     .cloned()
                     .unwrap_or_default(),
             });
-        } else if interactable.config.dissapear_on_use {
+        } else if interactable.config.dissapear_on_use
+            || interactable.data.obj.meshes[0]
+                .name
+                .starts_with("I_LoosePlank")
+        {
             self.interactables.remove(id);
         }
 
