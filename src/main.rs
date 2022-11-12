@@ -24,7 +24,7 @@ pub struct Game {
     white_texture: ugli::Texture,
     black_texture: ugli::Texture,
     transparent_black_texture: ugli::Texture,
-    shadow_map: Option<(ugli::Texture, ugli::Renderbuffer<ugli::DepthComponent>)>,
+    shadow_calc: ShadowCalculation,
     player: Player,
     navmesh: NavMesh,
     interactables: Vec<InteractableState>,
@@ -95,7 +95,7 @@ impl Game {
             transparent_black_texture: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| {
                 Rgba::TRANSPARENT_BLACK
             }),
-            shadow_map: None,
+            shadow_calc: ShadowCalculation::new(geng),
             monster: Monster::new(assets, &navmesh),
             navmesh,
             transision: None,

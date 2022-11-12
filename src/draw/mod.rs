@@ -6,12 +6,18 @@ pub use helpers::*;
 
 const SHADOW_MAP_SIZE: Vec2<usize> = vec2(1024, 1024);
 
+pub struct ShadowCalculation {
+    light_shadow_map: ugli::Texture,
+    light_depth_buffer: ugli::Renderbuffer<ugli::DepthComponent>,
+    camera_shadow_map: ugli::Texture,
+}
+
 impl Game {
     pub fn draw_impl(&mut self, framebuffer: &mut ugli::Framebuffer) {
         self.framebuffer_size = framebuffer.size().map(|x| x as f32);
         ugli::clear(framebuffer, Some(Rgba::BLACK), Some(1.0), None);
 
-        self.update_shadow_map();
+        self.update_shadows(framebuffer);
 
         // self.geng.draw_2d(
         //     framebuffer,
@@ -87,9 +93,9 @@ impl Game {
                         u_texture: texture,
                         u_texture_matrix: Mat3::identity(), // data.texture_matrix,
                         u_dark_texture: dark_texture,
-                        u_shadow_map: &self.shadow_map.as_ref().unwrap().0,
-                        u_shadow_size: self.shadow_map.as_ref().unwrap().0.size(),
-                        u_light_matrix: light.matrix(self.shadow_map.as_ref().unwrap().0.size().map(|x| x as f32)),
+                        u_shadow_map: &self.shadow_calc.light_shadow_map,
+                        u_shadow_size: self.shadow_calc.light_shadow_map.size(),
+                        u_light_matrix: light.matrix(self.shadow_calc.light_shadow_map.size().map(|x| x as f32)),
                         u_light_source: light.pos,
                     },
                     geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
@@ -173,43 +179,53 @@ impl Game {
         self.geng.draw_2d(
             framebuffer,
             &geng::PixelPerfectCamera,
-            &draw_2d::TexturedQuad::new(aabb, &self.shadow_map.as_ref().unwrap().0),
+            &draw_2d::TexturedQuad::new(aabb, &self.shadow_calc.light_shadow_map),
         );
     }
 
-    fn update_shadow_map(&mut self) {
+    fn update_shadows(&mut self, framebuffer: &ugli::Framebuffer) {
         // Update resolution
-        let (mut shadow_map, mut shadow_buffer) = self.shadow_map.take().unwrap_or_else(|| {
-            (
-                ugli::Texture::new_with(self.geng.ugli(), SHADOW_MAP_SIZE, |_| Rgba::BLACK),
-                ugli::Renderbuffer::new(self.geng.ugli(), SHADOW_MAP_SIZE),
-            )
-        });
-        shadow_map.set_filter(ugli::Filter::Nearest);
+        if self.shadow_calc.camera_shadow_map.size() != framebuffer.size() {
+            self.shadow_calc.camera_shadow_map =
+                ugli::Texture::new_with(self.geng.ugli(), framebuffer.size(), |_| Rgba::BLACK);
+        }
 
         // Create a temprorary framebuffer
         let mut shadow_framebuffer = ugli::Framebuffer::new(
             self.geng.ugli(),
-            ugli::ColorAttachment::Texture(&mut shadow_map),
-            ugli::DepthAttachment::Renderbuffer(&mut shadow_buffer),
+            ugli::ColorAttachment::Texture(&mut self.shadow_calc.light_shadow_map),
+            ugli::DepthAttachment::Renderbuffer(&mut self.shadow_calc.light_depth_buffer),
         );
         ugli::clear(&mut shadow_framebuffer, Some(Rgba::WHITE), Some(1.0), None);
 
-        // Render lights
+        // Render shadows into the texture
         let light = Light {
             fov: self.camera.fov, // 0.5,
             pos: self.player.flashdark_pos,
             rot_h: self.camera.rot_h, // self.player.rot_h,
             rot_v: self.camera.rot_v, // self.player.rot_v,
         };
-        self.obj_shadow(
+        obj_shadow(
             &light,
             &mut shadow_framebuffer,
             &self.assets.level.obj,
             Mat4::identity(),
+            &self.assets.shaders.shadow,
         );
+    }
+}
 
-        // Update the field
-        self.shadow_map = Some((shadow_map, shadow_buffer));
+impl ShadowCalculation {
+    pub fn new(geng: &Geng) -> Self {
+        Self {
+            light_shadow_map: {
+                let mut texture =
+                    ugli::Texture::new_with(geng.ugli(), SHADOW_MAP_SIZE, |_| Rgba::WHITE);
+                texture.set_filter(ugli::Filter::Nearest);
+                texture
+            },
+            light_depth_buffer: ugli::Renderbuffer::new(geng.ugli(), SHADOW_MAP_SIZE),
+            camera_shadow_map: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| Rgba::BLACK),
+        }
     }
 }

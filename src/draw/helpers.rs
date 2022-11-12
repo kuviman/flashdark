@@ -177,9 +177,9 @@ impl Game {
                         u_texture: texture,
                         u_texture_matrix: Mat3::identity(),
                         u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
-                        u_shadow_map: &self.shadow_map.as_ref().unwrap().0,
-                        u_shadow_size: self.shadow_map.as_ref().unwrap().0.size(),
-                        u_light_matrix: light.matrix(self.shadow_map.as_ref().unwrap().0.size().map(|x| x as f32)),
+                        u_shadow_map: &self.shadow_calc.light_shadow_map,
+                        u_shadow_size: self.shadow_calc.light_shadow_map.size(),
+                        u_light_matrix: light.matrix(self.shadow_calc.light_shadow_map.size().map(|x| x as f32)),
                         u_light_source: light.pos,
                     },
                     geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
@@ -192,50 +192,50 @@ impl Game {
             );
         }
     }
+}
 
-    pub fn obj_shadow(
-        &self,
-        light: &Light,
-        framebuffer: &mut ugli::Framebuffer,
-        obj: &Obj,
-        matrix: Mat4<f32>,
-    ) {
-        for mesh in &obj.meshes {
-            // let mut matrix = matrix;
-            if mesh.name == "PlayerSpawn" {
-                continue;
-            }
-            if mesh.name.starts_with("B_") {
-                // // TODO: only once
-                // let mut sum = Vec3::ZERO;
-                // for v in &*mesh.geometry {
-                //     sum += v.a_v;
-                // }
-                // let center = sum / mesh.geometry.len() as f32;
-                // matrix = matrix
-                //     * Mat4::translate(center)
-                //     * Mat4::rotate_z(self.camera.rot_h)
-                //     * Mat4::translate(-center);
-                continue; // Ignore billboards for lighting for now
-            }
-            ugli::draw(
-                framebuffer,
-                &self.assets.shaders.shadow,
-                ugli::DrawMode::Triangles,
-                &mesh.geometry,
-                (
-                    ugli::uniforms! {
-                        u_model_matrix: matrix,
-                    },
-                    geng::camera3d_uniforms(light, framebuffer.size().map(|x| x as f32)),
-                ),
-                ugli::DrawParameters {
-                    // blend_mode: Some(ugli::BlendMode::default()),
-                    depth_func: Some(ugli::DepthFunc::Less),
-                    cull_face: Some(ugli::CullFace::Front),
-                    ..default()
-                },
-            );
+pub fn obj_shadow(
+    light: &Light,
+    framebuffer: &mut ugli::Framebuffer,
+    obj: &Obj,
+    matrix: Mat4<f32>,
+    shadow_shader: &ugli::Program,
+) {
+    for mesh in &obj.meshes {
+        // let mut matrix = matrix;
+        if mesh.name == "PlayerSpawn" {
+            continue;
         }
+        if mesh.name.starts_with("B_") {
+            // // TODO: only once
+            // let mut sum = Vec3::ZERO;
+            // for v in &*mesh.geometry {
+            //     sum += v.a_v;
+            // }
+            // let center = sum / mesh.geometry.len() as f32;
+            // matrix = matrix
+            //     * Mat4::translate(center)
+            //     * Mat4::rotate_z(self.camera.rot_h)
+            //     * Mat4::translate(-center);
+            continue; // Ignore billboards for lighting for now
+        }
+        ugli::draw(
+            framebuffer,
+            shadow_shader,
+            ugli::DrawMode::Triangles,
+            &mesh.geometry,
+            (
+                ugli::uniforms! {
+                    u_model_matrix: matrix,
+                },
+                geng::camera3d_uniforms(light, framebuffer.size().map(|x| x as f32)),
+            ),
+            ugli::DrawParameters {
+                // blend_mode: Some(ugli::BlendMode::default()),
+                depth_func: Some(ugli::DepthFunc::Less),
+                cull_face: Some(ugli::CullFace::Front),
+                ..default()
+            },
+        );
     }
 }
