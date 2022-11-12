@@ -21,7 +21,7 @@ pub struct Monster {
 
 impl Drop for Monster {
     fn drop(&mut self) {
-        self.loop_sound.pause();
+        self.loop_sound.stop();
     }
 }
 
