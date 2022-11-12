@@ -24,6 +24,6 @@ impl geng::AbstractCamera3d for Light {
     }
 
     fn projection_matrix(&self, framebuffer_size: Vec2<f32>) -> Mat4<f32> {
-        Mat4::perspective(self.fov, framebuffer_size.x / framebuffer_size.y, 0.1, 10.0)
+        Mat4::perspective(self.fov, framebuffer_size.x / framebuffer_size.y, 0.1, 50.0)
     }
 }

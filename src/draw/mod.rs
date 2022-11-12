@@ -4,12 +4,14 @@ mod helpers;
 
 pub use helpers::*;
 
+const SHADOW_MAP_SIZE: Vec2<usize> = vec2(1024, 1024);
+
 impl Game {
     pub fn draw_impl(&mut self, framebuffer: &mut ugli::Framebuffer) {
         self.framebuffer_size = framebuffer.size().map(|x| x as f32);
         ugli::clear(framebuffer, Some(Rgba::BLACK), Some(1.0), None);
 
-        self.update_shadow_map(framebuffer);
+        self.update_shadow_map();
 
         // self.geng.draw_2d(
         //     framebuffer,
@@ -24,7 +26,7 @@ impl Game {
         let look = self.look();
 
         let light = Light {
-            fov: self.camera.fov, // 1.0,
+            fov: self.camera.fov, // 0.5,
             pos: self.player.flashdark_pos,
             rot_h: self.camera.rot_h, // self.player.rot_h,
             rot_v: self.camera.rot_v, // self.player.rot_v,
@@ -87,7 +89,8 @@ impl Game {
                         u_dark_texture: dark_texture,
                         u_shadow_map: &self.shadow_map.as_ref().unwrap().0,
                         u_shadow_size: self.shadow_map.as_ref().unwrap().0.size(),
-                        u_light_matrix: light.matrix(self.framebuffer_size),
+                        u_light_matrix: light.matrix(self.shadow_map.as_ref().unwrap().0.size().map(|x| x as f32)),
+                        u_light_source: light.pos,
                     },
                     geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
                 ),
@@ -174,18 +177,14 @@ impl Game {
         );
     }
 
-    fn update_shadow_map(&mut self, framebuffer: &mut ugli::Framebuffer) {
+    fn update_shadow_map(&mut self) {
         // Update resolution
-        let (mut shadow_map, mut shadow_buffer) = self
-            .shadow_map
-            .take()
-            .filter(|(sm, _buf)| sm.size() == framebuffer.size())
-            .unwrap_or_else(|| {
-                (
-                    ugli::Texture::new_with(self.geng.ugli(), framebuffer.size(), |_| Rgba::BLACK),
-                    ugli::Renderbuffer::new(self.geng.ugli(), framebuffer.size()),
-                )
-            });
+        let (mut shadow_map, mut shadow_buffer) = self.shadow_map.take().unwrap_or_else(|| {
+            (
+                ugli::Texture::new_with(self.geng.ugli(), SHADOW_MAP_SIZE, |_| Rgba::BLACK),
+                ugli::Renderbuffer::new(self.geng.ugli(), SHADOW_MAP_SIZE),
+            )
+        });
         shadow_map.set_filter(ugli::Filter::Nearest);
 
         // Create a temprorary framebuffer
@@ -194,11 +193,11 @@ impl Game {
             ugli::ColorAttachment::Texture(&mut shadow_map),
             ugli::DepthAttachment::Renderbuffer(&mut shadow_buffer),
         );
-        ugli::clear(&mut shadow_framebuffer, Some(Rgba::BLACK), Some(1.0), None);
+        ugli::clear(&mut shadow_framebuffer, Some(Rgba::WHITE), Some(1.0), None);
 
         // Render lights
         let light = Light {
-            fov: self.camera.fov, // 1.0,
+            fov: self.camera.fov, // 0.5,
             pos: self.player.flashdark_pos,
             rot_h: self.camera.rot_h, // self.player.rot_h,
             rot_v: self.camera.rot_v, // self.player.rot_v,
