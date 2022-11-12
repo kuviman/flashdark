@@ -195,6 +195,7 @@ impl Game {
             ugli::clear(&mut shadow_framebuffer, Some(Rgba::WHITE), Some(1.0), None);
 
             // Get the shadow map from the light's perspective
+            // Level
             obj_shadow(
                 &light,
                 &mut shadow_framebuffer,
@@ -202,6 +203,17 @@ impl Game {
                 Mat4::identity(),
                 &self.assets.shaders.shadow,
             );
+
+            // Interactables
+            for interactable in &self.interactables {
+                obj_shadow(
+                    &light,
+                    &mut shadow_framebuffer,
+                    &interactable.data.obj,
+                    interactable.data.typ.matrix(interactable.progress),
+                    &self.assets.shaders.shadow,
+                );
+            }
         }
     }
 }
