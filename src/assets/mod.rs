@@ -19,6 +19,17 @@ pub fn loop_sound(sound: &mut geng::Sound) {
 }
 
 #[derive(geng::Assets)]
+pub struct GhostAssets {
+    pub front_left: ugli::Texture,
+    pub front_right: ugli::Texture,
+    pub back_left: ugli::Texture,
+    pub back_right: ugli::Texture,
+    pub left: ugli::Texture,
+    pub right: ugli::Texture,
+    pub crawling: ugli::Texture,
+}
+
+#[derive(geng::Assets)]
 pub struct Assets {
     pub shaders: Shaders,
     #[asset(postprocess = "make_repeated")]
@@ -27,9 +38,7 @@ pub struct Assets {
     pub floor: ugli::Texture,
     #[asset(postprocess = "make_repeated")]
     pub ceiling: ugli::Texture,
-    pub ghost: ugli::Texture,
-    pub ghost_crawling: ugli::Texture,
-    pub ghost_front: ugli::Texture,
+    pub ghost: GhostAssets,
     pub key: ugli::Texture,
     pub table_top: ugli::Texture,
     pub table_leg: ugli::Texture,

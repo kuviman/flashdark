@@ -246,15 +246,24 @@ impl Game {
         if !self.monster_spawned {
             return;
         }
-        let texture = if Vec2::dot(
-            self.monster.dir.xy(),
-            vec2(0.0, 1.0).rotate(self.camera.rot_h),
-        ) > 0.0
-        {
-            &self.assets.ghost
-        } else {
-            &self.assets.ghost_front
-        };
+        let texture = [
+            (&self.assets.ghost.back_left, 30.0),
+            (&self.assets.ghost.left, 90.0),
+            (&self.assets.ghost.front_left, 150.0),
+            (&self.assets.ghost.front_right, 210.0),
+            (&self.assets.ghost.right, 270.0),
+            (&self.assets.ghost.back_right, 330.0),
+        ]
+        .into_iter()
+        .max_by_key(|(_texture, angle)| {
+            r32(Vec2::dot(
+                self.monster.dir.xy(),
+                vec2(0.0, 1.0).rotate(self.camera.rot_h + angle * f32::PI / 180.0),
+            ))
+        })
+        .unwrap()
+        .0;
+
         if self.monster_sees_player() {
             // texture = &self.assets.hand;
         }

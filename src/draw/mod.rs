@@ -63,7 +63,7 @@ impl Game {
             let t = self.cutscene_t / 3.0;
             self.draw_billboard(
                 framebuffer,
-                &self.assets.ghost_crawling,
+                &self.assets.ghost.crawling,
                 self.assets.level.trigger_cubes["GhostSpawn"].center()
                     + vec3(1.0 - t, 0.0, 0.0) * 0.5,
                 t,
