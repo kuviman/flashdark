@@ -30,6 +30,7 @@ pub struct Game {
     interactables: Vec<InteractableState>,
     items: Vec<Item>,
     monster: Monster,
+    lights: Collection<Light>,
     transision: Option<geng::Transition>,
 }
 
@@ -95,8 +96,9 @@ impl Game {
             transparent_black_texture: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| {
                 Rgba::TRANSPARENT_BLACK
             }),
-            shadow_calc: ShadowCalculation::new(geng),
+            shadow_calc: ShadowCalculation::new(),
             monster: Monster::new(assets, &navmesh),
+            lights: Self::initialize_lights(assets),
             navmesh,
             transision: None,
         }

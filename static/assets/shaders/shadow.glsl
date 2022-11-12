@@ -9,15 +9,11 @@ void main() {
 #endif
 
 #ifdef FRAGMENT_SHADER
+uniform ivec2 u_shadow_size;
+
 void main() {
-    // if (gl_FragCoord.z > 1.0) {
-    //     gl_FragColor = pack4(1.0);
-    // } else {
-    //     gl_FragColor = pack4(0.5);
-    // }
-
-    // gl_FragColor = vec4(vec3(gl_FragCoord.z / 10.0 - 0.9), 1.0);
-
-    gl_FragColor = pack4(gl_FragCoord.z);
+    float d = length(gl_FragCoord.xy / vec2(u_shadow_size) - 0.5);
+    float depth = d < 0.5 ? gl_FragCoord.z : 0.0;
+    gl_FragColor = pack4(depth);
 }
 #endif
