@@ -38,15 +38,16 @@ impl Game {
             .interactables
             .iter()
             .filter_map(|data| {
-                let config = assets.config.interactables.get(&data.obj.meshes[0].name);
+                let name = &data.obj.meshes[0].name;
+                if name == "I_HintKey" {
+                    return None;
+                }
+                let config = assets.config.interactables.get(name);
                 if config.map_or(false, |config| config.hidden) {
                     return None;
                 }
                 Some(InteractableState {
-                    open: assets
-                        .config
-                        .open_interactables
-                        .contains(&data.obj.meshes[0].name),
+                    open: assets.config.open_interactables.contains(name),
                     progress: 0.0,
                     data: data.clone(),
                     config: config.cloned().unwrap_or_default(),

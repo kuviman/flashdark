@@ -40,6 +40,12 @@ impl Game {
                         let data = &self.assets.level.items[name];
                         let spawn_index = global_rng().gen_range(0..data.spawns.len());
                         let spawn = &data.spawns[spawn_index];
+                        self.items.push(Item {
+                            name: name.to_owned(),
+                            mesh_index: spawn_index,
+                            parent_interactable: None,
+                            pos: spawn.pos,
+                        });
                         let mut swing_sfx = self.assets.sfx.swingLoop.effect();
                         swing_sfx.set_position(
                             self.assets.level.trigger_cubes["SwingingSwing"]
@@ -50,12 +56,6 @@ impl Game {
                         );
                         swing_sfx.play(); // TODO: swing
                         self.swing_sfx = Some(swing_sfx);
-                        self.items.push(Item {
-                            name: name.to_owned(),
-                            mesh_index: spawn_index,
-                            parent_interactable: None,
-                            pos: spawn.pos,
-                        });
                     }
                 }
             }

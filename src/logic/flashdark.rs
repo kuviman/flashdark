@@ -39,6 +39,33 @@ impl Game {
         if self.key_puzzle_state == KeyPuzzleState::LightOut {
             self.key_puzzle_state = KeyPuzzleState::Finish;
             self.ambient_light = self.assets.config.ambient_light_inside_house;
+
+            for (name, data) in &self.assets.level.items {
+                if !name.contains("StudyKey") {
+                    continue;
+                }
+                for (mesh_index, spawn) in data.spawns.iter().enumerate() {
+                    self.items.push(Item {
+                        name: name.clone(),
+                        mesh_index,
+                        parent_interactable: spawn.parent_interactable.clone(),
+                        pos: spawn.pos,
+                    });
+                }
+            }
+            let data = self
+                .assets
+                .level
+                .interactables
+                .iter()
+                .find(|i| i.obj.meshes[0].name == "I_HintKey")
+                .unwrap();
+            self.interactables.push(InteractableState {
+                open: false,
+                progress: 0.0,
+                data: data.clone(),
+                config: self.assets.config.interactables["I_HintKey"].clone(),
+            });
         }
     }
 }

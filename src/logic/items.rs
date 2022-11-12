@@ -21,6 +21,9 @@ impl Game {
                 if name.contains("Fuse") {
                     return false;
                 }
+                if name.contains("StudyKey") {
+                    return false;
+                }
                 true
             })
             .flat_map(|(name, data)| {
