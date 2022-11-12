@@ -161,9 +161,6 @@ impl Game {
                         &self.white_texture
                     });
             for light in &self.lights {
-                if light.id.0 > 1 {
-                    continue;
-                }
                 let shadow_map = self.shadow_calc.shadow_maps.get(&light.id).unwrap();
                 ugli::draw(
                     framebuffer,
@@ -190,7 +187,7 @@ impl Game {
                     ),
                     ugli::DrawParameters {
                         blend_mode: Some(ugli::BlendMode::default()),
-                        depth_func: Some(ugli::DepthFunc::Less),
+                        depth_func: Some(ugli::DepthFunc::LessOrEqual),
                         ..default()
                     },
                 );
