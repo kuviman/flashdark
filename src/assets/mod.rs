@@ -58,4 +58,5 @@ pub struct Shaders {
     pub vertical_sprite: ugli::Program,
     pub obj: ugli::Program,
     pub shadow: ugli::Program,
+    pub camera_shadow_map: ugli::Program,
 }

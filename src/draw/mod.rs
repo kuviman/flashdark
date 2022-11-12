@@ -40,7 +40,6 @@ impl Game {
         self.draw_obj(
             framebuffer,
             &self.assets.level.obj,
-            &light,
             Mat4::identity(),
             Rgba::WHITE,
         );
@@ -51,7 +50,6 @@ impl Game {
             self.draw_obj(
                 framebuffer,
                 &interactable.data.obj,
-                &light,
                 interactable.data.typ.matrix(interactable.progress),
                 if highlight {
                     Rgba::new(0.8, 0.8, 1.0, 1.0)
@@ -93,10 +91,8 @@ impl Game {
                         u_texture: texture,
                         u_texture_matrix: Mat3::identity(), // data.texture_matrix,
                         u_dark_texture: dark_texture,
-                        u_shadow_map: &self.shadow_calc.light_shadow_map,
-                        u_shadow_size: self.shadow_calc.light_shadow_map.size(),
-                        u_light_matrix: light.matrix(self.shadow_calc.light_shadow_map.size().map(|x| x as f32)),
-                        u_light_source: light.pos,
+                        u_shadow_map: &self.shadow_calc.camera_shadow_map,
+                        u_shadow_size: self.shadow_calc.camera_shadow_map.size(),
                     },
                     geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
                 ),
@@ -179,7 +175,7 @@ impl Game {
         self.geng.draw_2d(
             framebuffer,
             &geng::PixelPerfectCamera,
-            &draw_2d::TexturedQuad::new(aabb, &self.shadow_calc.light_shadow_map),
+            &draw_2d::TexturedQuad::new(aabb, &self.shadow_calc.camera_shadow_map),
         );
     }
 
@@ -190,7 +186,7 @@ impl Game {
                 ugli::Texture::new_with(self.geng.ugli(), framebuffer.size(), |_| Rgba::BLACK);
         }
 
-        // Create a temprorary framebuffer
+        // Create a temprorary framebuffer for light
         let mut shadow_framebuffer = ugli::Framebuffer::new(
             self.geng.ugli(),
             ugli::ColorAttachment::Texture(&mut self.shadow_calc.light_shadow_map),
@@ -198,7 +194,7 @@ impl Game {
         );
         ugli::clear(&mut shadow_framebuffer, Some(Rgba::WHITE), Some(1.0), None);
 
-        // Render shadows into the texture
+        // Get the shadow map from the light's perspective
         let light = Light {
             fov: self.camera.fov, // 0.5,
             pos: self.player.flashdark_pos,
@@ -212,6 +208,46 @@ impl Game {
             Mat4::identity(),
             &self.assets.shaders.shadow,
         );
+
+        // Create a temprorary framebuffer for camera
+        let mut renderbuffer = ugli::Renderbuffer::new(self.geng.ugli(), framebuffer.size());
+        let mut camera_framebuffer = ugli::Framebuffer::new(
+            self.geng.ugli(),
+            ugli::ColorAttachment::Texture(&mut self.shadow_calc.camera_shadow_map),
+            ugli::DepthAttachment::Renderbuffer(&mut renderbuffer),
+        );
+        ugli::clear(&mut camera_framebuffer, Some(Rgba::BLACK), Some(1.0), None);
+
+        // Calculate the shadows in camera space
+        for mesh in &self.assets.level.obj.meshes {
+            if mesh.name == "PlayerSpawn" {
+                continue;
+            }
+            if mesh.name.starts_with("B_") {
+                continue; // Ignore billboards for lighting for now
+            }
+            ugli::draw(
+                &mut camera_framebuffer,
+                &self.assets.shaders.camera_shadow_map,
+                ugli::DrawMode::Triangles,
+                &mesh.geometry,
+                (
+                    ugli::uniforms! {
+                        u_model_matrix: Mat4::identity(),
+                        u_shadow_map: &self.shadow_calc.light_shadow_map,
+                        u_shadow_size: self.shadow_calc.light_shadow_map.size(),
+                        u_light_matrix: light.matrix(self.shadow_calc.light_shadow_map.size().map(|x| x as f32)),
+                        u_light_source: light.pos,
+                    },
+                    geng::camera3d_uniforms(&self.camera, framebuffer.size().map(|x| x as f32)),
+                ),
+                ugli::DrawParameters {
+                    blend_mode: Some(ugli::BlendMode::default()),
+                    depth_func: Some(ugli::DepthFunc::Less),
+                    ..default()
+                },
+            );
+        }
     }
 }
 
