@@ -5,10 +5,22 @@ mod helpers;
 pub use helpers::*;
 
 const SHADOW_MAP_SIZE: Vec2<usize> = vec2(1024, 1024);
+const MAX_LIGHTS: usize = 100;
 
 pub struct ShadowCalculation {
     shadow_maps: HashMap<LightId, ugli::Texture>,
     depth_buffers: HashMap<LightId, ugli::Renderbuffer<ugli::DepthComponent>>,
+}
+
+struct LightsUniform<'a> {
+    u_lights: Vec<LightUniform<'a>>,
+}
+
+struct LightUniform<'a> {
+    pos: Vec3<f32>,
+    matrix: Mat4<f32>,
+    shadow_map: &'a ugli::Texture,
+    intensity: f32,
 }
 
 impl Game {
@@ -181,21 +193,6 @@ impl Game {
                 reticle_texture,
             ),
         );
-
-        // Draw shadow map
-        let shadow_map = self.shadow_calc.shadow_maps.get(&LightId(0)).unwrap();
-        let aabb = AABB::point(vec2(50.0, 500.0))
-            .extend_positive(shadow_map.size().map(|x| x as f32) * 0.2);
-        self.geng.draw_2d(
-            framebuffer,
-            &geng::PixelPerfectCamera,
-            &draw_2d::Quad::new(aabb, Rgba::WHITE),
-        );
-        self.geng.draw_2d(
-            framebuffer,
-            &geng::PixelPerfectCamera,
-            &draw_2d::TexturedQuad::new(aabb, shadow_map),
-        );
     }
 
     fn update_shadows(&mut self) {
@@ -264,5 +261,24 @@ impl ShadowCalculation {
 impl Default for ShadowCalculation {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl<'a> ugli::Uniforms for LightsUniform<'a> {
+    fn walk_uniforms<C>(&self, visitor: &mut C)
+    where
+        C: ugli::UniformVisitor,
+    {
+        visitor.visit("u_lights_count", &self.u_lights.len());
+        for (i, light) in self.u_lights.iter().enumerate().take(MAX_LIGHTS) {
+            visitor.visit(&format!("u_lights[{i}].pos"), &light.pos);
+            visitor.visit(&format!("u_lights[{i}].matrix"), &light.matrix);
+            visitor.visit(&format!("u_lights[{i}].shadow_map"), light.shadow_map);
+            visitor.visit(
+                &format!("u_lights[{i}].shadow_size"),
+                &light.shadow_map.size(),
+            );
+            visitor.visit(&format!("u_lights[{i}].intensity"), &light.intensity);
+        }
     }
 }

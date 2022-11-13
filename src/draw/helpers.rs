@@ -181,41 +181,36 @@ impl Game {
             } else {
                 &self.white_texture
             });
-        for light in &self.lights {
-            let shadow_map = self.shadow_calc.shadow_maps.get(&light.id).unwrap();
-            ugli::draw(
-                framebuffer,
-                &self.assets.shaders.obj,
-                ugli::DrawMode::Triangles,
-                &mesh.geometry,
-                (
-                    ugli::uniforms! {
-                        u_flashdark_pos: self.player.flashdark_pos,
-                        u_flashdark_dir: self.player.flashdark_dir,
-                        u_flashdark_angle: f32::PI / 4.0,
-                        u_flashdark_strength: self.player.flashdark_strength,
-                        u_flashdark_dark: self.player.flashdark_dark,
-                        u_ambient_light_color: self.ambient_light,
-                        u_model_matrix: matrix,
-                        u_color: color,
-                        u_texture: texture,
-                        u_texture_matrix: Mat3::identity(),
-                        u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
-                        u_darkness: if self.fuse_placed { 1000.0 } else { -6.0 },
-                        u_shadow_map: shadow_map,
-                        u_shadow_size: shadow_map.size(),
-                        u_light_matrix: light.matrix(shadow_map.size().map(|x| x as f32)),
-                        u_light_source: light.pos,
-                    },
-                    geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
-                ),
-                ugli::DrawParameters {
-                    blend_mode: Some(ugli::BlendMode::default()),
-                    depth_func: Some(ugli::DepthFunc::LessOrEqual),
-                    ..default()
+        let lights = light_uniforms(&self.lights, &self.shadow_calc.shadow_maps);
+        ugli::draw(
+            framebuffer,
+            &self.assets.shaders.obj,
+            ugli::DrawMode::Triangles,
+            &mesh.geometry,
+            (
+                ugli::uniforms! {
+                    u_flashdark_pos: self.player.flashdark_pos,
+                    u_flashdark_dir: self.player.flashdark_dir,
+                    u_flashdark_angle: f32::PI / 4.0,
+                    u_flashdark_strength: self.player.flashdark_strength,
+                    u_flashdark_dark: self.player.flashdark_dark,
+                    u_ambient_light_color: self.ambient_light,
+                    u_model_matrix: matrix,
+                    u_color: color,
+                    u_texture: texture,
+                    u_texture_matrix: Mat3::identity(),
+                    u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
+                    u_darkness: if self.fuse_placed { 1000.0 } else { -6.0 },
                 },
-            );
-        }
+                geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
+                lights,
+            ),
+            ugli::DrawParameters {
+                blend_mode: Some(ugli::BlendMode::default()),
+                depth_func: Some(ugli::DepthFunc::Less),
+                ..default()
+            },
+        );
     }
 
     pub fn draw_obj(
@@ -231,7 +226,7 @@ impl Game {
     }
 }
 
-pub fn obj_shadow(
+pub(super) fn obj_shadow(
     light: &Light,
     framebuffer: &mut ugli::Framebuffer,
     obj: &Obj,
@@ -280,5 +275,25 @@ pub fn obj_shadow(
                 ..default()
             },
         );
+    }
+}
+
+pub(super) fn light_uniforms<'a>(
+    lights: &'a Collection<Light>,
+    shadow_maps: &'a HashMap<LightId, ugli::Texture>,
+) -> LightsUniform<'a> {
+    LightsUniform {
+        u_lights: lights
+            .iter()
+            .map(|light| {
+                let shadow_map = shadow_maps.get(&light.id).unwrap();
+                LightUniform {
+                    pos: light.pos,
+                    matrix: light.matrix(shadow_map.size().map(|x| x as f32)),
+                    intensity: light.intensity,
+                    shadow_map,
+                }
+            })
+            .collect(),
     }
 }

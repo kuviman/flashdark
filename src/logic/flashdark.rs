@@ -30,6 +30,7 @@ impl Game {
         light.pos = self.player.flashdark_pos;
         light.rot_h = self.camera.rot_h;
         light.rot_v = self.camera.rot_v;
+        light.intensity = self.player.flashdark_strength;
     }
 
     pub fn toggle_flashdark(&mut self) {

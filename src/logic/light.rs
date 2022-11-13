@@ -11,6 +11,7 @@ pub struct Light {
     pub pos: Vec3<f32>,
     pub rot_h: f32,
     pub rot_v: f32,
+    pub intensity: f32,
 }
 
 impl Light {
@@ -48,6 +49,7 @@ impl Game {
             pos: Vec3::ZERO,
             rot_h: 0.0,
             rot_v: 0.0,
+            intensity: 1.0,
         });
         lights.extend(assets.level.obj.meshes.iter().filter_map(|mesh| {
             mesh.name.contains("Light").then(|| Light {
@@ -62,6 +64,7 @@ impl Game {
                 },
                 rot_h: 0.0,
                 rot_v: -f32::PI / 2.0,
+                intensity: 1.0,
             })
         }));
         lights
