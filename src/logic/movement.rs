@@ -22,7 +22,8 @@ impl Game {
         }
 
         let mut walk_speed = 3.0;
-        if self.geng.window().is_key_pressed(geng::Key::LShift) {
+        walk_speed *= self.player.height;
+        if self.player.god_mode && self.geng.window().is_key_pressed(geng::Key::LShift) {
             // TODO: disable
             walk_speed *= 3.0;
         }
