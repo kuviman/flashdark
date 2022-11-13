@@ -17,6 +17,7 @@ pub struct Monster {
     pub speed: f32,
     pub loop_sound: geng::SoundEffect,
     pub scream_time: f32,
+    pub next_flashdark_detect_time: f32,
 }
 
 impl Drop for Monster {
@@ -29,6 +30,7 @@ impl Monster {
     pub fn new(assets: &Assets) -> Self {
         let pos = assets.level.trigger_cubes["GhostSpawn"].center();
         Self {
+            next_flashdark_detect_time: assets.config.flashdark_detect_interval,
             scream_time: 0.0,
             pos,
             target_type: TargetType::Rng,
@@ -159,7 +161,15 @@ impl Game {
             if self.monster_sees_player() {
                 self.monster_walk_to(self.player.pos, TargetType::Player);
             } else if self.player.flashdark_on {
-                self.monster_walk_to(self.player.pos, TargetType::Flashdark);
+                self.monster.next_flashdark_detect_time -= delta_time;
+                if self.monster.next_flashdark_detect_time < 0.0 {
+                    self.monster.next_flashdark_detect_time =
+                        self.assets.config.flashdark_detect_interval;
+                    if global_rng().gen_bool(self.assets.config.flashdark_detect_probability as f64)
+                    {
+                        self.monster_walk_to(self.player.pos, TargetType::Flashdark);
+                    }
+                }
             }
         }
 

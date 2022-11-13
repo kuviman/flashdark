@@ -1,4 +1,6 @@
 {
+    "flashdark_detect_interval": 1.0,
+    "flashdark_detect_probability": 0.5,
     "tv_detection_angle": 30.0,
     "ambient_light": "#0F1E70",
     "ambient_light_after_fuse": "#4968FF",
