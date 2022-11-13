@@ -57,10 +57,11 @@ void main() {
     float cos = 1.0; // dot(light_dir, normal); // TODO: fix bias
     float bias = max(0.001, 0.01 * (1.0 - cos));
 
-    vec2 texel_size = 1.0 / vec2(u_shadow_size);
+    vec2 texel_size = 3.0 / vec2(u_shadow_size);
     float shadow = 0.0;
-    for (int i = -1; i <= 1; ++i) {
-        for (int j = -1; j <= 1; ++j) {
+    int soft = 2;
+    for (int i = -soft; i <= soft; ++i) {
+        for (int j = -soft; j <= soft; ++j) {
             vec2 sample_pos = light_pos.xy + vec2(i, j) * texel_size;
             if (sample_pos.x <= 1.0 && sample_pos.x >= 0.0 && sample_pos.y <= 1.0 && sample_pos.y >= 0.0) {
                 float pcf_depth = unpack4(texture2D(u_shadow_map, sample_pos));
@@ -70,10 +71,10 @@ void main() {
             }
         }
     }
-    shadow /= 9.0;
-    if (light_pos.z > 1.0) {
-        shadow = 0.0;
-    }
+    shadow /= (2.0 * float(soft) + 1.0) * (2.0 * float(soft) + 1.0);
+    // if (light_pos.z > 1.0) {
+    //     shadow = 0.0;
+    // }
     flashdarked *= 1.0 - shadow;
     
     vec4 texture_color = (texture2D(u_dark_texture, v_uv) * flashdarked + texture2D(u_texture, v_uv) * (1.0 - flashdarked)) * vec4(u_color.xyz, 1.0);
