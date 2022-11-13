@@ -37,7 +37,7 @@ impl Game {
 
         // Key puzzle
         if self.key_puzzle_state == KeyPuzzleState::LightOut {
-            self.key_puzzle_state = KeyPuzzleState::Finish;
+            self.key_puzzle_state = KeyPuzzleState::Ready;
             self.ambient_light = self.assets.config.ambient_light_inside_house;
 
             for (name, data) in &self.assets.level.items {
@@ -62,6 +62,7 @@ impl Game {
                 .unwrap();
             self.interactables.push(InteractableState {
                 open: false,
+                extra_hacky_library_moving_closet_progress: 0.0,
                 progress: 0.0,
                 data: data.clone(),
                 config: self.assets.config.interactables["I_HintKey"].clone(),

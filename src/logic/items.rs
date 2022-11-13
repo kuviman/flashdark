@@ -9,32 +9,29 @@ pub struct Item {
 
 impl Game {
     pub fn initialize_items(assets: &Assets) -> Vec<Item> {
-        assets
-            .level
-            .items
-            .iter()
-            // .map(|(name, spawns)| Item {
-            //     name: name.clone(),
-            //     pos: spawns.choose(&mut global_rng()).unwrap().clone(),
-            // })
-            .filter(|(name, _data)| {
-                if name.contains("Fuse") {
-                    return false;
-                }
-                if name.contains("StudyKey") {
-                    return false;
-                }
-                true
-            })
-            .flat_map(|(name, data)| {
-                data.spawns.iter().enumerate().map(|(index, data)| Item {
-                    name: name.clone(),
-                    parent_interactable: data.parent_interactable.clone(),
-                    mesh_index: index,
-                    pos: data.pos,
-                })
-            })
-            .collect()
+        let mut items = Vec::new();
+        for (name, data) in assets.level.items.iter().filter(|(name, _data)| {
+            if name.contains("Fuse") {
+                return false;
+            }
+            if name.contains("StudyKey") {
+                return false;
+            }
+            if *name == "Book5" {
+                return false;
+            }
+            true
+        }) {
+            let index = global_rng().gen_range(0..data.spawns.len());
+            let spawn = &data.spawns[index];
+            items.push(Item {
+                name: name.clone(),
+                parent_interactable: spawn.parent_interactable.clone(),
+                mesh_index: index,
+                pos: spawn.pos,
+            });
+        }
+        items
     }
 
     pub fn item_matrix(&self, item: &Item) -> Mat4<f32> {
@@ -45,7 +42,7 @@ impl Game {
                 .iter()
                 .find(|inter| inter.data.obj.meshes[0].name == *parent) // TODO: this is slow
                 .unwrap();
-            matrix = parent.data.typ.matrix(parent.progress) * matrix;
+            matrix = parent.matrix() * matrix;
         }
         matrix
     }

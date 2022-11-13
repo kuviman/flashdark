@@ -32,7 +32,7 @@ impl Game {
             self.draw_obj(
                 framebuffer,
                 &interactable.data.obj,
-                interactable.data.typ.matrix(interactable.progress),
+                interactable.matrix(),
                 Rgba::WHITE,
             );
         }

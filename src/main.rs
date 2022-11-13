@@ -19,6 +19,7 @@ pub enum KeyPuzzleState {
     Begin,
     Entered,
     LightOut,
+    Ready,
     Finish,
 }
 

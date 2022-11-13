@@ -67,10 +67,7 @@ impl Game {
             return false;
         }
         for interactable in &self.interactables {
-            if !check(
-                &interactable.data.obj,
-                interactable.data.typ.matrix(interactable.progress),
-            ) {
+            if !check(&interactable.data.obj, interactable.matrix()) {
                 return false;
             }
         }
@@ -202,13 +199,24 @@ impl Game {
             }
             let v = vector_from_obj(
                 &interactable.data.obj,
-                interactable.data.typ.matrix(interactable.progress),
+                interactable.matrix(),
                 self.monster.pos,
             );
             let radius = 0.25;
             if v.len() < radius {
                 let mut can_open = true;
                 if name == "D_DoorStudy" && !player_inside_house {
+                    can_open = false;
+                }
+                // COPYPASTE YAY
+                if interactable.config.disabled
+                    || (interactable.data.obj.meshes[0].name == "D_DoorStorage"
+                        && !self.storage_unlocked)
+                    || (interactable.data.obj.meshes[0]
+                        .name
+                        .ends_with("S_StudyCloset")
+                        && self.key_puzzle_state != KeyPuzzleState::Finish)
+                {
                     can_open = false;
                 }
                 if can_open {
