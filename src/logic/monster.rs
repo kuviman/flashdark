@@ -17,6 +17,7 @@ pub struct Monster {
     pub speed: f32,
     pub loop_sound: geng::SoundEffect,
     pub scream_time: f32,
+    pub next_flashdark_detect_time: f32,
 }
 
 impl Drop for Monster {
@@ -29,6 +30,7 @@ impl Monster {
     pub fn new(assets: &Assets) -> Self {
         let pos = assets.level.trigger_cubes["GhostSpawn"].center();
         Self {
+            next_flashdark_detect_time: assets.config.flashdark_detect_interval,
             scream_time: 0.0,
             pos,
             target_type: TargetType::Rng,
@@ -67,10 +69,7 @@ impl Game {
             return false;
         }
         for interactable in &self.interactables {
-            if !check(
-                &interactable.data.obj,
-                interactable.data.typ.matrix(interactable.progress),
-            ) {
+            if !check(&interactable.data.obj, interactable.matrix()) {
                 return false;
             }
         }
@@ -89,17 +88,20 @@ impl Game {
         }
         self.can_see(
             self.monster.pos + vec3(0.0, 0.0, 1.3),
-            self.player.pos + vec3(0.0, 0.0, 1.0),
+            self.player.pos + vec3(0.0, 0.0, self.player.height),
         )
     }
     pub fn monster_walk_to(&mut self, pos: Vec3<f32>, target_type: TargetType) {
-        if target_type != self.monster.target_type {
+        // if target_type != self.monster.target_type {
+        if (pos - self.monster.next_target_pos).len() > 0.5
+            || target_type != self.monster.target_type
+        {
             match target_type {
                 TargetType::Player => {
                     self.monster.scream_time = 1.0;
                     let mut effect = self.assets.sfx.ghostScream.effect();
                     effect.set_position(self.monster.pos.map(|x| x as f64));
-                    effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
+                    // effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
                     effect.play();
                 }
                 TargetType::Noise | TargetType::Flashdark => {
@@ -111,7 +113,7 @@ impl Game {
                         .unwrap()
                         .effect();
                     effect.set_position(self.monster.pos.map(|x| x as f64));
-                    effect.set_max_distance(self.assets.config.max_sound_distance);
+                    // effect.set_max_distance(self.assets.config.max_sound_distance);
                     effect.play();
                 }
                 TargetType::Rng => {}
@@ -132,7 +134,7 @@ impl Game {
         }
     }
     pub fn check_monster_sfx(&mut self, pos: Vec3<f32>) {
-        if (pos - self.monster.pos).len() < self.assets.config.max_sound_distance as f32 {
+        if (pos - self.monster.pos).len() < self.assets.config.max_ghost_sound_distance as f32 {
             self.monster_walk_to(pos, TargetType::Noise);
         }
     }
@@ -159,7 +161,15 @@ impl Game {
             if self.monster_sees_player() {
                 self.monster_walk_to(self.player.pos, TargetType::Player);
             } else if self.player.flashdark_on {
-                self.monster_walk_to(self.player.pos, TargetType::Flashdark);
+                self.monster.next_flashdark_detect_time -= delta_time;
+                if self.monster.next_flashdark_detect_time < 0.0 {
+                    self.monster.next_flashdark_detect_time =
+                        self.assets.config.flashdark_detect_interval;
+                    if global_rng().gen_bool(self.assets.config.flashdark_detect_probability as f64)
+                    {
+                        self.monster_walk_to(self.player.pos, TargetType::Flashdark);
+                    }
+                }
             }
         }
 
@@ -202,13 +212,24 @@ impl Game {
             }
             let v = vector_from_obj(
                 &interactable.data.obj,
-                interactable.data.typ.matrix(interactable.progress),
+                interactable.matrix(),
                 self.monster.pos,
             );
             let radius = 0.25;
             if v.len() < radius {
                 let mut can_open = true;
                 if name == "D_DoorStudy" && !player_inside_house {
+                    can_open = false;
+                }
+                // COPYPASTE YAY
+                if interactable.config.disabled
+                    || (interactable.data.obj.meshes[0].name == "D_DoorStorage"
+                        && !self.storage_unlocked)
+                    || (interactable.data.obj.meshes[0]
+                        .name
+                        .ends_with("S_StudyCloset")
+                        && self.key_puzzle_state != KeyPuzzleState::Finish)
+                {
                     can_open = false;
                 }
                 if can_open {

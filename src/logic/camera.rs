@@ -35,7 +35,7 @@ impl LookAt {
 
 impl Game {
     pub fn update_camera(&mut self, delta_time: f32) {
-        self.camera.pos = self.player.pos + vec3(0.0, 0.0, 1.0);
+        self.camera.pos = self.player.pos + vec3(0.0, 0.0, self.player.height);
         self.camera.rot_h = self.player.rot_h;
         self.camera.rot_v = self.player.rot_v;
 
@@ -77,14 +77,14 @@ impl Game {
         );
         for (id, interactable) in self.interactables.iter().enumerate() {
             update_target(
-                intersect_ray_with_obj(
-                    &interactable.data.obj,
-                    interactable.data.typ.matrix(interactable.progress),
-                    ray,
-                ),
+                intersect_ray_with_obj(&interactable.data.obj, interactable.matrix(), ray),
                 if interactable.config.disabled
                     || (interactable.data.obj.meshes[0].name == "D_DoorStorage"
                         && !self.storage_unlocked)
+                    || (interactable.data.obj.meshes[0]
+                        .name
+                        .ends_with("S_StudyCloset")
+                        && self.key_puzzle_state != KeyPuzzleState::Finish)
                 {
                     Object::StaticLevel
                 } else {

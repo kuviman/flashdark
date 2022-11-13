@@ -11,8 +11,19 @@ impl Game {
         while self.player.rot_h < -f32::PI {
             self.player.rot_h += 2.0 * f32::PI;
         }
+
+        const CROUCH_TIME: f32 = 0.2;
+        if self.geng.window().is_key_pressed(geng::Key::LCtrl)
+            || self.geng.window().is_key_pressed(geng::Key::C)
+        {
+            self.player.height += (0.5 - self.player.height).clamp(-delta_time / CROUCH_TIME, 1.0);
+        } else {
+            self.player.height += (1.0 - self.player.height).clamp(-1.0, delta_time / CROUCH_TIME);
+        }
+
         let mut walk_speed = 3.0;
-        if self.geng.window().is_key_pressed(geng::Key::LShift) {
+        walk_speed *= self.player.height;
+        if self.player.god_mode && self.geng.window().is_key_pressed(geng::Key::LShift) {
             // TODO: disable
             walk_speed *= 3.0;
         }
@@ -90,10 +101,7 @@ impl Game {
                 };
                 check(&self.assets.level.obj, Mat4::identity());
                 for interactable in &self.interactables {
-                    check(
-                        &interactable.data.obj,
-                        interactable.data.typ.matrix(interactable.progress),
-                    );
+                    check(&interactable.data.obj, interactable.matrix());
                 }
             }
         }

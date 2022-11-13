@@ -145,6 +145,7 @@ impl geng::LoadAsset for LevelData {
             }
 
             let mut interactables = Vec::new();
+            let mut planks = Vec::new();
             for i in (0..obj.meshes.len()).rev() {
                 if obj.meshes[i].name.starts_with("D_") || obj.meshes[i].name.starts_with("DR_") {
                     let mesh = obj.meshes.remove(i);
@@ -172,7 +173,9 @@ impl geng::LoadAsset for LevelData {
                         typ: InteractableType::LDoor { pivot },
                     });
                 }
-                if obj.meshes[i].name.starts_with("I_") {
+                if obj.meshes[i].name.starts_with("I_")
+                    || obj.meshes[i].name.starts_with("B_SingingGirl")
+                {
                     let mesh = obj.meshes.remove(i);
                     let front_face = mesh
                         .geometry
@@ -201,6 +204,16 @@ impl geng::LoadAsset for LevelData {
                                 typ: InteractableType::Drawer { shift },
                             });
                         }
+                    } else if mesh.name.starts_with("I_LoosePlank") {
+                        planks.push(InteractableData {
+                            obj: Obj { meshes: vec![mesh] },
+                            typ: InteractableType::Drawer { shift },
+                        });
+                    } else if mesh.name.contains("BookshelfLibrary") {
+                        interactables.push(InteractableData {
+                            obj: Obj { meshes: vec![mesh] },
+                            typ: InteractableType::Static,
+                        });
                     } else {
                         interactables.push(InteractableData {
                             obj: Obj { meshes: vec![mesh] },
@@ -208,6 +221,12 @@ impl geng::LoadAsset for LevelData {
                         });
                     }
                 }
+            }
+
+            const PLANKS_N: usize = 4;
+            for _ in 0..PLANKS_N {
+                let i = global_rng().gen_range(0..planks.len());
+                interactables.push(planks.remove(i));
             }
 
             let mut items = HashMap::<String, ItemData>::new();
@@ -248,9 +267,9 @@ impl geng::LoadAsset for LevelData {
                             parent_interactable: interactables.iter().enumerate().find_map(
                                 |(index, inter)| {
                                     let mesh = &inter.obj.meshes[0];
-                                    if mesh.name.starts_with("I_LoosePlank") {
-                                        return None;
-                                    }
+                                    // if mesh.name.starts_with("I_LoosePlank") {
+                                    //     return None;
+                                    // }
                                     let mut min = mesh.geometry[0].a_v;
                                     let mut max = mesh.geometry[0].a_v;
                                     for v in mesh.geometry.iter() {
@@ -278,6 +297,15 @@ impl geng::LoadAsset for LevelData {
                             ),
                         });
                 }
+            }
+
+            {
+                let doll_spawns = &mut items.get_mut("Doll").unwrap().spawns;
+                doll_spawns.retain(|spawn| spawn.parent_interactable.is_some());
+                for spawn in doll_spawns.iter_mut() {
+                    spawn.parent_interactable = None;
+                }
+                assert!(doll_spawns.len() == PLANKS_N);
             }
 
             let hint_key_config = **key_configs

@@ -19,6 +19,7 @@ pub enum KeyPuzzleState {
     Begin,
     Entered,
     LightOut,
+    Ready,
     Finish,
 }
 
@@ -133,6 +134,7 @@ impl Game {
             assets: assets.clone(),
             player: Player {
                 pos: assets.level.spawn_point,
+                height: 1.0,
                 vel: Vec3::ZERO,
                 rot_h: 0.0,
                 rot_v: 0.0,
