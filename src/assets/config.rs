@@ -9,11 +9,27 @@ pub struct InteractableConfig {
     pub give_item: Option<String>,
     #[serde(default)]
     pub hidden: bool,
+    #[serde(default)]
+    pub transparent: bool,
+    #[serde(default)]
+    pub dissapear_on_use: bool,
+    #[serde(default)]
+    pub disabled: bool,
+    pub sfx: Option<String>,
 }
 
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
 #[asset(json)]
 pub struct Config {
+    pub tv_detection_angle: f32,
+    pub sky_color: Rgba<f32>,
+    pub ambient_light: Rgba<f32>,
+    pub ambient_light_after_fuse: Rgba<f32>,
+    pub ambient_light_inside_house: Rgba<f32>,
+    pub footstep_dist: f32,
+    pub max_sound_distance: f64,
+    pub arms_horizontal_length: f32,
+    pub arms_vertical_length: f32,
     pub parents: HashMap<String, String>,
     pub open_interactables: HashSet<String>,
     pub interactables: HashMap<String, Rc<InteractableConfig>>,

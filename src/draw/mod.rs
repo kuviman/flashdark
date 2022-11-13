@@ -14,7 +14,12 @@ pub struct ShadowCalculation {
 impl Game {
     pub fn draw_impl(&mut self, framebuffer: &mut ugli::Framebuffer) {
         self.framebuffer_size = framebuffer.size().map(|x| x as f32);
-        ugli::clear(framebuffer, Some(Rgba::BLACK), Some(1.0), None);
+        ugli::clear(
+            framebuffer,
+            Some(self.assets.config.sky_color),
+            Some(1.0),
+            None,
+        );
 
         self.update_shadows();
 
@@ -28,17 +33,16 @@ impl Game {
         );
 
         for (id, interactable) in self.interactables.iter().enumerate() {
-            let highlight =
-                look.target.as_ref().map(|target| target.object) == Some(Object::Interactable(id));
+            if interactable.config.transparent {
+                continue;
+            }
+            // let highlight =
+            //     look.target.as_ref().map(|target| target.object) == Some(Object::Interactable(id));
             self.draw_obj(
                 framebuffer,
                 &interactable.data.obj,
                 interactable.data.typ.matrix(interactable.progress),
-                if highlight {
-                    Rgba::new(0.8, 0.8, 1.0, 1.0)
-                } else {
-                    Rgba::WHITE
-                },
+                Rgba::WHITE,
             );
         }
 
@@ -51,49 +55,34 @@ impl Game {
                 .dark_texture
                 .as_deref()
                 .unwrap_or(texture);
-            let highlight =
-                look.target.as_ref().map(|target| target.object) == Some(Object::Item(id));
-            let color = if highlight {
-                Rgba::new(0.8, 0.8, 1.0, 1.0)
-            } else {
-                Rgba::WHITE
-            };
-            for light in &self.lights {
-                let shadow_map = self.shadow_calc.shadow_maps.get(&light.id).unwrap();
-                ugli::draw(
-                    framebuffer,
-                    &self.assets.shaders.obj,
-                    ugli::DrawMode::TriangleFan,
-                    &data.mesh.geometry,
-                    (
-                        ugli::uniforms! {
-                            u_flashdark_pos: self.player.flashdark_pos,
-                            u_flashdark_dir: self.player.flashdark_dir,
-                            u_flashdark_angle: f32::PI / 4.0,
-                            u_flashdark_strength: self.player.flashdark_strength,
-                            u_model_matrix: self.item_matrix(item),
-                            u_color: color,
-                            u_texture: texture,
-                            u_texture_matrix: Mat3::identity(), // data.texture_matrix,
-                            u_dark_texture: dark_texture,
-                            u_shadow_map: shadow_map,
-                            u_shadow_size: shadow_map.size(),
-                            u_light_matrix: light.matrix(shadow_map.size().map(|x| x as f32)),
-                        },
-                        geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
-                    ),
-                    ugli::DrawParameters {
-                        blend_mode: Some(ugli::BlendMode::default()),
-                        depth_func: Some(ugli::DepthFunc::Less),
-                        ..default()
-                    },
-                );
-            }
+            // let highlight =
+            //     look.target.as_ref().map(|target| target.object) == Some(Object::Item(id));
+            // let color = if highlight {
+            //     Rgba::new(0.8, 0.8, 1.0, 1.0)
+            // } else {
+            //     Rgba::WHITE
+            // };
+            self.draw_mesh(framebuffer, &data.mesh, self.item_matrix(item), Rgba::WHITE);
         }
 
         self.draw_monster(framebuffer);
 
+        // TV cutscene
+        if self.fuse_placed && self.cutscene_t < 3.0 && self.lock_controls {
+            let t = self.cutscene_t / 3.0;
+            self.draw_billboard(
+                framebuffer,
+                &self.assets.ghost.crawling,
+                self.assets.level.trigger_cubes["GhostSpawn"].center()
+                    + vec3(1.0 - t, 0.0, 0.0) * 0.5,
+                t,
+                0.0,
+            );
+        }
+
         self.draw_debug_navmesh(framebuffer);
+
+        // UI ---
 
         let camera2d = geng::Camera2d {
             center: Vec2::ZERO,
@@ -110,6 +99,11 @@ impl Game {
         );
         if let Some(name) = &self.player.item {
             let data = &self.assets.level.items[name];
+            let texture_aabb = if name.contains("StudyKey") {
+                AABB::point(Vec2::ZERO).extend_positive(vec2(0.25, 0.25))
+            } else {
+                data.texture_aabb
+            };
             self.geng.draw_2d(
                 framebuffer,
                 &camera2d,
@@ -117,39 +111,75 @@ impl Game {
                     vec![
                         draw_2d::TexturedVertex {
                             a_pos: vec2(-1.0, -1.0),
-                            a_vt: data.texture_aabb.bottom_left(),
+                            a_vt: texture_aabb.bottom_left(),
                             a_color: Rgba::WHITE,
                         },
                         draw_2d::TexturedVertex {
                             a_pos: vec2(1.0, -1.0),
-                            a_vt: data.texture_aabb.bottom_right(),
+                            a_vt: texture_aabb.bottom_right(),
                             a_color: Rgba::WHITE,
                         },
                         draw_2d::TexturedVertex {
                             a_pos: vec2(1.0, 1.0),
-                            a_vt: data.texture_aabb.top_right(),
+                            a_vt: texture_aabb.top_right(),
                             a_color: Rgba::WHITE,
                         },
                         draw_2d::TexturedVertex {
                             a_pos: vec2(-1.0, 1.0),
-                            a_vt: data.texture_aabb.top_left(),
+                            a_vt: texture_aabb.top_left(),
                             a_color: Rgba::WHITE,
                         },
                     ],
                     data.spawns[0].mesh.material.texture.as_deref().unwrap(),
                 )
                 .scale(vec2(
-                    2.0 * data.texture_aabb.width() / data.texture_aabb.height(),
+                    2.0 * texture_aabb.width() / texture_aabb.height(),
                     2.0,
                 ))
                 .translate(vec2(5.0, -4.2)),
             );
         }
 
+        let reticle_texture = (|| {
+            match look.target {
+                None => &self.assets.reticle,
+                Some(target) => match target.object {
+                    Object::StaticLevel => &self.assets.reticle,
+                    Object::Interactable(id) => {
+                        let interactable = &self.interactables[id];
+
+                        // Copypasta mmmm
+                        let mut requirement = interactable.config.require_item.as_deref();
+                        if interactable.data.obj.meshes[0]
+                            .name
+                            .starts_with("I_LoosePlank")
+                        {
+                            requirement = Some("Crowbar");
+                        }
+
+                        if let Some(requirement) = requirement {
+                            if self.player.item.as_deref() != Some(requirement) {
+                                return &self.assets.require_item;
+                                // self.assets.level.items[requirement].spawns[0]
+                                //     .mesh
+                                //     .material
+                                //     .texture
+                                //     .unwrap();
+                            }
+                        }
+                        &self.assets.hand
+                    }
+                    Object::Item(id) => &self.assets.hand,
+                },
+            }
+        })();
         self.geng.draw_2d(
             framebuffer,
             &camera2d,
-            &draw_2d::Ellipse::circle(Vec2::ZERO, 0.02, Rgba::WHITE),
+            &draw_2d::TexturedQuad::new(
+                AABB::point(Vec2::ZERO).extend_uniform(0.5),
+                reticle_texture,
+            ),
         );
 
         // Draw shadow map

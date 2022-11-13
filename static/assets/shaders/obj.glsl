@@ -37,6 +37,9 @@ uniform float u_flashdark_angle;
 uniform float u_flashdark_strength;
 uniform vec3 u_flashdark_dir;
 uniform vec3 u_flashdark_pos;
+uniform float u_flashdark_dark;
+uniform float u_darkness;
+uniform vec4 u_ambient_light_color;
 uniform sampler2D u_texture;
 uniform sampler2D u_dark_texture;
 
@@ -77,7 +80,9 @@ void main() {
     // }
     flashdarked *= 1.0 - shadow;
     
-    vec4 texture_color = (texture2D(u_dark_texture, v_uv) * flashdarked + texture2D(u_texture, v_uv) * (1.0 - flashdarked)) * vec4(u_color.xyz, 1.0);
+    vec4 dark_color = texture2D(u_texture, v_uv) * (1.0 - u_flashdark_dark) + texture2D(u_dark_texture, v_uv) * u_flashdark_dark;
+    vec4 light_color = texture2D(u_texture, v_uv) * u_ambient_light_color;
+    vec4 texture_color = (dark_color * flashdarked + light_color * (1.0 - flashdarked)) * vec4(u_color.xyz, 1.0);
     vec4 fog_color = vec4(0.0, 0.0, 0.0, texture_color.w);
     gl_FragColor = texture_color * (1.0 - fog_factor) + fog_color * fog_factor;
 
@@ -86,5 +91,6 @@ void main() {
     } else {
         gl_FragColor.w = u_color.w * (1.0 - shadow);
     }
+    gl_FragColor.xyz *= 1.0 - smoothstep(u_darkness, u_darkness + 3.0, v_world_pos.y);
 }
 #endif

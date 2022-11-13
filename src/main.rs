@@ -1,4 +1,4 @@
-use geng::prelude::*;
+use geng::{prelude::*, Key};
 
 mod assets;
 mod camera;
@@ -14,7 +14,37 @@ pub use id::*;
 pub use logic::*;
 pub use util::*;
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub enum KeyPuzzleState {
+    Begin,
+    Entered,
+    LightOut,
+    Finish,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub struct KeyConfiguration {
+    top_color: usize,
+    bottom_color: usize,
+    top_shape: usize,
+    bottom_shape: usize,
+}
+
+impl KeyConfiguration {
+    pub fn random() -> Self {
+        Self {
+            top_color: global_rng().gen_range(0..4),
+            bottom_color: global_rng().gen_range(0..4),
+            top_shape: global_rng().gen_range(0..4),
+            bottom_shape: global_rng().gen_range(0..4),
+        }
+    }
+}
+
 pub struct Game {
+    storage_unlocked: bool,
+    key_puzzle_state: KeyPuzzleState,
+    monster_spawned: bool,
     framebuffer_size: Vec2<f32>,
     quad_geometry: ugli::VertexBuffer<geng::obj::Vertex>,
     geng: Geng,
@@ -26,23 +56,50 @@ pub struct Game {
     transparent_black_texture: ugli::Texture,
     shadow_calc: ShadowCalculation,
     player: Player,
+    ambient_light: Rgba<f32>,
     navmesh: NavMesh,
     interactables: Vec<InteractableState>,
     items: Vec<Item>,
     monster: Monster,
     lights: Collection<Light>,
+    time: f32,
+    fuse_spawned: bool,
+    fuse_placed: bool,
+    lock_controls: bool,
+    cutscene_t: f32,
+    tv_noise: Option<geng::SoundEffect>,
+    swing_sfx: Option<geng::SoundEffect>,
+    current_swing_ref_distance: f32,
     transision: Option<geng::Transition>,
 }
 
 impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
         // geng.window().lock_cursor();
-        let mut music = assets.music.effect();
-        music.set_volume(0.5);
-        music.play();
-        // let navmesh = Self::init_navmesh(geng, &assets.level);
-        let navmesh = assets.navmesh.clone();
+
+        if false {
+            let mut music = assets.music.effect();
+            music.set_volume(0.5);
+            music.play();
+        }
+        let mut navmesh = if false {
+            Self::init_navmesh(geng, &assets.level)
+        } else {
+            assets.navmesh.clone()
+        };
+        navmesh.remove_unreachable_from(assets.level.spawn_point);
         Self {
+            storage_unlocked: false,
+            key_puzzle_state: KeyPuzzleState::Begin,
+            monster_spawned: false,
+            cutscene_t: 0.0,
+            lock_controls: false,
+            ambient_light: assets.config.ambient_light,
+            tv_noise: None,
+            swing_sfx: None,
+            current_swing_ref_distance: 10000.0,
+            fuse_placed: false,
+            time: 0.0,
             items: Self::initialize_items(assets),
             quad_geometry: ugli::VertexBuffer::new_static(
                 geng.ugli(),
@@ -69,6 +126,7 @@ impl Game {
                     },
                 ],
             ),
+            fuse_spawned: false,
             interactables: Self::initialize_interactables(assets),
             framebuffer_size: vec2(1.0, 1.0),
             geng: geng.clone(),
@@ -80,9 +138,12 @@ impl Game {
                 rot_v: 0.0,
                 flashdark_pos: Vec3::ZERO,
                 flashdark_dir: vec3(0.0, 1.0, 0.0),
-                flashdark_on: false,
+                flashdark_on: true,
                 flashdark_strength: 0.0,
+                flashdark_dark: 0.0,
                 item: None,
+                next_footstep: 0.0,
+                god_mode: false,
             },
             camera: Camera {
                 pos: assets.level.spawn_point,
@@ -97,8 +158,8 @@ impl Game {
                 Rgba::TRANSPARENT_BLACK
             }),
             shadow_calc: ShadowCalculation::new(),
-            monster: Monster::new(assets, &navmesh),
             lights: Self::initialize_lights(assets),
+            monster: Monster::new(assets),
             navmesh,
             transision: None,
         }
@@ -115,8 +176,10 @@ impl geng::State for Game {
     }
 
     fn handle_event(&mut self, event: geng::Event) {
-        self.handle_event_camera(&event);
-        self.handle_clicks(&event);
+        if !self.lock_controls {
+            self.handle_event_camera(&event);
+            self.handle_clicks(&event);
+        }
 
         // TODO: remove
         match event {
@@ -128,6 +191,13 @@ impl geng::State for Game {
             }
             geng::Event::KeyDown { key: geng::Key::P } => {
                 self.monster.next_target_pos = self.player.pos;
+            }
+            geng::Event::KeyDown { key: geng::Key::G } => {
+                self.player.god_mode = !self.player.god_mode;
+                self.ambient_light = self.assets.config.ambient_light_inside_house;
+                self.player.flashdark_dark = 1.0;
+                self.player.flashdark_dark = 1.0;
+                self.fuse_placed = true;
             }
             _ => {}
         }

@@ -54,6 +54,42 @@ impl NavMesh {
         error!("Could not pathfind");
         p1
     }
+
+    pub fn remove_unreachable_from(&mut self, p: Vec3<f32>) {
+        let mut q = std::collections::VecDeque::new();
+        let mut reachable = vec![false; self.waypoints.len()];
+        let s = self.closest_waypoint(p);
+        q.push_back(s);
+        reachable[s] = true;
+        while let Some(v) = q.pop_front() {
+            for &u in &self.edges[v] {
+                if !reachable[u] {
+                    reachable[u] = true;
+                    q.push_back(u);
+                }
+            }
+        }
+        let mut new_indices = vec![0; self.waypoints.len()];
+        let mut next = 0;
+        let mut new_waypoints = Vec::new();
+        for v in 0..self.waypoints.len() {
+            if reachable[v] {
+                new_waypoints.push(self.waypoints[v]);
+                new_indices[v] = next;
+                next += 1;
+            }
+        }
+        let mut new_edges = vec![vec![]; new_waypoints.len()];
+        for v in 0..self.waypoints.len() {
+            if reachable[v] {
+                new_edges[new_indices[v]] = self.edges[v].iter().map(|&u| new_indices[u]).collect();
+            }
+        }
+        *self = Self {
+            waypoints: new_waypoints,
+            edges: new_edges,
+        }
+    }
 }
 
 impl Game {
