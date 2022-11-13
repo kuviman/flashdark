@@ -28,6 +28,7 @@ pub struct Config {
     pub ambient_light_inside_house: Rgba<f32>,
     pub footstep_dist: f32,
     pub max_sound_distance: f64,
+    pub max_ghost_sound_distance: f64,
     pub arms_horizontal_length: f32,
     pub arms_vertical_length: f32,
     pub parents: HashMap<String, String>,

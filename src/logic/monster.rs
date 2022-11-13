@@ -86,17 +86,20 @@ impl Game {
         }
         self.can_see(
             self.monster.pos + vec3(0.0, 0.0, 1.3),
-            self.player.pos + vec3(0.0, 0.0, 1.0),
+            self.player.pos + vec3(0.0, 0.0, self.player.height),
         )
     }
     pub fn monster_walk_to(&mut self, pos: Vec3<f32>, target_type: TargetType) {
-        if target_type != self.monster.target_type {
+        // if target_type != self.monster.target_type {
+        if (pos - self.monster.next_target_pos).len() > 0.5
+            || target_type != self.monster.target_type
+        {
             match target_type {
                 TargetType::Player => {
                     self.monster.scream_time = 1.0;
                     let mut effect = self.assets.sfx.ghostScream.effect();
                     effect.set_position(self.monster.pos.map(|x| x as f64));
-                    effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
+                    // effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
                     effect.play();
                 }
                 TargetType::Noise | TargetType::Flashdark => {
@@ -108,7 +111,7 @@ impl Game {
                         .unwrap()
                         .effect();
                     effect.set_position(self.monster.pos.map(|x| x as f64));
-                    effect.set_max_distance(self.assets.config.max_sound_distance);
+                    // effect.set_max_distance(self.assets.config.max_sound_distance);
                     effect.play();
                 }
                 TargetType::Rng => {}
@@ -129,7 +132,7 @@ impl Game {
         }
     }
     pub fn check_monster_sfx(&mut self, pos: Vec3<f32>) {
-        if (pos - self.monster.pos).len() < self.assets.config.max_sound_distance as f32 {
+        if (pos - self.monster.pos).len() < self.assets.config.max_ghost_sound_distance as f32 {
             self.monster_walk_to(pos, TargetType::Noise);
         }
     }

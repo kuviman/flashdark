@@ -35,7 +35,7 @@ impl LookAt {
 
 impl Game {
     pub fn update_camera(&mut self, delta_time: f32) {
-        self.camera.pos = self.player.pos + vec3(0.0, 0.0, 1.0);
+        self.camera.pos = self.player.pos + vec3(0.0, 0.0, self.player.height);
         self.camera.rot_h = self.player.rot_h;
         self.camera.rot_v = self.player.rot_v;
 

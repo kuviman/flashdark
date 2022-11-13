@@ -6,6 +6,7 @@
     "sky_color": "#0F1E70",
     "footstep_dist": 1.0,
     "max_sound_distance": 10.0,
+    "max_ghost_sound_distance": 5.0,
     "arms_horizontal_length": 1.0,
     "arms_vertical_length": 1.5,
     "parents": {
