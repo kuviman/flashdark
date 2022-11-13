@@ -95,12 +95,13 @@ void main() {
     }
     // Ambient
     light_level = max(0.05, light_level);
+    vec4 light_color = u_ambient_light_color * (1.0 - light_level) + vec4(1.0, 1.0, 1.0, 1.0) * light_level;
     
     flashdarked *= min(1.0, light_level);
     
+    vec4 normal_color = texture2D(u_texture, v_uv);
     vec4 dark_color = texture2D(u_texture, v_uv) * (1.0 - u_flashdark_dark) + texture2D(u_dark_texture, v_uv) * u_flashdark_dark;
-    vec4 light_color = texture2D(u_texture, v_uv) * u_ambient_light_color;
-    vec4 texture_color = (dark_color * flashdarked + light_color * (1.0 - flashdarked)) * vec4(u_color.xyz, 1.0);
+    vec4 texture_color = (dark_color * flashdarked + normal_color * (1.0 - flashdarked)) * vec4(u_color.xyz, 1.0);
     vec4 fog_color = vec4(0.0, 0.0, 0.0, texture_color.w);
     gl_FragColor = texture_color * (1.0 - fog_factor) + fog_color * fog_factor;
 
@@ -110,6 +111,6 @@ void main() {
         gl_FragColor.w = u_color.w;
     }
     gl_FragColor.xyz *= 1.0 - smoothstep(u_darkness, u_darkness + 3.0, v_world_pos.y);
-    gl_FragColor.xyz *= light_level;
+    gl_FragColor.xyz *= light_color.xyz;
 }
 #endif
