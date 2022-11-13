@@ -4,7 +4,7 @@
     "tv_detection_angle": 30.0,
     "ambient_light": "#0F1E70",
     "ambient_light_after_fuse": "#4968FF",
-    "ambient_light_inside_house": "#FFF",
+    "ambient_light_inside_house": "#4968FF",
     "sky_color": "#0F1E70",
     "footstep_dist": 1.0,
     "max_sound_distance": 10.0,
