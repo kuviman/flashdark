@@ -37,7 +37,7 @@ impl Game {
 
         // Key puzzle
         if self.key_puzzle_state == KeyPuzzleState::LightOut {
-            self.key_puzzle_state = KeyPuzzleState::Finish;
+            self.key_puzzle_state = KeyPuzzleState::Ready;
             self.ambient_light = self.assets.config.ambient_light_inside_house;
 
             for (name, data) in &self.assets.level.items {

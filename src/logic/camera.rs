@@ -81,6 +81,10 @@ impl Game {
                 if interactable.config.disabled
                     || (interactable.data.obj.meshes[0].name == "D_DoorStorage"
                         && !self.storage_unlocked)
+                    || (interactable.data.obj.meshes[0]
+                        .name
+                        .ends_with("S_StudyCloset")
+                        && self.key_puzzle_state != KeyPuzzleState::Finish)
                 {
                     Object::StaticLevel
                 } else {

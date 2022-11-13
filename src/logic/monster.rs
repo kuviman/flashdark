@@ -208,6 +208,17 @@ impl Game {
                 if name == "D_DoorStudy" && !player_inside_house {
                     can_open = false;
                 }
+                // COPYPASTE YAY
+                if interactable.config.disabled
+                    || (interactable.data.obj.meshes[0].name == "D_DoorStorage"
+                        && !self.storage_unlocked)
+                    || (interactable.data.obj.meshes[0]
+                        .name
+                        .ends_with("S_StudyCloset")
+                        && self.key_puzzle_state != KeyPuzzleState::Finish)
+                {
+                    can_open = false;
+                }
                 if can_open {
                     self.click_interactable(id, false);
                     break;

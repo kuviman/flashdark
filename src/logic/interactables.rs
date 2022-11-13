@@ -142,6 +142,9 @@ impl Game {
                 return;
             }
         }
+        if interactable.data.obj.meshes[0].name == "I_StudyClosetLock" {
+            self.key_puzzle_state = KeyPuzzleState::Finish;
+        }
 
         let sfx_position = find_center(&interactable.data.obj.meshes[0].geometry);
 
