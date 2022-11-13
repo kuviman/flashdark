@@ -11,10 +11,11 @@
     "parents": {
         "child": "parent"
     },
-    "open_interactables": [
-        "D_DoorWithHandle"
-    ],
+    "open_interactables": [],
     "interactables": {
+        "D_DoorWithHandle": {
+            "disabled": true
+        },
         "D_DoorMain": {
             "disabled": true
         },
