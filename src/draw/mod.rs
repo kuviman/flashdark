@@ -239,7 +239,7 @@ impl Game {
                     &light,
                     &mut shadow_framebuffer,
                     &interactable.data.obj,
-                    interactable.data.typ.matrix(interactable.progress),
+                    interactable.matrix(),
                     &self.assets.shaders.shadow,
                     &self.white_texture,
                     None,
