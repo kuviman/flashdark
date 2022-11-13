@@ -11,6 +11,7 @@ struct Light {
     float intensity;
 };
 
+const int SHADOWS_SOFT = 2;
 const int MAX_LIGHTS = 25;
 uniform Light u_lights[MAX_LIGHTS];
 uniform int u_lights_count;
@@ -64,7 +65,6 @@ void main() {
 
     // Shadow
     float light_level = 0.0;
-    int soft = 2;
     for (int light = 0; light < MAX_LIGHTS; ++light) {
         if (light >= u_lights_count) { break; }
         vec2 texel_size = 3.0 / vec2(u_lights[light].shadow_size);
@@ -76,8 +76,8 @@ void main() {
         float bias = max(0.005, 0.01 * (1.0 - cos));
 
         float l_shadow = 0.0;
-        for (int i = -soft; i <= soft; ++i) {
-            for (int j = -soft; j <= soft; ++j) {
+        for (int i = -SHADOWS_SOFT; i <= SHADOWS_SOFT; ++i) {
+            for (int j = -SHADOWS_SOFT; j <= SHADOWS_SOFT; ++j) {
                 vec2 sample_pos = light_pos.xy + vec2(i, j) * texel_size;
                 if (sample_pos.x <= 1.0 && sample_pos.x >= 0.0 && sample_pos.y <= 1.0 && sample_pos.y >= 0.0) {
                     float pcf_depth = unpack4(texture2D(u_lights[light].shadow_map, sample_pos));
@@ -87,7 +87,7 @@ void main() {
                 }
             }
         }
-        l_shadow /= (2.0 * float(soft) + 1.0) * (2.0 * float(soft) + 1.0);
+        l_shadow /= (2.0 * float(SHADOWS_SOFT) + 1.0) * (2.0 * float(SHADOWS_SOFT) + 1.0);
         // if (light_pos.z > 1.0) {
         //     l_shadow = 0.0;
         // }
