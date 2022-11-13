@@ -173,7 +173,9 @@ impl geng::LoadAsset for LevelData {
                         typ: InteractableType::LDoor { pivot },
                     });
                 }
-                if obj.meshes[i].name.starts_with("I_") {
+                if obj.meshes[i].name.starts_with("I_")
+                    || obj.meshes[i].name.starts_with("B_SingingGirl")
+                {
                     let mesh = obj.meshes.remove(i);
                     let front_face = mesh
                         .geometry
@@ -206,6 +208,11 @@ impl geng::LoadAsset for LevelData {
                         planks.push(InteractableData {
                             obj: Obj { meshes: vec![mesh] },
                             typ: InteractableType::Drawer { shift },
+                        });
+                    } else if mesh.name.contains("BookshelfLibrary") {
+                        interactables.push(InteractableData {
+                            obj: Obj { meshes: vec![mesh] },
+                            typ: InteractableType::Static,
                         });
                     } else {
                         interactables.push(InteractableData {

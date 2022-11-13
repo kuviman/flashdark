@@ -17,6 +17,9 @@ impl Game {
             if name.contains("StudyKey") {
                 return false;
             }
+            if *name == "Book5" {
+                return false;
+            }
             true
         }) {
             let index = global_rng().gen_range(0..data.spawns.len());
@@ -39,7 +42,7 @@ impl Game {
                 .iter()
                 .find(|inter| inter.data.obj.meshes[0].name == *parent) // TODO: this is slow
                 .unwrap();
-            matrix = parent.data.typ.matrix(parent.progress) * matrix;
+            matrix = parent.matrix() * matrix;
         }
         matrix
     }

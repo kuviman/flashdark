@@ -3,6 +3,7 @@ use super::*;
 pub struct InteractableState {
     pub open: bool,
     pub progress: f32,
+    pub extra_hacky_library_moving_closet_progress: f32,
     pub data: Rc<InteractableData>,
     pub config: Rc<InteractableConfig>,
 }
@@ -11,23 +12,31 @@ pub enum InteractableType {
     LDoor { pivot: Vec3<f32> },
     RDoor { pivot: Vec3<f32> },
     Drawer { shift: Vec3<f32> },
+    Static,
 }
 
-impl InteractableType {
-    pub fn matrix(&self, progress: f32) -> Mat4<f32> {
-        match *self {
-            Self::LDoor { pivot } => {
+impl InteractableState {
+    pub fn matrix(&self) -> Mat4<f32> {
+        let mut matrix = match self.data.typ {
+            InteractableType::LDoor { pivot } => {
                 Mat4::translate(pivot)
-                    * Mat4::rotate_z(-progress * f32::PI / 2.0)
+                    * Mat4::rotate_z(-self.progress * f32::PI / 2.0)
                     * Mat4::translate(-pivot)
             }
-            Self::RDoor { pivot } => {
+            InteractableType::RDoor { pivot } => {
                 Mat4::translate(pivot)
-                    * Mat4::rotate_z(progress * f32::PI / 2.0)
+                    * Mat4::rotate_z(self.progress * f32::PI / 2.0)
                     * Mat4::translate(-pivot)
             }
-            Self::Drawer { shift } => Mat4::translate(progress * shift),
-        }
+            InteractableType::Drawer { shift } => Mat4::translate(self.progress * shift),
+            InteractableType::Static => Mat4::identity(),
+        };
+        matrix = Mat4::translate(vec3(
+            0.0,
+            self.extra_hacky_library_moving_closet_progress,
+            0.0,
+        )) * matrix;
+        matrix
     }
 }
 
@@ -62,6 +71,7 @@ impl Game {
                 }
                 Some(InteractableState {
                     open: assets.config.open_interactables.contains(name),
+                    extra_hacky_library_moving_closet_progress: 0.0,
                     progress: 0.0,
                     data: data.clone(),
                     config: config.cloned().unwrap_or_default(),
@@ -150,7 +160,7 @@ impl Game {
                 &self.assets.sfx.drawerOpen
             }
         } else {
-            unreachable!()
+            &self.assets.sfx.drawerOpen // Girl sound?
         };
         let mut effect = sfx.effect();
         effect.set_position(sfx_position.map(|x| x as f64));
@@ -160,6 +170,9 @@ impl Game {
         interactable.open = !interactable.open;
         if interactable.config.use_item {
             self.player.item = None;
+        }
+        if let Some(give) = &interactable.config.give_item {
+            self.player.item = Some(give.clone());
         }
         // TODO: clone not needed
         let mut transform = interactable.config.transform_on_use.clone();
@@ -184,6 +197,7 @@ impl Game {
             self.interactables.push(InteractableState {
                 open: false,
                 progress: 0.0,
+                extra_hacky_library_moving_closet_progress: 0.0,
                 data: self
                     .assets
                     .level
@@ -210,6 +224,27 @@ impl Game {
 
         if player {
             self.check_monster_sfx(sfx_position);
+        }
+
+        // Library puzzle
+        {
+            let current_library_puzzle_progress = self
+                .interactables
+                .iter()
+                .filter(|i| i.data.obj.meshes[0].name.starts_with("I_BookshelfLibrary"))
+                .filter(|i| i.open)
+                .count();
+            let mut p = current_library_puzzle_progress as f32 / 10.0;
+            if current_library_puzzle_progress == 5 {
+                p = 1.0;
+            }
+            for i in self
+                .interactables
+                .iter_mut()
+                .filter(|i| i.data.obj.meshes[0].name.contains("LibraryMovingCloset"))
+            {
+                i.extra_hacky_library_moving_closet_progress = p;
+            }
         }
 
         if check_storage_lock {

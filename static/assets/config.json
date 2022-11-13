@@ -31,6 +31,9 @@
         "I_HintKey": {
             "disabled": true
         },
+        "I_LibraryMovingCloset": {
+            "disabled": true
+        },
         "I_StudyClosetLock": {
             "require_item": "TheStudyKeyPuzzleSolution",
             "use_item": true,
@@ -47,6 +50,36 @@
         },
         "I_StorageButton4": {
             "disabled": true
+        },
+        "B_SingingGirl": {
+            "require_item": "Doll",
+            "use_item": true,
+            "give_item": "Book5",
+            "transform_on_use": "B_SingingGirlDone"
+        },
+        "B_SingingGirlDone": {
+            "disabled": true,
+            "hidden": true
+        },
+        "I_BookshelfLibrary1": {
+            "require_item": "Book1",
+            "use_item": true
+        },
+        "I_BookshelfLibrary2": {
+            "require_item": "Book2",
+            "use_item": true
+        },
+        "I_BookshelfLibrary3": {
+            "require_item": "Book5",
+            "use_item": true
+        },
+        "I_BookshelfLibrary4": {
+            "require_item": "Book4",
+            "use_item": true
+        },
+        "I_BookshelfLibrary5": {
+            "require_item": "Book3",
+            "use_item": true
         }
     },
     "rooms": {

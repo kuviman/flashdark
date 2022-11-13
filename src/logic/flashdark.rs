@@ -62,6 +62,7 @@ impl Game {
                 .unwrap();
             self.interactables.push(InteractableState {
                 open: false,
+                extra_hacky_library_moving_closet_progress: 0.0,
                 progress: 0.0,
                 data: data.clone(),
                 config: self.assets.config.interactables["I_HintKey"].clone(),

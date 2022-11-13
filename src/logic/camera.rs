@@ -77,11 +77,7 @@ impl Game {
         );
         for (id, interactable) in self.interactables.iter().enumerate() {
             update_target(
-                intersect_ray_with_obj(
-                    &interactable.data.obj,
-                    interactable.data.typ.matrix(interactable.progress),
-                    ray,
-                ),
+                intersect_ray_with_obj(&interactable.data.obj, interactable.matrix(), ray),
                 if interactable.config.disabled
                     || (interactable.data.obj.meshes[0].name == "D_DoorStorage"
                         && !self.storage_unlocked)

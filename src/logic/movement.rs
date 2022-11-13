@@ -90,10 +90,7 @@ impl Game {
                 };
                 check(&self.assets.level.obj, Mat4::identity());
                 for interactable in &self.interactables {
-                    check(
-                        &interactable.data.obj,
-                        interactable.data.typ.matrix(interactable.progress),
-                    );
+                    check(&interactable.data.obj, interactable.matrix());
                 }
             }
         }

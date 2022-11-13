@@ -67,10 +67,7 @@ impl Game {
             return false;
         }
         for interactable in &self.interactables {
-            if !check(
-                &interactable.data.obj,
-                interactable.data.typ.matrix(interactable.progress),
-            ) {
+            if !check(&interactable.data.obj, interactable.matrix()) {
                 return false;
             }
         }
@@ -202,7 +199,7 @@ impl Game {
             }
             let v = vector_from_obj(
                 &interactable.data.obj,
-                interactable.data.typ.matrix(interactable.progress),
+                interactable.matrix(),
                 self.monster.pos,
             );
             let radius = 0.25;
