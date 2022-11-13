@@ -226,38 +226,6 @@ impl Game {
         color: Rgba<f32>,
     ) {
         for mesh in &obj.meshes {
-            // for light in &self.lights {
-            //     let shadow_map = self.shadow_calc.shadow_maps.get(&light.id).unwrap();
-            //     ugli::draw(
-            //         framebuffer,
-            //         &self.assets.shaders.obj,
-            //         ugli::DrawMode::Triangles,
-            //         &mesh.geometry,
-            //         (
-            //             ugli::uniforms! {
-            //                 u_flashdark_pos: self.player.flashdark_pos,
-            //                 u_flashdark_dir: self.player.flashdark_dir,
-            //                 u_flashdark_angle: f32::PI / 4.0,
-            //                 u_flashdark_strength: self.player.flashdark_strength,
-            //                 u_model_matrix: matrix,
-            //                 u_color: color,
-            //                 u_texture: texture,
-            //                 u_texture_matrix: Mat3::identity(),
-            //                 u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
-            //                 u_shadow_map: shadow_map,
-            //                 u_shadow_size: shadow_map.size(),
-            //                 u_light_matrix: light.matrix(shadow_map.size().map(|x| x as f32)),
-            //                 u_light_source: light.pos,
-            //             },
-            //             geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
-            //         ),
-            //         ugli::DrawParameters {
-            //             blend_mode: Some(ugli::BlendMode::default()),
-            //             depth_func: Some(ugli::DepthFunc::LessOrEqual),
-            //             ..default()
-            //         },
-            //     );
-            // }
             self.draw_mesh(framebuffer, mesh, matrix, color);
         }
     }
@@ -269,6 +237,8 @@ pub fn obj_shadow(
     obj: &Obj,
     matrix: Mat4<f32>,
     shadow_shader: &ugli::Program,
+    white_texture: &ugli::Texture,
+    cull_face: Option<ugli::CullFace>,
 ) {
     for mesh in &obj.meshes {
         // let mut matrix = matrix;
@@ -288,6 +258,7 @@ pub fn obj_shadow(
             //     * Mat4::translate(-center);
             continue; // Ignore billboards for lighting for now
         }
+        let texture = mesh.material.texture.as_deref().unwrap_or(white_texture);
         ugli::draw(
             framebuffer,
             shadow_shader,
@@ -297,13 +268,15 @@ pub fn obj_shadow(
                 ugli::uniforms! {
                     u_model_matrix: matrix,
                     u_shadow_size: framebuffer.size(),
+                    u_texture: texture,
+                    u_texture_matrix: Mat3::identity(),
                 },
                 geng::camera3d_uniforms(light, framebuffer.size().map(|x| x as f32)),
             ),
             ugli::DrawParameters {
                 // blend_mode: Some(ugli::BlendMode::default()),
                 depth_func: Some(ugli::DepthFunc::Less),
-                cull_face: Some(ugli::CullFace::Back),
+                cull_face,
                 ..default()
             },
         );

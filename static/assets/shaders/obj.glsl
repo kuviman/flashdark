@@ -58,7 +58,7 @@ void main() {
     vec3 normal = normalize(v_normal);
     
     float cos = 1.0; // dot(light_dir, normal); // TODO: fix bias
-    float bias = max(0.001, 0.01 * (1.0 - cos));
+    float bias = max(0.005, 0.01 * (1.0 - cos));
 
     vec2 texel_size = 3.0 / vec2(u_shadow_size);
     float shadow = 0.0;
@@ -75,6 +75,8 @@ void main() {
         }
     }
     shadow /= (2.0 * float(soft) + 1.0) * (2.0 * float(soft) + 1.0);
+    // Ambient
+    shadow = max(0.0, shadow - 0.05);
     // if (light_pos.z > 1.0) {
     //     shadow = 0.0;
     // }

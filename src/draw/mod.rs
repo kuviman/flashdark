@@ -232,6 +232,8 @@ impl Game {
                 &self.assets.level.obj,
                 Mat4::identity(),
                 &self.assets.shaders.shadow,
+                &self.white_texture,
+                Some(ugli::CullFace::Back),
             );
 
             // Interactables
@@ -242,6 +244,8 @@ impl Game {
                     &interactable.data.obj,
                     interactable.data.typ.matrix(interactable.progress),
                     &self.assets.shaders.shadow,
+                    &self.white_texture,
+                    None,
                 );
             }
         }
