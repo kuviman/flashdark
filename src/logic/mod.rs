@@ -86,9 +86,10 @@ impl Game {
                 .normalize_or_zero();
             let tv_dir = (tv_pos - self.camera.pos).normalize_or_zero();
             let trigger_box = &self.assets.level.trigger_cubes["TVLookTrigger"];
-            if trigger_box.horizontal_aabb().contains(self.player.pos.xy())
-                && Vec3::dot(camera_dir, tv_dir)
-                    > (self.assets.config.tv_detection_angle * f32::PI / 180.0).cos()
+            if true
+            // trigger_box.horizontal_aabb().contains(self.player.pos.xy())
+            // && Vec3::dot(camera_dir, tv_dir)
+            //     > (self.assets.config.tv_detection_angle * f32::PI / 180.0).cos()
             {
                 self.cutscene_t += delta_time;
 
@@ -108,6 +109,7 @@ impl Game {
                 if self.cutscene_t > 1.4 {
                     self.player.flashdark.dark = 1.0;
                 }
+                self.player.height = 1.0; // Uncrouch
                 self.lock_controls = true;
                 let target_rot_h = tv_dir.xy().arg() - f32::PI / 2.0;
                 let target_rot_v = vec2(tv_dir.xy().len(), tv_dir.z).arg();
