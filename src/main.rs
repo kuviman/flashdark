@@ -88,7 +88,7 @@ impl Game {
         } else {
             assets.navmesh.clone()
         };
-        navmesh.remove_unreachable_from(assets.level.spawn_point);
+        navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
         Self {
             storage_unlocked: false,
             key_puzzle_state: KeyPuzzleState::Begin,

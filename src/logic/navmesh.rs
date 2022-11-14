@@ -94,23 +94,27 @@ impl NavMesh {
 
 impl Game {
     pub fn init_navmesh(geng: &Geng, level: &LevelData) -> NavMesh {
-        let hor_range = -15.0..15.0;
+        let x_range = -15.0..14.0;
+        let y_range = -11.0..11.0;
         let ver_range = 0.0..1.0;
-        const HOR_GRID_SIZE: usize = 30;
+        const HOR_GRID_SIZE: usize = 50;
         const VER_GRID_SIZE: usize = 5;
-        const MIN_DISTANCE_TO_MESH: f32 = 0.1;
-        let hor_step = (hor_range.end - hor_range.start) / HOR_GRID_SIZE as f32;
+        const MIN_DISTANCE_TO_MESH: f32 = 0.2;
+        let hor_step = 1.0;
         let waypoints: Vec<Vec3<f32>> = {
             let obj = &level.obj;
             let mut points = HashMap::<Vec2<usize>, Vec<Vec3<f32>>>::new();
             for xi in 0..=HOR_GRID_SIZE {
-                let x = hor_range.start
-                    + (hor_range.end - hor_range.start) * xi as f32 / HOR_GRID_SIZE as f32;
+                let x = x_range.start
+                    + (x_range.end - x_range.start) * xi as f32 / HOR_GRID_SIZE as f32;
                 for yi in 0..=HOR_GRID_SIZE {
-                    let y = hor_range.start
-                        + (hor_range.end - hor_range.start) * yi as f32 / HOR_GRID_SIZE as f32;
+                    let y = y_range.start
+                        + (y_range.end - y_range.start) * yi as f32 / HOR_GRID_SIZE as f32;
                     let points = points.entry(vec2(xi, yi)).or_default();
                     for zi in 0..=VER_GRID_SIZE {
+                        if zi != 0 {
+                            break; // HAHA
+                        }
                         let z = ver_range.start
                             + (ver_range.end - ver_range.start) * zi as f32 / VER_GRID_SIZE as f32;
                         let mut p = vec3(x, y, z);
@@ -149,7 +153,7 @@ impl Game {
             spatial_map.insert(v, waypoints[v].xy().map(|x| r32(x)), R32::ZERO);
         }
         for v in 0..waypoints.len() {
-            for u in spatial_map.lookup(
+            'next_vertex: for u in spatial_map.lookup(
                 AABB::point(waypoints[v].xy())
                     .extend_uniform(max_hor_connectivity)
                     .map(|x| r32(x)),
@@ -170,6 +174,26 @@ impl Game {
                 if let Some(t) = intersect_ray_with_obj(&level.obj, Mat4::identity(), ray) {
                     if t < 1.0 {
                         continue;
+                    }
+                }
+                for interactable in &level.interactables {
+                    let name = &interactable.obj.meshes[0].name;
+                    if let InteractableType::LDoor { .. } | InteractableType::RDoor { .. } =
+                        interactable.typ
+                    {
+                        if name != "D_DoorMain"
+                            && name != "D_DoorWithHandle"
+                            && !name.contains("LibraryMovingCloset")
+                        {
+                            continue;
+                        }
+                    }
+                    if let Some(t) =
+                        intersect_ray_with_obj(&interactable.obj, Mat4::identity(), ray)
+                    {
+                        if t < 1.0 {
+                            continue 'next_vertex;
+                        }
                     }
                 }
                 edges[v].push(u);
@@ -234,11 +258,11 @@ impl Game {
                 },
             }],
         };
-        // self.draw_obj(
-        //     framebuffer,
-        //     &debug_obj,
-        //     Mat4::identity(),
-        //     Rgba::new(1.0, 1.0, 1.0, 0.3),
-        // );
+        self.draw_obj(
+            framebuffer,
+            &debug_obj,
+            Mat4::identity(),
+            Rgba::new(1.0, 1.0, 1.0, 0.3),
+        );
     }
 }

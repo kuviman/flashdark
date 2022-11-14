@@ -141,6 +141,17 @@ impl Game {
         }
     }
     pub fn check_monster_sfx(&mut self, pos: Vec3<f32>) {
+        let player_inside_house = {
+            let door_id = self
+                .interactables
+                .iter()
+                .position(|interactable| interactable.data.obj.meshes[0].name == "D_DoorMain")
+                .unwrap();
+            !self.interactables[door_id].open
+        };
+        if !player_inside_house {
+            return;
+        }
         if !self.monster_spawned {
             return;
         }
