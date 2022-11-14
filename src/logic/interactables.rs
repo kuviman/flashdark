@@ -100,8 +100,8 @@ impl Game {
                         music.stop();
                     }
                     self.music = Some({
-                        let mut music = self.assets.music.ambient.effect();
-                        music.set_volume(0.2);
+                        let mut music = self.assets.sfx.ambient.effect();
+                        music.set_volume(0.8);
                         music.play();
                         music
                     });

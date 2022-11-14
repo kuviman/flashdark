@@ -12,7 +12,7 @@ pub struct ShadowCalculation {
     depth_buffers: HashMap<LightId, ugli::Renderbuffer<ugli::DepthComponent>>,
 }
 
-struct LightsUniform<'a> {
+pub struct LightsUniform<'a> {
     u_lights: Vec<LightUniform<'a>>,
 }
 

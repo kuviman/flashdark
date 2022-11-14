@@ -181,10 +181,7 @@ impl Game {
             } else {
                 &self.white_texture
             });
-        let lights = light_uniforms(
-            &self.lights,
-            &self.shadow_calc.as_ref().unwrap().shadow_maps,
-        );
+        let lights = self.light_uniforms();
         ugli::draw(
             framebuffer,
             &self.assets.shaders.obj,
@@ -287,24 +284,23 @@ impl Game {
             );
         }
     }
-}
 
-pub(super) fn light_uniforms<'a>(
-    lights: &'a Collection<Light>,
-    shadow_maps: &'a HashMap<LightId, ugli::Texture>,
-) -> LightsUniform<'a> {
-    LightsUniform {
-        u_lights: lights
-            .iter()
-            .map(|light| {
-                let shadow_map = shadow_maps.get(&light.id).unwrap();
-                LightUniform {
-                    pos: light.pos,
-                    matrix: light.matrix(shadow_map.size().map(|x| x as f32)),
-                    intensity: light.intensity,
-                    shadow_map,
-                }
-            })
-            .collect(),
+    pub fn light_uniforms(&self) -> LightsUniform {
+        let lights = &self.lights;
+        let shadow_maps = &self.shadow_calc.as_ref().unwrap().shadow_maps;
+        LightsUniform {
+            u_lights: lights
+                .iter()
+                .map(|light| {
+                    let shadow_map = shadow_maps.get(&light.id).unwrap();
+                    LightUniform {
+                        pos: light.pos,
+                        matrix: light.matrix(shadow_map.size().map(|x| x as f32)),
+                        intensity: light.intensity,
+                        shadow_map,
+                    }
+                })
+                .collect(),
+        }
     }
 }

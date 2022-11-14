@@ -85,6 +85,8 @@ impl Game {
                         .name
                         .ends_with("S_StudyCloset")
                         && self.key_puzzle_state != KeyPuzzleState::Finish)
+                    || (interactable.data.obj.meshes[0].name == "D_DoorStudy"
+                        && self.key_puzzle_state == KeyPuzzleState::LightOut)
                 {
                     Object::StaticLevel
                 } else {

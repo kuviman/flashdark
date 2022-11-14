@@ -67,12 +67,14 @@ pub struct Assets {
 pub struct Music {
     #[asset(path = "OutsideMusic.mp3", postprocess = "loop_sound")]
     pub outside: geng::Sound,
-    #[asset(path = "MainCreepyToneAmbient.wav", postprocess = "loop_sound")]
-    pub ambient: geng::Sound,
+    // #[asset(path = "MainCreepyToneAmbient.wav", postprocess = "loop_sound")]
+    // pub ambient: geng::Sound,
 }
 
 #[derive(geng::Assets)]
 pub struct SfxAssets {
+    #[asset(path = "HouseAmbient.mp3", postprocess = "loop_sound")]
+    pub ambient: geng::Sound,
     pub doorClose: geng::Sound,
     pub doorLocked: geng::Sound,
     pub doorOpen: geng::Sound,
