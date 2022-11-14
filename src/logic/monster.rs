@@ -141,7 +141,11 @@ impl Game {
         }
     }
     pub fn check_monster_sfx(&mut self, pos: Vec3<f32>) {
-        if (pos - self.monster.pos).len() < self.assets.config.max_ghost_sound_distance as f32 {
+        if !self.monster_spawned {
+            return;
+        }
+        if (pos - self.monster.pos).xy().len() < self.assets.config.max_ghost_sound_distance as f32
+        {
             self.monster_walk_to(pos, TargetType::Noise);
         }
     }

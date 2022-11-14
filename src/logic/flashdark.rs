@@ -28,6 +28,18 @@ impl Game {
         light.rot_h = self.player.flashdark.rot_h;
         light.rot_v = self.player.flashdark.rot_v;
         light.intensity = self.player.flashdark.strength;
+
+        // actually flicker LUL
+        if self.player.flashdark.on {
+            self.monster.next_flashdark_detect_time -= delta_time;
+            if self.monster.next_flashdark_detect_time < 0.0 {
+                self.monster.next_flashdark_detect_time =
+                    self.assets.config.flashdark_detect_interval;
+                if global_rng().gen_bool(self.assets.config.flashdark_detect_probability as f64) {
+                    self.toggle_flashdark();
+                }
+            }
+        }
     }
 
     pub fn toggle_flashdark(&mut self) {
@@ -37,6 +49,9 @@ impl Game {
         } else {
             self.assets.sfx.flashOff.play();
         }
+
+        self.monster.next_flashdark_detect_time = self.assets.config.flashdark_detect_interval;
+        self.check_monster_sfx(self.player.pos);
 
         // Key puzzle
         if self.key_puzzle_state == KeyPuzzleState::LightOut {
