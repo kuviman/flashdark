@@ -6,6 +6,16 @@ pub use spatial_map::*;
 
 pub const EPS: f32 = 1e-7;
 
+pub fn normalize_angle(mut a: f32) -> f32 {
+    while a > f32::PI {
+        a -= 2.0 * f32::PI;
+    }
+    while a < -f32::PI {
+        a += 2.0 * f32::PI;
+    }
+    a
+}
+
 pub fn nlerp2(a: Vec2<f32>, b: Vec2<f32>, t: f32) -> Vec2<f32> {
     (a * (1.0 - t) + b * t).normalize_or_zero()
 }

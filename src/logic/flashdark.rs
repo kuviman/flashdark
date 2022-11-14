@@ -13,25 +13,20 @@ impl Game {
 
         // let new_dir =
         //     (self.look().position_or_inf() - self.player.flashdark.pos).normalize_or_zero();
-        let new_dir = self
-            .camera
-            .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0)
-            .dir
-            .normalize_or_zero();
-        if Vec3::dot(new_dir, self.player.flashdark.dir) < 0.0 {
-            self.player.flashdark.dir = new_dir;
-        } else {
-            self.player.flashdark.dir = nlerp3(
-                self.player.flashdark.dir,
-                new_dir,
-                (delta_time / 0.1).min(1.0),
-            );
-        }
+        self.player.flashdark.rot_v +=
+            (self.player.rot_v - self.player.flashdark.rot_v) * (delta_time / 0.1).min(1.0);
+        self.player.flashdark.rot_h +=
+            normalize_angle(self.player.rot_h - self.player.flashdark.rot_h)
+                * (delta_time / 0.1).min(1.0);
+        self.player.flashdark.dir = (Mat4::rotate_z(self.player.flashdark.rot_h)
+            * Mat4::rotate_x(self.player.flashdark.rot_v)
+            * vec4(0.0, 1.0, 0.0, 1.0))
+        .xyz();
 
         let light = self.lights.get_mut(&LightId(0)).unwrap();
         light.pos = self.player.flashdark.pos;
-        light.rot_h = self.camera.rot_h;
-        light.rot_v = self.camera.rot_v;
+        light.rot_h = self.player.flashdark.rot_h;
+        light.rot_v = self.player.flashdark.rot_v;
         light.intensity = self.player.flashdark.strength;
     }
 

@@ -5,12 +5,7 @@ impl Game {
         if self.lock_controls {
             return;
         }
-        while self.player.rot_h > f32::PI {
-            self.player.rot_h -= 2.0 * f32::PI;
-        }
-        while self.player.rot_h < -f32::PI {
-            self.player.rot_h += 2.0 * f32::PI;
-        }
+        self.player.rot_h = normalize_angle(self.player.rot_h);
 
         const CROUCH_TIME: f32 = 0.2;
         if self.geng.window().is_key_pressed(geng::Key::LCtrl)

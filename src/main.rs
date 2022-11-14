@@ -140,6 +140,8 @@ impl Game {
                 rot_v: 0.0,
                 flashdark: Flashdark {
                     pos: Vec3::ZERO,
+                    rot_h: 0.0,
+                    rot_v: 0.0,
                     dir: vec3(0.0, 1.0, 0.0),
                     on: true,
                     strength: 0.0,

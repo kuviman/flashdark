@@ -3,6 +3,8 @@ use super::*;
 pub struct Flashdark {
     pub strength: f32,
     pub on: bool,
+    pub rot_h: f32,
+    pub rot_v: f32,
     pub dir: Vec3<f32>,
     pub pos: Vec3<f32>,
     pub dark: f32,
