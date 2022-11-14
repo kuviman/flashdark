@@ -258,7 +258,7 @@ impl Game {
                 if can_open {
                     self.click_interactable(id, false);
                     break;
-                } else {
+                } else if self.monster.target_type != TargetType::Player {
                     self.monster.next_target_pos = self.monster.pos;
                     let n = v.normalize_or_zero();
                     self.monster.pos += n * (radius - v.len());
