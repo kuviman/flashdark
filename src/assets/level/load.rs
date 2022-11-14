@@ -332,6 +332,7 @@ impl geng::LoadAsset for LevelData {
                 "TheStudyKeyPuzzleSolution".to_owned(),
                 key_solution_item_data,
             );
+            key_configs.insert("TheStudyKeyPuzzleSolution".to_owned(), hint_key_config);
 
             Ok(LevelData {
                 key_configs,
