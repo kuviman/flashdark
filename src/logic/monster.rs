@@ -160,7 +160,8 @@ impl Game {
         if player_inside_house {
             if self.monster_sees_player() {
                 self.monster_walk_to(self.player.pos, TargetType::Player);
-            } else if self.player.flashdark.on {
+            } else if false && self.player.flashdark.on {
+                // REMOVE
                 self.monster.next_flashdark_detect_time -= delta_time;
                 if self.monster.next_flashdark_detect_time < 0.0 {
                     self.monster.next_flashdark_detect_time =
