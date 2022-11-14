@@ -2,6 +2,7 @@ use super::*;
 
 pub struct InteractableState {
     pub open: bool,
+    pub open_other_way: bool,
     pub progress: f32,
     pub extra_hacky_library_moving_closet_progress: f32,
     pub data: Rc<InteractableData>,
@@ -20,12 +21,18 @@ impl InteractableState {
         let mut matrix = match self.data.typ {
             InteractableType::LDoor { pivot } => {
                 Mat4::translate(pivot)
-                    * Mat4::rotate_z(-self.progress * f32::PI / 2.0)
+                    * Mat4::rotate_z(
+                        -self.progress * f32::PI / 2.0
+                            * if self.open_other_way { -1.0 } else { 1.0 },
+                    )
                     * Mat4::translate(-pivot)
             }
             InteractableType::RDoor { pivot } => {
                 Mat4::translate(pivot)
-                    * Mat4::rotate_z(self.progress * f32::PI / 2.0)
+                    * Mat4::rotate_z(
+                        self.progress * f32::PI / 2.0
+                            * if self.open_other_way { -1.0 } else { 1.0 },
+                    )
                     * Mat4::translate(-pivot)
             }
             InteractableType::Drawer { shift } => Mat4::translate(self.progress * shift),
@@ -70,6 +77,7 @@ impl Game {
                     return None;
                 }
                 Some(InteractableState {
+                    open_other_way: false,
                     open: assets.config.open_interactables.contains(name),
                     extra_hacky_library_moving_closet_progress: 0.0,
                     progress: 0.0,
@@ -110,7 +118,7 @@ impl Game {
         }
     }
 
-    pub fn click_interactable(&mut self, id: Id, player: bool) {
+    pub fn click_interactable(&mut self, id: Id, player: bool, from: Vec3<f32>) {
         let interactable = &mut self.interactables[id];
 
         if self.key_puzzle_state == KeyPuzzleState::LightOut {
@@ -189,6 +197,19 @@ impl Game {
         effect.set_max_distance(self.assets.config.max_sound_distance);
         effect.play();
 
+        if !interactable.open
+            && interactable.progress == 0.0
+            && !interactable.data.obj.meshes[0].name.contains("Closet")
+        {
+            if let InteractableType::LDoor { pivot } = interactable.data.typ {
+                interactable.open_other_way =
+                    Vec2::skew((sfx_position - from).xy(), (pivot - from).xy()) > 0.0;
+            }
+            if let InteractableType::RDoor { pivot } = interactable.data.typ {
+                interactable.open_other_way =
+                    Vec2::skew((sfx_position - from).xy(), (pivot - from).xy()) < 0.0;
+            }
+        }
         interactable.open = !interactable.open;
         if interactable.config.use_item {
             self.player.item = None;
@@ -217,6 +238,7 @@ impl Game {
         if let Some(transform) = transform {
             self.interactables.remove(id);
             self.interactables.push(InteractableState {
+                open_other_way: false,
                 open: false,
                 progress: 0.0,
                 extra_hacky_library_moving_closet_progress: 0.0,

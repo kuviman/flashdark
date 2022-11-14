@@ -130,6 +130,7 @@ impl Game {
                             })
                             .unwrap(),
                         false,
+                        self.assets.level.trigger_cubes["HouseEntrance"].center(),
                     );
                     self.monster_spawned = true;
                 }
@@ -147,7 +148,7 @@ impl Game {
                 .position(|interactable| interactable.data.obj.meshes[0].name == "D_DoorMain")
                 .unwrap();
             if self.interactables[door_id].open {
-                self.click_interactable(door_id, false);
+                self.click_interactable(door_id, false, Vec3::ZERO);
                 self.ambient_light = self.assets.config.ambient_light_inside_house;
             }
         }
@@ -164,7 +165,7 @@ impl Game {
                 .position(|interactable| interactable.data.obj.meshes[0].name == "D_DoorStudy")
                 .unwrap();
             if self.interactables[door_id].open {
-                self.click_interactable(door_id, false);
+                self.click_interactable(door_id, false, Vec3::ZERO);
             }
             self.key_puzzle_state = KeyPuzzleState::Entered;
         }
@@ -180,7 +181,7 @@ impl Game {
                         match target.object {
                             Object::StaticLevel => {}
                             Object::Interactable(id) => {
-                                self.click_interactable(id, true);
+                                self.click_interactable(id, true, self.player.pos);
                             }
                             Object::Item(id) => {
                                 self.click_item(id);

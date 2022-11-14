@@ -79,6 +79,7 @@ impl Game {
                 .find(|i| i.obj.meshes[0].name == "I_HintKey")
                 .unwrap();
             self.interactables.push(InteractableState {
+                open_other_way: false,
                 open: false,
                 extra_hacky_library_moving_closet_progress: 0.0,
                 progress: 0.0,

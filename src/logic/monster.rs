@@ -256,7 +256,7 @@ impl Game {
                     can_open = false;
                 }
                 if can_open {
-                    self.click_interactable(id, false);
+                    self.click_interactable(id, false, self.monster.pos);
                     break;
                 } else if self.monster.target_type != TargetType::Player {
                     self.monster.next_target_pos = self.monster.pos;
