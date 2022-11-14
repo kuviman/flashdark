@@ -1,5 +1,5 @@
 # Blender MTL File: 'roomMVP.blend'
-# Material Count: 26
+# Material Count: 29
 
 newmtl BookshelfMat
 Ns 225.000000
@@ -181,6 +181,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd FlashDarkMVPLevelRef.png
+map_d FlashDarkMVPLevelRef.png
 
 newmtl SingingGirlDoneMat
 Ns 225.000000
@@ -264,6 +265,28 @@ d 1.000000
 illum 2
 map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_01.png
 
+newmtl WallsBathroom
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_Bathroom.png
+
+newmtl WallsBlue
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_03.png
+
 newmtl WallsExterior
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
@@ -285,6 +308,17 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_02.png
+
+newmtl WallsPlayroom
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_Playroom.png
 
 newmtl WindowMat
 Ns 225.000000
