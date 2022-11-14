@@ -79,6 +79,11 @@ impl Game {
         if self.player.god_mode {
             return false;
         }
+        if (self.monster.pos - self.player.pos).xy().len()
+            > self.assets.config.monster_view_distance
+        {
+            return false;
+        }
         if Vec2::dot(
             self.monster.dir.xy().normalize_or_zero(),
             (self.player.pos - self.monster.pos)
