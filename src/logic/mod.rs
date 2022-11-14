@@ -93,20 +93,20 @@ impl Game {
                 self.cutscene_t += delta_time;
 
                 if self.cutscene_t < 0.2 {
-                    self.player.flashdark_on = false;
+                    self.player.flashdark.on = false;
                 } else if self.cutscene_t < 0.6 {
-                    self.player.flashdark_on = true;
+                    self.player.flashdark.on = true;
                 } else if self.cutscene_t < 0.8 {
-                    self.player.flashdark_on = false;
+                    self.player.flashdark.on = false;
                 } else if self.cutscene_t < 1.2 {
-                    self.player.flashdark_on = true;
+                    self.player.flashdark.on = true;
                 } else if self.cutscene_t < 1.4 {
-                    self.player.flashdark_on = false;
+                    self.player.flashdark.on = false;
                 } else if self.cutscene_t < 1.8 {
-                    self.player.flashdark_on = true;
+                    self.player.flashdark.on = true;
                 }
                 if self.cutscene_t > 1.4 {
-                    self.player.flashdark_dark = 1.0;
+                    self.player.flashdark.dark = 1.0;
                 }
                 self.lock_controls = true;
                 let target_rot_h = tv_dir.xy().arg() - f32::PI / 2.0;

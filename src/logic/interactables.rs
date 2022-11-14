@@ -138,7 +138,7 @@ impl Game {
             if self.key_puzzle_state == KeyPuzzleState::Entered {
                 self.key_puzzle_state = KeyPuzzleState::LightOut;
                 self.ambient_light = Rgba::BLACK;
-                self.player.flashdark_on = false;
+                self.player.flashdark.on = false;
                 return;
             }
         }

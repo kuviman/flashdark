@@ -138,11 +138,13 @@ impl Game {
                 vel: Vec3::ZERO,
                 rot_h: 0.0,
                 rot_v: 0.0,
-                flashdark_pos: Vec3::ZERO,
-                flashdark_dir: vec3(0.0, 1.0, 0.0),
-                flashdark_on: true,
-                flashdark_strength: 0.0,
-                flashdark_dark: 0.0,
+                flashdark: Flashdark {
+                    pos: Vec3::ZERO,
+                    dir: vec3(0.0, 1.0, 0.0),
+                    on: true,
+                    strength: 0.0,
+                    dark: 0.0,
+                },
                 item: None,
                 next_footstep: 0.0,
                 god_mode: false,
@@ -197,8 +199,7 @@ impl geng::State for Game {
             geng::Event::KeyDown { key: geng::Key::G } => {
                 self.player.god_mode = !self.player.god_mode;
                 self.ambient_light = self.assets.config.ambient_light_inside_house;
-                self.player.flashdark_dark = 1.0;
-                self.player.flashdark_dark = 1.0;
+                self.player.flashdark.dark = 1.0;
                 self.fuse_placed = true;
             }
             _ => {}

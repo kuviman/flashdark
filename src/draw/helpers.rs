@@ -192,11 +192,11 @@ impl Game {
             &mesh.geometry,
             (
                 ugli::uniforms! {
-                    u_flashdark_pos: self.player.flashdark_pos,
-                    u_flashdark_dir: self.player.flashdark_dir,
+                    u_flashdark_pos: self.player.flashdark.pos,
+                    u_flashdark_dir: self.player.flashdark.dir,
                     u_flashdark_angle: f32::PI / 4.0,
-                    u_flashdark_strength: self.player.flashdark_strength,
-                    u_flashdark_dark: self.player.flashdark_dark,
+                    u_flashdark_strength: self.player.flashdark.strength,
+                    u_flashdark_dark: self.player.flashdark.dark,
                     u_ambient_light_color: self.ambient_light,
                     u_model_matrix: matrix,
                     u_color: color,
