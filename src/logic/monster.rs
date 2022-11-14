@@ -80,9 +80,11 @@ impl Game {
             return false;
         }
         if Vec2::dot(
-            self.monster.dir.xy(),
-            (self.player.pos - self.monster.pos).xy(),
-        ) < 0.0
+            self.monster.dir.xy().normalize_or_zero(),
+            (self.player.pos - self.monster.pos)
+                .xy()
+                .normalize_or_zero(),
+        ) < (self.assets.config.monster_fov / 2.0 * f32::PI / 180.0).cos()
         {
             return false;
         }

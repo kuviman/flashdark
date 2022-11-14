@@ -21,6 +21,7 @@ pub struct InteractableConfig {
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
 #[asset(json)]
 pub struct Config {
+    pub monster_fov: f32,
     pub flashdark_detect_interval: f32,
     pub flashdark_detect_probability: f32,
     pub tv_detection_angle: f32,

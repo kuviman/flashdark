@@ -1,4 +1,5 @@
 {
+    "monster_fov": 120,
     "flashdark_detect_interval": 1.0,
     "flashdark_detect_probability": 0.5,
     "tv_detection_angle": 30.0,
