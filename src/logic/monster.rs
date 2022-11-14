@@ -9,6 +9,7 @@ pub enum TargetType {
 }
 
 pub struct Monster {
+    pub stand_still_time: f32,
     pub pos: Vec3<f32>,
     pub dir: Vec3<f32>,
     pub target_type: TargetType,
@@ -30,6 +31,7 @@ impl Monster {
     pub fn new(assets: &Assets) -> Self {
         let pos = assets.level.trigger_cubes["GhostSpawn"].center();
         Self {
+            stand_still_time: 0.0,
             next_flashdark_detect_time: assets.config.flashdark_detect_interval,
             scream_time: 0.0,
             pos,
@@ -173,10 +175,23 @@ impl Game {
             return;
         }
         if (self.monster.pos - self.monster.next_target_pos).xy().len() < 0.1 {
-            self.monster_walk_to(
-                *self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
-                TargetType::Rng,
-            );
+            let mut go_next = true;
+            if self.monster.target_type == TargetType::Rng {
+                self.monster.stand_still_time -= delta_time;
+                if self.monster.stand_still_time > 0.0 {
+                    go_next = false;
+                }
+            }
+            if go_next {
+                self.monster.stand_still_time = {
+                    let (a, b) = self.assets.config.ghost_stand_still_time;
+                    global_rng().gen_range(a..b)
+                };
+                self.monster_walk_to(
+                    *self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
+                    TargetType::Rng,
+                );
+            }
         }
 
         if player_inside_house {
@@ -260,6 +275,7 @@ impl Game {
                     break;
                 } else if self.monster.target_type != TargetType::Player {
                     self.monster.next_target_pos = self.monster.pos;
+                    self.monster.stand_still_time = 0.0;
                     let n = v.normalize_or_zero();
                     self.monster.pos += n * (radius - v.len());
                 }

@@ -1,4 +1,8 @@
 {
+    "ghost_stand_still_time": [
+        3,
+        6
+    ],
     "monster_fov": 120,
     "monster_view_distance": 10.0,
     "flashdark_detect_interval": 1.0,
