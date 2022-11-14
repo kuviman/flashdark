@@ -291,6 +291,12 @@ impl Game {
         LightsUniform {
             u_lights: lights
                 .iter()
+                .filter(|light| {
+                    if self.key_puzzle_state == KeyPuzzleState::LightOut && light.id.0 != 0 {
+                        return false;
+                    }
+                    true
+                })
                 .map(|light| {
                     let shadow_map = shadow_maps.get(&light.id).unwrap();
                     LightUniform {
