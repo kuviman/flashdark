@@ -32,6 +32,8 @@
             "require_item": "Fuse",
             "transparent": true,
             "use_item": true,
+            "sfx": "fusePlaced.mp3",
+            "sfx_volume": 5.0,
             "transform_on_use": "I_FusePlaced"
         },
         "I_FusePlaced": {

@@ -16,6 +16,7 @@ pub struct InteractableConfig {
     #[serde(default)]
     pub disabled: bool,
     pub sfx: Option<String>,
+    pub sfx_volume: Option<f64>,
 }
 
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]

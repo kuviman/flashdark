@@ -85,6 +85,7 @@ pub struct SfxAssets {
     pub flashOn: geng::Sound,
     #[asset(path = "swingLoop.mp3", postprocess = "loop_sound")]
     pub swingLoop: geng::Sound,
+    #[asset(path = "fusePlaced.mp3")]
     pub fusePlaced: geng::Sound,
     pub genericPickup: geng::Sound,
     #[asset(postprocess = "loop_sound")]
@@ -107,6 +108,7 @@ impl SfxAssets {
             "placeObject.wav" => &self.placeObject,
             "doorLocked.wav" => &self.doorLocked,
             "doorUnlocked.wav" => &self.doorUnlocked,
+            "fusePlaced.mp3" => &self.fusePlaced,
             _ => unreachable!(),
         }
     }
