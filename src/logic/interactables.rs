@@ -87,12 +87,26 @@ impl Game {
             } else {
                 0.3
             };
+            let was_zero = interactable.progress == 0.0;
             if interactable.open {
                 interactable.progress += delta_time / inter_time;
             } else {
                 interactable.progress -= delta_time / inter_time;
             }
             interactable.progress = interactable.progress.clamp(0.0, 1.0);
+            if !was_zero && interactable.progress == 0.0 {
+                if interactable.data.obj.meshes[0].name == "D_DoorMain" {
+                    if let Some(mut music) = self.music.take() {
+                        music.stop();
+                    }
+                    self.music = Some({
+                        let mut music = self.assets.music.ambient.effect();
+                        music.set_volume(0.2);
+                        music.play();
+                        music
+                    });
+                }
+            }
         }
     }
 
@@ -142,8 +156,13 @@ impl Game {
                 return;
             }
         }
+        let mut clear_keys = false;
         if interactable.data.obj.meshes[0].name == "I_StudyClosetLock" {
             self.key_puzzle_state = KeyPuzzleState::Finish;
+            if let Some(mut sfx) = self.tv_noise.take() {
+                sfx.stop();
+            }
+            clear_keys = true;
         }
 
         let sfx_position = find_center(&interactable.data.obj.meshes[0].geometry);
@@ -227,6 +246,12 @@ impl Game {
 
         if player {
             self.check_monster_sfx(sfx_position);
+        }
+
+        if clear_keys {
+            self.items.retain(|item| !item.name.contains("StudyKey"));
+            self.interactables
+                .retain(|i| !i.data.obj.meshes[0].name.contains("I_HintKey"));
         }
 
         // Library puzzle

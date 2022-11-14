@@ -72,17 +72,29 @@ pub struct Game {
     swing_sfx: Option<geng::SoundEffect>,
     current_swing_ref_distance: f32,
     transision: Option<geng::Transition>,
+    music: Option<geng::SoundEffect>,
+}
+
+impl Drop for Game {
+    fn drop(&mut self) {
+        if let Some(sfx) = &mut self.music {
+            sfx.stop();
+        }
+        if let Some(sfx) = &mut self.tv_noise {
+            sfx.stop();
+        }
+    }
 }
 
 impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
         // geng.window().lock_cursor();
 
-        if true {
+        let music = true.then(|| {
             let mut music = assets.music.outside.effect();
-            music.set_volume(0.5);
             music.play();
-        }
+            music
+        });
         let mut navmesh = if false {
             Self::init_navmesh(geng, &assets.level)
         } else {
@@ -90,6 +102,7 @@ impl Game {
         };
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
         Self {
+            music,
             storage_unlocked: false,
             key_puzzle_state: KeyPuzzleState::Begin,
             monster_spawned: false,
