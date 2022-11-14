@@ -78,8 +78,8 @@ impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
         // geng.window().lock_cursor();
 
-        if false {
-            let mut music = assets.music.effect();
+        if true {
+            let mut music = assets.music.outside.effect();
             music.set_volume(0.5);
             music.play();
         }

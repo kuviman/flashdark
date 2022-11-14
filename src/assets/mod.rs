@@ -54,14 +54,21 @@ pub struct Assets {
     pub obj: Obj,
     #[asset(path = "JumpScare1.wav")]
     pub jumpscare: geng::Sound,
-    #[asset(path = "MainCreepyToneAmbient.wav", postprocess = "loop_sound")]
-    pub music: geng::Sound,
+    #[asset(path = "Music")]
+    pub music: Music,
     pub level: LevelData,
     pub config: Config,
     pub navmesh: NavMesh,
     #[asset(path = "SFX")]
     pub sfx: SfxAssets,
 }
+
+#[derive(geng::Assets)]
+pub struct Music {
+    #[asset(path = "OutsideMusic.mp3", postprocess = "loop_sound")]
+    pub outside: geng::Sound,
+}
+
 #[derive(geng::Assets)]
 pub struct SfxAssets {
     pub doorClose: geng::Sound,
@@ -72,7 +79,7 @@ pub struct SfxAssets {
     pub drawerOpen: geng::Sound,
     pub flashOff: geng::Sound,
     pub flashOn: geng::Sound,
-    #[asset(postprocess = "loop_sound")]
+    #[asset(path = "swingLoop.mp3", postprocess = "loop_sound")]
     pub swingLoop: geng::Sound,
     pub fusePlaced: geng::Sound,
     pub genericPickup: geng::Sound,
@@ -80,7 +87,7 @@ pub struct SfxAssets {
     pub ghostLoop: geng::Sound,
     pub ghostScream: geng::Sound,
     pub placeObject: geng::Sound,
-    #[asset(postprocess = "loop_sound")]
+    #[asset(path = "tvStatic.mp3", postprocess = "loop_sound")]
     pub tvStatic: geng::Sound,
     #[asset(path = "ghostAlarmed*.wav", range = "1..=3")]
     pub ghostAlarmed: Vec<geng::Sound>,
