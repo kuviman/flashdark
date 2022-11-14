@@ -55,7 +55,7 @@ pub struct Game {
     white_texture: ugli::Texture,
     black_texture: ugli::Texture,
     transparent_black_texture: ugli::Texture,
-    shadow_calc: ShadowCalculation,
+    shadow_calc: Option<ShadowCalculation>,
     player: Player,
     ambient_light: Rgba<f32>,
     navmesh: NavMesh,
@@ -159,7 +159,7 @@ impl Game {
             transparent_black_texture: ugli::Texture::new_with(geng.ugli(), vec2(1, 1), |_| {
                 Rgba::TRANSPARENT_BLACK
             }),
-            shadow_calc: ShadowCalculation::new(),
+            shadow_calc: Some(ShadowCalculation::new()),
             lights: Self::initialize_lights(assets),
             monster: Monster::new(assets),
             navmesh,

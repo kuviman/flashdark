@@ -196,20 +196,16 @@ impl Game {
     }
 
     fn update_shadows(&mut self) {
+        let mut shadow_calc = self.shadow_calc.take().unwrap();
         for light in &self.lights {
             // Get shadow map texture and depth buffer for the light
-            let shadow_map = self
-                .shadow_calc
-                .shadow_maps
-                .entry(light.id)
-                .or_insert_with(|| {
-                    let mut texture =
-                        ugli::Texture::new_with(self.geng.ugli(), SHADOW_MAP_SIZE, |_| Rgba::WHITE);
-                    texture.set_filter(ugli::Filter::Nearest);
-                    texture
-                });
-            let depth_buffer = self
-                .shadow_calc
+            let shadow_map = shadow_calc.shadow_maps.entry(light.id).or_insert_with(|| {
+                let mut texture =
+                    ugli::Texture::new_with(self.geng.ugli(), SHADOW_MAP_SIZE, |_| Rgba::WHITE);
+                texture.set_filter(ugli::Filter::Nearest);
+                texture
+            });
+            let depth_buffer = shadow_calc
                 .depth_buffers
                 .entry(light.id)
                 .or_insert_with(|| ugli::Renderbuffer::new(self.geng.ugli(), SHADOW_MAP_SIZE));
@@ -223,7 +219,7 @@ impl Game {
 
             // Get the shadow map from the light's perspective
             // Level
-            obj_shadow(
+            self.obj_shadow(
                 &light,
                 &mut shadow_framebuffer,
                 &self.assets.level.obj,
@@ -235,7 +231,7 @@ impl Game {
 
             // Interactables
             for interactable in &self.interactables {
-                obj_shadow(
+                self.obj_shadow(
                     &light,
                     &mut shadow_framebuffer,
                     &interactable.data.obj,
@@ -246,6 +242,7 @@ impl Game {
                 );
             }
         }
+        self.shadow_calc = Some(shadow_calc);
     }
 }
 

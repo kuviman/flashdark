@@ -156,22 +156,22 @@ impl Game {
                 * Mat4::rotate_z(self.camera.rot_h)
                 * Mat4::translate(-center);
         }
-        if mesh.name.starts_with("HB_") {
-            // TODO: only once
-            let mut sum = Vec3::ZERO;
-            for v in &*mesh.geometry {
-                sum += v.a_v;
-            }
-            let center = sum / mesh.geometry.len() as f32;
-            matrix = matrix
-                * Mat4::translate(center)
-                * Mat4::rotate_x(if center.y > self.camera.pos.y {
-                    self.camera.rot_v
-                } else {
-                    -self.camera.rot_v
-                })
-                * Mat4::translate(-center);
-        }
+        // if mesh.name.starts_with("HB_") {
+        //     // TODO: only once
+        //     let mut sum = Vec3::ZERO;
+        //     for v in &*mesh.geometry {
+        //         sum += v.a_v;
+        //     }
+        //     let center = sum / mesh.geometry.len() as f32;
+        //     matrix = matrix
+        //         * Mat4::translate(center)
+        //         * Mat4::rotate_x(if center.y > self.camera.pos.y {
+        //             self.camera.rot_v
+        //         } else {
+        //             -self.camera.rot_v
+        //         })
+        //         * Mat4::translate(-center);
+        // }
         let texture = mesh
             .material
             .texture
@@ -181,7 +181,10 @@ impl Game {
             } else {
                 &self.white_texture
             });
-        let lights = light_uniforms(&self.lights, &self.shadow_calc.shadow_maps);
+        let lights = light_uniforms(
+            &self.lights,
+            &self.shadow_calc.as_ref().unwrap().shadow_maps,
+        );
         ugli::draw(
             framebuffer,
             &self.assets.shaders.obj,
@@ -224,57 +227,65 @@ impl Game {
             self.draw_mesh(framebuffer, mesh, matrix, color);
         }
     }
-}
 
-pub(super) fn obj_shadow(
-    light: &Light,
-    framebuffer: &mut ugli::Framebuffer,
-    obj: &Obj,
-    matrix: Mat4<f32>,
-    shadow_shader: &ugli::Program,
-    white_texture: &ugli::Texture,
-    cull_face: Option<ugli::CullFace>,
-) {
-    for mesh in &obj.meshes {
-        // let mut matrix = matrix;
-        if mesh.name == "PlayerSpawn" {
-            continue;
-        }
-        if mesh.name.starts_with("B_") {
-            // // TODO: only once
-            // let mut sum = Vec3::ZERO;
-            // for v in &*mesh.geometry {
-            //     sum += v.a_v;
-            // }
-            // let center = sum / mesh.geometry.len() as f32;
-            // matrix = matrix
-            //     * Mat4::translate(center)
-            //     * Mat4::rotate_z(self.camera.rot_h)
-            //     * Mat4::translate(-center);
-            continue; // Ignore billboards for lighting for now
-        }
-        let texture = mesh.material.texture.as_deref().unwrap_or(white_texture);
-        ugli::draw(
-            framebuffer,
-            shadow_shader,
-            ugli::DrawMode::Triangles,
-            &mesh.geometry,
-            (
-                ugli::uniforms! {
-                    u_model_matrix: matrix,
-                    u_shadow_size: framebuffer.size(),
-                    u_texture: texture,
-                    u_texture_matrix: Mat3::identity(),
+    pub fn obj_shadow(
+        &self,
+        light: &Light,
+        framebuffer: &mut ugli::Framebuffer,
+        obj: &Obj,
+        matrix: Mat4<f32>,
+        shadow_shader: &ugli::Program,
+        white_texture: &ugli::Texture,
+        cull_face: Option<ugli::CullFace>,
+    ) {
+        for mesh in &obj.meshes {
+            let mut matrix = matrix;
+            if mesh.name == "PlayerSpawn" {
+                continue;
+            }
+            if self.fuse_spawned && mesh.name.contains("SwingingSwing") {
+                let center = self.assets.level.trigger_cubes["SwingingSwing"].center();
+                matrix = matrix
+                    * Mat4::translate(center)
+                    * Mat4::rotate_x(self.time.sin() * 0.5)
+                    * Mat4::translate(-center);
+            }
+            if mesh.name.starts_with("B_") {
+                // // TODO: only once
+                let mut sum = Vec3::ZERO;
+                for v in &*mesh.geometry {
+                    sum += v.a_v;
+                }
+                let center = sum / mesh.geometry.len() as f32;
+                matrix = matrix
+                    * Mat4::translate(center)
+                    * Mat4::rotate_z(self.camera.rot_h)
+                    * Mat4::translate(-center);
+                // continue; // Ignore billboards for lighting for now
+            }
+            let texture = mesh.material.texture.as_deref().unwrap_or(white_texture);
+            ugli::draw(
+                framebuffer,
+                shadow_shader,
+                ugli::DrawMode::Triangles,
+                &mesh.geometry,
+                (
+                    ugli::uniforms! {
+                        u_model_matrix: matrix,
+                        u_shadow_size: framebuffer.size(),
+                        u_texture: texture,
+                        u_texture_matrix: Mat3::identity(),
+                    },
+                    geng::camera3d_uniforms(light, framebuffer.size().map(|x| x as f32)),
+                ),
+                ugli::DrawParameters {
+                    // blend_mode: Some(ugli::BlendMode::default()),
+                    depth_func: Some(ugli::DepthFunc::Less),
+                    cull_face,
+                    ..default()
                 },
-                geng::camera3d_uniforms(light, framebuffer.size().map(|x| x as f32)),
-            ),
-            ugli::DrawParameters {
-                // blend_mode: Some(ugli::BlendMode::default()),
-                depth_func: Some(ugli::DepthFunc::Less),
-                cull_face,
-                ..default()
-            },
-        );
+            );
+        }
     }
 }
 
