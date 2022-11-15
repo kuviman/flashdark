@@ -2,7 +2,7 @@
 # Material Count: 36
 
 newmtl BookshelfMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -14,7 +14,7 @@ map_Kd BookshelfTexture.png
 map_d BookshelfTexture.png
 
 newmtl CeilingMat0
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -22,10 +22,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd repeating textures\\Ceiling_0.png
+map_Kd Ceiling_0.png
 
 newmtl CeilingMatA
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -36,7 +36,7 @@ illum 2
 map_Kd Ceiling_A.png
 
 newmtl CeilingMatB
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -47,7 +47,7 @@ illum 2
 map_Kd Ceiling_B.png
 
 newmtl CeilingMatC
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -58,7 +58,7 @@ illum 2
 map_Kd Ceiling_C.png
 
 newmtl CeilingMatD
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -69,7 +69,7 @@ illum 2
 map_Kd Ceiling_D.png
 
 newmtl ClosetMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -81,7 +81,7 @@ map_Kd ClosetTexture.png
 map_d ClosetTexture.png
 
 newmtl DarkItemsMat1
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -93,7 +93,7 @@ map_Kd DarkItems1.png
 map_d DarkItems1.png
 
 newmtl DoorMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -104,7 +104,7 @@ illum 2
 map_Kd DoorTextures.png
 
 newmtl DrawerMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -115,7 +115,7 @@ illum 2
 map_Kd DrawerTexture.png
 
 newmtl FloorMarble
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -123,11 +123,11 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd repeating\\Floor_marble.png
-map_d repeating\\Floor_marble.png
+map_Kd Floor_marble.png
+map_d Floor_marble.png
 
 newmtl FloorTile
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -135,11 +135,11 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd repeating\\Floor_tile.png
-map_d repeating\\Floor_tile.png
+map_Kd Floor_tile.png
+map_d Floor_tile.png
 
 newmtl FloorWood
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -147,11 +147,11 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd repeating\\Floor_wood.png
-map_d repeating\\Floor_wood.png
+map_Kd Floor_wood.png
+map_d Floor_wood.png
 
 newmtl FridgeMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -162,7 +162,7 @@ illum 2
 map_Kd FridgeTexture.png
 
 newmtl FuseboxMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -174,7 +174,7 @@ map_Kd FuseboxTexture.png
 map_d FuseboxTexture.png
 
 newmtl FuseboxMat.001
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -186,7 +186,7 @@ map_Kd FuseboxTexture.png
 map_d FuseboxTexture.png
 
 newmtl GrassMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -194,10 +194,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 20.000000 20.000000 20.000000 repeating\\grass.png
+map_Kd -s 20.000000 20.000000 20.000000 grass.png
 
 newmtl Item2DMat1
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -209,7 +209,7 @@ map_Kd ItemTextures1.png
 map_d ItemTextures1.png
 
 newmtl Items2DMat2
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -221,7 +221,7 @@ map_Kd ItemTextures2.png
 map_d ItemTextures2.png
 
 newmtl KeysMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -233,7 +233,7 @@ map_Kd KeysPuzzleTexture.png
 map_d KeysPuzzleTexture.png
 
 newmtl KitchenCounter
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -252,7 +252,7 @@ d 1
 illum 2
 
 newmtl SingingGirlDoneMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -264,7 +264,7 @@ map_Kd littleGirlDoll.png
 map_d littleGirlDoll.png
 
 newmtl SingingGirlMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -276,7 +276,7 @@ map_Kd littleGirl.png
 map_d littleGirl.png
 
 newmtl SofaMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -288,7 +288,7 @@ map_Kd SofaTexture.png
 map_d SofaTexture.png
 
 newmtl SwingMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -300,7 +300,7 @@ map_Kd SwingTexture.png
 map_d SwingTexture.png
 
 newmtl SymbolsMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -312,7 +312,7 @@ map_Kd SymbolsTexture.png
 map_d SymbolsTexture.png
 
 newmtl TVMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -323,7 +323,7 @@ illum 2
 map_Kd TVTexture.png
 
 newmtl WallMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -334,7 +334,7 @@ illum 2
 map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_01.png
 
 newmtl WallsBathroom
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -342,10 +342,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1.000000 1.000000 0.500000 repeating textures\\Wallpaper_06.png
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_06.png
 
 newmtl WallsBlue
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -356,7 +356,7 @@ illum 2
 map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_03.png
 
 newmtl WallsExterior
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -367,7 +367,7 @@ illum 2
 map_Kd -s 1.000000 1.000000 0.500000 Exterior_wall.png
 
 newmtl WallsKitchen
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -375,10 +375,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1.000000 1.000000 0.500000 repeating textures\\Wallpaper_04.png
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_04.png
 
 newmtl WallsLibrary
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -389,7 +389,7 @@ illum 2
 map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_02.png
 
 newmtl WallsPlayroom
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -397,10 +397,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1.000000 1.000000 0.500000 repeating textures\\Wallpaper_05.png
 
 newmtl WindowMat
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000

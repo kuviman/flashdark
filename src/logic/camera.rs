@@ -33,6 +33,7 @@ impl LookAt {
     }
 }
 
+// Rust Pog
 impl Game {
     pub fn update_camera(&mut self, delta_time: f32) {
         self.camera.pos = self.player.pos + vec3(0.0, 0.0, self.player.height);
