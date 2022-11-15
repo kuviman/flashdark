@@ -19,6 +19,7 @@ pub struct Monster {
     pub loop_sound: geng::SoundEffect,
     pub scream_time: f32,
     pub next_flashdark_detect_time: f32,
+    pub pause_time: f32,
 }
 
 impl Drop for Monster {
@@ -40,6 +41,7 @@ impl Monster {
             next_pathfind_pos: pos,
             next_target_pos: pos,
             speed: 1.0,
+            pause_time: 0.0,
             loop_sound: {
                 let mut effect = assets.sfx.ghostLoop.effect();
                 effect.set_max_distance(assets.config.max_sound_distance);
@@ -174,6 +176,7 @@ impl Game {
         if !self.monster_spawned {
             return;
         }
+        self.monster.pause_time -= delta_time;
         if (self.monster.pos - self.monster.next_target_pos).xy().len() < 0.1 {
             let mut go_next = true;
             if self.monster.target_type == TargetType::Rng {
@@ -236,8 +239,10 @@ impl Game {
                     .xy()
                     .extend(self.monster.next_pathfind_pos.z);
             };
-            self.monster.pos += (self.monster.next_pathfind_pos - self.monster.pos)
-                .clamp_len(..=delta_time * self.monster.speed);
+            if self.monster.pause_time <= 0.0 {
+                self.monster.pos += (self.monster.next_pathfind_pos - self.monster.pos)
+                    .clamp_len(..=delta_time * self.monster.speed);
+            }
         }
 
         for (id, interactable) in self.interactables.iter().enumerate() {
@@ -272,6 +277,7 @@ impl Game {
                 }
                 if can_open {
                     self.click_interactable(id, false, self.monster.pos);
+                    self.monster.pause_time = 0.6;
                     break;
                 } else if self.monster.target_type != TargetType::Player {
                     self.monster.next_target_pos = self.monster.pos;
