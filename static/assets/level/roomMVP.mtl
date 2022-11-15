@@ -22,7 +22,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd repeating textures\\Ceiling_0.png
+map_Kd Ceiling_0.png
 
 newmtl CeilingMatA
 Ns 225.000000
@@ -123,8 +123,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd repeating\\Floor_marble.png
-map_d repeating\\Floor_marble.png
+map_Kd Floor_marble.png
+map_d Floor_marble.png
 
 newmtl FloorTile
 Ns 225.000000
@@ -135,8 +135,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd repeating\\Floor_tile.png
-map_d repeating\\Floor_tile.png
+map_Kd Floor_tile.png
+map_d Floor_tile.png
 
 newmtl FloorWood
 Ns 225.000000
@@ -147,8 +147,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd repeating\\Floor_wood.png
-map_d repeating\\Floor_wood.png
+map_Kd Floor_wood.png
+map_d Floor_wood.png
 
 newmtl FridgeMat
 Ns 225.000000
@@ -194,7 +194,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 20.000000 20.000000 20.000000 repeating\\grass.png
+map_Kd -s 20.000000 20.000000 20.000000 grass.png
 
 newmtl Item2DMat1
 Ns 225.000000
@@ -342,7 +342,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1.000000 1.000000 0.500000 repeating textures\\Wallpaper_06.png
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_06.png
 
 newmtl WallsBlue
 Ns 225.000000
@@ -375,7 +375,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1.000000 1.000000 0.500000 repeating textures\\Wallpaper_04.png
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_04.png
 
 newmtl WallsLibrary
 Ns 225.000000
@@ -397,7 +397,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1.000000 1.000000 0.500000 repeating textures\\Wallpaper_05.png
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_05.png
 
 newmtl WindowMat
 Ns 225.000000
