@@ -80,7 +80,10 @@ impl geng::LoadAsset for LevelData {
             let storage_lock_combination = std::array::from_fn(|_| global_rng().gen_range(0..4));
 
             for mesh in &mut obj.meshes {
-                if mesh.name.starts_with("S_Grass") || mesh.name.starts_with("S_Ceiling") {
+                if mesh.name.starts_with("S_Grass")
+                    || mesh.name.starts_with("S_Ceiling")
+                    || mesh.name.starts_with("S_RefFloor")
+                {
                     for v in mesh.geometry.iter_mut() {
                         v.a_vt = v.a_v.xy() / 2.0;
                     }
