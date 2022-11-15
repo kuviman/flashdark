@@ -87,6 +87,8 @@ pub struct SfxAssets {
     pub swingLoop: geng::Sound,
     #[asset(path = "fusePlaced.mp3")]
     pub fusePlaced: geng::Sound,
+    #[asset(path = "introSequence.mp3")]
+    pub intro_sequence: geng::Sound,
     pub genericPickup: geng::Sound,
     #[asset(postprocess = "loop_sound")]
     pub ghostLoop: geng::Sound,

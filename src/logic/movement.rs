@@ -2,7 +2,7 @@ use super::*;
 
 impl Game {
     pub fn update_movement(&mut self, delta_time: f32) {
-        if self.lock_controls {
+        if self.lock_controls || self.intro_t > 0.0 {
             return;
         }
         self.player.rot_h = normalize_angle(self.player.rot_h);

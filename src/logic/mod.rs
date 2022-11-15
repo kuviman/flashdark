@@ -31,6 +31,45 @@ impl Game {
         self.update_interactables(delta_time);
         self.update_monster(delta_time);
 
+        // Intro
+        if self.intro_t > 0.0 {
+            if !self.geng.window().pressed_keys().is_empty() {
+                self.intro_skip_t += delta_time;
+            } else {
+                self.intro_skip_t -= delta_time;
+            }
+            self.intro_skip_t = self.intro_skip_t.clamp(0.0, 1.0);
+            if self.intro_skip_t >= 1.0 {
+                self.intro_t = self.intro_t.min(0.1);
+            }
+            let gate_open_time = 5.0;
+            let a = self.intro_t > gate_open_time;
+            self.intro_t -= delta_time;
+            if a && self.intro_t < gate_open_time {
+                for i in &mut self.interactables {
+                    if i.data.obj.meshes[0].name.contains("FenceDoor") {
+                        i.open = true;
+                    }
+                }
+            }
+            if self.intro_t < 0.0 {
+                unsafe {
+                    BOOLEAN = true;
+                }
+                if let Some(mut sfx) = self.intro_sfx.take() {
+                    sfx.stop();
+                }
+                for i in &mut self.interactables {
+                    if i.data.obj.meshes[0].name.contains("FenceDoor") {
+                        i.open = false;
+                        i.progress = 0.0;
+                    }
+                }
+                self.music = Some(self.assets.music.outside.play());
+            }
+            self.player.pos = self.assets.level.spawn_point - vec3(0.0, self.intro_t, 0.0);
+        }
+
         // Activating the swing
         if let Some(target) = self.look().target {
             if let Object::Interactable(id) = target.object {

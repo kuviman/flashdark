@@ -76,11 +76,13 @@ impl Game {
                 if config.map_or(false, |config| config.hidden) {
                     return None;
                 }
+                let open = assets.config.open_interactables.contains(name)
+                    || config.map_or(false, |config| config.open);
                 Some(InteractableState {
-                    open_other_way: false,
-                    open: assets.config.open_interactables.contains(name),
+                    open_other_way: config.map_or(false, |config| config.open_inverse),
+                    open,
                     extra_hacky_library_moving_closet_progress: 0.0,
-                    progress: 0.0,
+                    progress: if open { 1.0 } else { 0.0 },
                     data: data.clone(),
                     config: config.cloned().unwrap_or_default(),
                 })
@@ -90,7 +92,12 @@ impl Game {
 
     pub fn update_interactables(&mut self, delta_time: f32) {
         for interactable in &mut self.interactables {
-            let inter_time = if interactable.data.obj.meshes[0].name.starts_with("D") {
+            let inter_time = if interactable.data.obj.meshes[0]
+                .name
+                .starts_with("DL_FenceDoor")
+            {
+                2.0
+            } else if interactable.data.obj.meshes[0].name.starts_with("D") {
                 0.6
             } else {
                 0.3

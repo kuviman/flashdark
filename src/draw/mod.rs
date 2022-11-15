@@ -280,6 +280,18 @@ impl Game {
                 reticle_texture,
             ),
         );
+
+        if self.intro_t > 0.0 {
+            let alpha = ((self.intro_t - 2.0) / 3.0).clamp(0.0, 1.0);
+            self.geng.draw_2d(
+                framebuffer,
+                &camera2d,
+                &draw_2d::Quad::new(
+                    AABB::point(Vec2::ZERO).extend_uniform(100.0),
+                    Rgba::new(0.0, 0.0, 0.0, alpha),
+                ),
+            );
+        }
     }
 
     fn update_shadows(&mut self) {

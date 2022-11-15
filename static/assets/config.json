@@ -28,6 +28,13 @@
         "D_DoorMain": {
             "disabled": true
         },
+        "DL_FenceDoor_L": {
+            "disabled": true
+        },
+        "DL_FenceDoor_R": {
+            "open_inverse": true,
+            "disabled": true
+        },
         "I_FusePlaceholder": {
             "require_item": "Fuse",
             "transparent": true,

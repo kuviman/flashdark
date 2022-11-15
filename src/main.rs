@@ -42,6 +42,8 @@ impl KeyConfiguration {
     }
 }
 
+static mut BOOLEAN: bool = false;
+
 pub struct Game {
     storage_unlocked: bool,
     key_puzzle_state: KeyPuzzleState,
@@ -71,9 +73,12 @@ pub struct Game {
     tv_noise: Option<geng::SoundEffect>,
     swing_sfx: Option<geng::SoundEffect>,
     current_swing_ref_distance: f32,
-    transision: Option<geng::Transition>,
+    transition: Option<geng::Transition>,
     music: Option<geng::SoundEffect>,
     noise: ugli::Texture,
+    intro_t: f32,
+    intro_skip_t: f32,
+    intro_sfx: Option<geng::SoundEffect>,
 }
 
 impl Drop for Game {
@@ -89,21 +94,19 @@ impl Drop for Game {
 
 impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
-        // geng.window().lock_cursor();
+        geng.window().lock_cursor();
 
-        let music = true.then(|| {
-            let mut music = assets.music.outside.effect();
-            music.play();
-            music
-        });
         let mut navmesh = if false {
             Self::init_navmesh(geng, &assets.level)
         } else {
             assets.navmesh.clone()
         };
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
+
         Self {
-            music,
+            intro_t: if unsafe { BOOLEAN } { 0.1 } else { 21.0 },
+            intro_skip_t: 0.0,
+            music: None,
             storage_unlocked: false,
             key_puzzle_state: KeyPuzzleState::Begin,
             monster_spawned: false,
@@ -158,7 +161,7 @@ impl Game {
                     rot_v: 0.0,
                     dir: vec3(0.0, 1.0, 0.0),
                     on: true,
-                    strength: 0.0,
+                    strength: 1.0,
                     dark: 0.0,
                 },
                 item: None,
@@ -181,7 +184,7 @@ impl Game {
             lights: Self::initialize_lights(assets),
             monster: Monster::new(assets),
             navmesh,
-            transision: None,
+            transition: None,
             noise: ugli::Texture::new_with(geng.ugli(), vec2(1024, 1024), |_| {
                 Rgba::new(
                     global_rng().gen(),
@@ -190,6 +193,7 @@ impl Game {
                     global_rng().gen(),
                 )
             }),
+            intro_sfx: unsafe { !BOOLEAN }.then(|| assets.sfx.intro_sequence.play()),
         }
     }
 }
@@ -204,7 +208,7 @@ impl geng::State for Game {
     }
 
     fn handle_event(&mut self, event: geng::Event) {
-        if !self.lock_controls {
+        if !self.lock_controls && self.intro_t < 0.0 {
             self.handle_event_camera(&event);
             self.handle_clicks(&event);
         }
@@ -226,11 +230,19 @@ impl geng::State for Game {
                 self.player.flashdark.dark = 1.0;
                 self.fuse_placed = true;
             }
+            geng::Event::KeyDown { key: geng::Key::R }
+                if self.geng.window().is_key_pressed(geng::Key::LCtrl) =>
+            {
+                self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
+                    &self.geng,
+                    &self.assets,
+                ))));
+            }
             _ => {}
         }
     }
     fn transition(&mut self) -> Option<geng::Transition> {
-        self.transision.take()
+        self.transition.take()
     }
 }
 

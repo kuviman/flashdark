@@ -88,7 +88,7 @@ impl geng::LoadAsset for LevelData {
                         v.a_vt = v.a_v.xy() / 2.0;
                     }
                 }
-                if mesh.name.starts_with("S_Walls") {
+                if mesh.name.starts_with("S_Walls") || mesh.name.starts_with("S_Fence") {
                     for v in mesh.geometry.iter_mut() {
                         v.a_vt = vec2((v.a_v.x + v.a_v.y) / 2.0, v.a_v.z / 2.0);
                     }

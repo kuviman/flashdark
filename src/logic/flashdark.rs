@@ -30,7 +30,7 @@ impl Game {
         light.intensity = self.player.flashdark.strength;
 
         // actually flicker LUL
-        if self.player.flashdark.on {
+        if self.player.flashdark.on && self.intro_t < 0.0 {
             self.monster.next_flashdark_detect_time -= delta_time;
             if self.monster.next_flashdark_detect_time < 0.0 {
                 self.monster.next_flashdark_detect_time =

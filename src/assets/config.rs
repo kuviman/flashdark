@@ -15,6 +15,10 @@ pub struct InteractableConfig {
     pub dissapear_on_use: bool,
     #[serde(default)]
     pub disabled: bool,
+    #[serde(default)]
+    pub open: bool,
+    #[serde(default)]
+    pub open_inverse: bool,
     pub sfx: Option<String>,
     pub sfx_volume: Option<f64>,
 }
