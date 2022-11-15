@@ -1,5 +1,5 @@
 # Blender MTL File: 'roomMVP.blend'
-# Material Count: 29
+# Material Count: 36
 
 newmtl BookshelfMat
 Ns 225.000000
@@ -13,7 +13,7 @@ illum 2
 map_Kd BookshelfTexture.png
 map_d BookshelfTexture.png
 
-newmtl CeilingMat
+newmtl CeilingMat0
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -22,7 +22,51 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 0.500000 0.500000 0.500000 CeilingTexture.png
+map_Kd repeating textures\\Ceiling_0.png
+
+newmtl CeilingMatA
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Ceiling_A.png
+
+newmtl CeilingMatB
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Ceiling_B.png
+
+newmtl CeilingMatC
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Ceiling_C.png
+
+newmtl CeilingMatD
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd Ceiling_D.png
 
 newmtl ClosetMat
 Ns 225.000000
@@ -70,6 +114,42 @@ d 1.000000
 illum 2
 map_Kd DrawerTexture.png
 
+newmtl FloorMarble
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd repeating\\Floor_marble.png
+map_d repeating\\Floor_marble.png
+
+newmtl FloorTile
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd repeating\\Floor_tile.png
+map_d repeating\\Floor_tile.png
+
+newmtl FloorWood
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd repeating\\Floor_wood.png
+map_d repeating\\Floor_wood.png
+
 newmtl FridgeMat
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
@@ -114,7 +194,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 20.000000 20.000000 20.000000 GrassTexture.png
+map_Kd -s 20.000000 20.000000 20.000000 repeating\\grass.png
 
 newmtl Item2DMat1
 Ns 225.000000
@@ -170,18 +250,6 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-
-newmtl RefFloor
-Ns 225.000000
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Kd FlashDarkMVPLevelRef.png
-map_d FlashDarkMVPLevelRef.png
 
 newmtl SingingGirlDoneMat
 Ns 225.000000
@@ -274,7 +342,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_Bathroom.png
+map_Kd -s 1.000000 1.000000 0.500000 repeating textures\\Wallpaper_06.png
 
 newmtl WallsBlue
 Ns 225.000000
@@ -298,6 +366,17 @@ d 1.000000
 illum 2
 map_Kd -s 1.000000 1.000000 0.500000 Exterior_wall.png
 
+newmtl WallsKitchen
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 1.000000 1.000000 0.500000 repeating textures\\Wallpaper_04.png
+
 newmtl WallsLibrary
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
@@ -318,7 +397,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_Playroom.png
+map_Kd -s 1.000000 1.000000 0.500000 repeating textures\\Wallpaper_05.png
 
 newmtl WindowMat
 Ns 225.000000
