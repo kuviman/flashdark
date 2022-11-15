@@ -1,5 +1,5 @@
 # Blender MTL File: 'roomMVP.blend'
-# Material Count: 38
+# Material Count: 40
 
 newmtl BookshelfMat
 Ns 225.000000
@@ -299,6 +299,16 @@ illum 2
 map_Kd littleGirl.png
 map_d littleGirl.png
 
+newmtl SkySphereMat
+Ns 323.999994
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
 newmtl SofaMat
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
@@ -345,6 +355,17 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd TVTexture.png
+
+newmtl TableMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd TableTexture.png
 
 newmtl WallMat
 Ns 225.000000
@@ -421,6 +442,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_04.png
 
 newmtl WindowMat
 Ns 225.000000
