@@ -1,4 +1,4 @@
-# Blender v3.3.1 OBJ File: 'roomMVP.blend'
+# Blender v2.82 (sub 7) OBJ File: 'roomMVP.blend'
 # www.blender.org
 mtllib roomMVP.mtl
 o I_FusePlaceholder
@@ -9525,7 +9525,7 @@ usemtl SofaMat
 s off
 f 2025/3762/302 2026/3763/302 2024/3764/302
 f 2025/3762/302 2027/3765/302 2026/3763/302
-o S_RefFloor.001
+o S_Ceiling
 v -1.484320 -10.763219 1.989065
 v 2.397693 -10.763197 1.989065
 v -1.484338 -5.423739 1.989065
