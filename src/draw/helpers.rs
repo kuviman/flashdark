@@ -182,6 +182,7 @@ impl Game {
                 &self.white_texture
             });
         let lights = self.light_uniforms();
+
         ugli::draw(
             framebuffer,
             &self.assets.shaders.obj,
@@ -197,6 +198,7 @@ impl Game {
                     u_ambient_light_color: self.ambient_light,
                     u_model_matrix: matrix,
                     u_color: color,
+                    u_noise: &self.noise,
                     u_texture: texture,
                     u_texture_matrix: Mat3::identity(),
                     u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
@@ -208,6 +210,7 @@ impl Game {
             ugli::DrawParameters {
                 blend_mode: Some(ugli::BlendMode::default()),
                 depth_func: Some(ugli::DepthFunc::Less),
+                cull_face: None, // TODO: maybe but probably not
                 ..default()
             },
         );

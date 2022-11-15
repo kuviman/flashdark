@@ -285,6 +285,9 @@ impl Game {
     fn update_shadows(&mut self) {
         let mut shadow_calc = self.shadow_calc.take().unwrap();
         for light in &self.lights {
+            if light.id.0 != 0 && shadow_calc.shadow_maps.contains_key(&light.id) {
+                continue;
+            }
             // Get shadow map texture and depth buffer for the light
             let shadow_map = shadow_calc.shadow_maps.entry(light.id).or_insert_with(|| {
                 let mut texture =

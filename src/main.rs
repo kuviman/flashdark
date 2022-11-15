@@ -73,6 +73,7 @@ pub struct Game {
     current_swing_ref_distance: f32,
     transision: Option<geng::Transition>,
     music: Option<geng::SoundEffect>,
+    noise: ugli::Texture,
 }
 
 impl Drop for Game {
@@ -181,6 +182,14 @@ impl Game {
             monster: Monster::new(assets),
             navmesh,
             transision: None,
+            noise: ugli::Texture::new_with(geng.ugli(), vec2(1024, 1024), |_| {
+                Rgba::new(
+                    global_rng().gen(),
+                    global_rng().gen(),
+                    global_rng().gen(),
+                    global_rng().gen(),
+                )
+            }),
         }
     }
 }
@@ -229,7 +238,11 @@ fn main() {
     logger::init().unwrap();
     geng::setup_panic_handler();
 
-    let geng = Geng::new("FlashDark");
+    let geng = Geng::new_with(geng::ContextOptions {
+        title: "FlashDark".to_string(),
+        vsync: false,
+        ..default()
+    });
     geng::run(
         &geng,
         geng::LoadingScreen::new(
