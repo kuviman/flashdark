@@ -256,7 +256,9 @@ impl Game {
     }
 
     pub fn draw_debug_navmesh(&self, framebuffer: &mut ugli::Framebuffer) {
-        return;
+        if !self.assets.config.create_navmesh {
+            return;
+        }
         let debug_obj = Obj {
             meshes: vec![ObjMesh {
                 name: "debug navmesh".to_owned(),
