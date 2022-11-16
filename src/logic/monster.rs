@@ -374,13 +374,16 @@ impl Game {
         if !self.monster_spawned {
             return;
         }
+        let textures = if self.monster.speed == 1.0 {
+            &self.assets.ghost.normal
+        } else {
+            &self.assets.ghost.chasing
+        };
         let texture = [
-            (&self.assets.ghost.back_left, 30.0),
-            (&self.assets.ghost.left, 90.0),
-            (&self.assets.ghost.front_left, 150.0),
-            (&self.assets.ghost.front_right, 210.0),
-            (&self.assets.ghost.right, 270.0),
-            (&self.assets.ghost.back_right, 330.0),
+            (&textures.left, 90.0),
+            (&textures.front, 180.0),
+            (&textures.right, 270.0),
+            (&textures.back, 0.0),
         ]
         .into_iter()
         .max_by_key(|(_texture, angle)| {
