@@ -108,10 +108,15 @@ impl geng::LoadAsset for LevelData {
                 }
             }
 
+            let mut skybox = None;
             let mut trigger_cubes = HashMap::new();
             for i in (0..obj.meshes.len()).rev() {
                 // info!("{:?}", obj.meshes[i].name);
                 let name = &obj.meshes[i].name;
+                if name == "Skybox" {
+                    skybox = Some(obj.meshes.remove(i));
+                    continue;
+                }
                 let trigger_name = if let Some(name) = name.strip_prefix("TC_") {
                     Some(name)
                 } else if name == "GhostSpawn" {
@@ -338,6 +343,7 @@ impl geng::LoadAsset for LevelData {
             key_configs.insert("TheStudyKeyPuzzleSolution".to_owned(), hint_key_config);
 
             Ok(LevelData {
+                skybox: skybox.unwrap(),
                 key_configs,
                 storage_lock_combination,
                 hint_key_config,

@@ -22,6 +22,7 @@ pub struct ItemData {
 
 pub struct LevelData {
     pub obj: Obj,
+    pub skybox: ObjMesh,
     pub items: HashMap<String, ItemData>,
     pub key_configs: HashMap<String, KeyConfiguration>,
     pub hint_key_config: KeyConfiguration,

@@ -28,9 +28,14 @@ impl Game {
         self.framebuffer_size = framebuffer.size().map(|x| x as f32);
         ugli::clear(
             framebuffer,
-            Some(self.assets.config.sky_color),
+            None, // Some(self.assets.config.sky_color),
             Some(1.0),
             None,
+        );
+        self.draw_skybox_mesh(
+            framebuffer,
+            &self.assets.level.skybox,
+            Mat4::translate(self.camera.pos),
         );
 
         self.update_shadows();

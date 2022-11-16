@@ -119,6 +119,7 @@ impl SfxAssets {
 #[derive(geng::Assets)]
 pub struct Shaders {
     pub wall: ugli::Program,
+    pub skybox: ugli::Program,
     pub billboard: ugli::Program,
     pub sprite: ugli::Program,
     pub horizontal_sprite: ugli::Program,

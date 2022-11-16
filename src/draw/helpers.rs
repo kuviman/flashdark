@@ -126,6 +126,33 @@ impl Game {
             rot,
         );
     }
+
+    pub fn draw_skybox_mesh(
+        &self,
+        framebuffer: &mut ugli::Framebuffer,
+        mesh: &ObjMesh,
+        matrix: Mat4<f32>,
+    ) {
+        let texture = mesh.material.texture.as_deref().unwrap();
+        ugli::draw(
+            framebuffer,
+            &self.assets.shaders.skybox,
+            ugli::DrawMode::Triangles,
+            &mesh.geometry,
+            (
+                ugli::uniforms! {
+                    u_model_matrix: matrix,
+                    u_texture: texture,
+                },
+                geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
+            ),
+            ugli::DrawParameters {
+                write_depth: false,
+                ..default()
+            },
+        );
+    }
+
     pub fn draw_mesh(
         &self,
         framebuffer: &mut ugli::Framebuffer,
