@@ -129,7 +129,7 @@ impl Game {
         let ver_range = 0.0..1.0;
         const HOR_GRID_SIZE: usize = 50;
         const VER_GRID_SIZE: usize = 5;
-        const MIN_DISTANCE_TO_MESH: f32 = 0.2;
+        const MIN_DISTANCE_TO_MESH: f32 = 0.4;
         let hor_step = 1.0;
         let waypoints: Vec<Vec3<f32>> = {
             let obj = &level.obj;
@@ -151,6 +151,7 @@ impl Game {
                         if let Some(t) = intersect_ray_with_obj(
                             obj,
                             Mat4::identity(),
+                            0.0,
                             geng::CameraRay {
                                 from: p,
                                 dir: vec3(0.0, 0.0, -1.0),
@@ -158,7 +159,7 @@ impl Game {
                         ) {
                             p.z -= t;
                         }
-                        p.z += MIN_DISTANCE_TO_MESH * 2.0;
+                        p.z += MIN_DISTANCE_TO_MESH;
                         if vector_from_obj(obj, Mat4::identity(), p).len() < MIN_DISTANCE_TO_MESH {
                             continue;
                         }
@@ -201,7 +202,12 @@ impl Game {
                     from: waypoints[v],
                     dir: waypoints[u] - waypoints[v],
                 };
-                if let Some(t) = intersect_ray_with_obj(&level.obj, Mat4::identity(), ray) {
+                if let Some(t) = intersect_ray_with_obj(
+                    &level.obj,
+                    Mat4::identity(),
+                    MIN_DISTANCE_TO_MESH - EPS,
+                    ray,
+                ) {
                     if t < 1.0 {
                         continue;
                     }
@@ -218,9 +224,12 @@ impl Game {
                             continue;
                         }
                     }
-                    if let Some(t) =
-                        intersect_ray_with_obj(&interactable.obj, Mat4::identity(), ray)
-                    {
+                    if let Some(t) = intersect_ray_with_obj(
+                        &interactable.obj,
+                        Mat4::identity(),
+                        MIN_DISTANCE_TO_MESH - EPS,
+                        ray,
+                    ) {
                         if t < 1.0 {
                             continue 'next_vertex;
                         }

@@ -66,6 +66,7 @@ impl Game {
             if let Some(ray_t) = intersect_ray_with_obj(
                 obj,
                 matrix,
+                self.assets.config.peek_distance,
                 geng::CameraRay {
                     from: pos,
                     dir: (target - pos).normalize_or_zero(),

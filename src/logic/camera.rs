@@ -73,12 +73,12 @@ impl Game {
             }
         };
         update_target(
-            intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), ray),
+            intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), 0.0, ray),
             Object::StaticLevel,
         );
         for (id, interactable) in self.interactables.iter().enumerate() {
             update_target(
-                intersect_ray_with_obj(&interactable.data.obj, interactable.matrix(), ray),
+                intersect_ray_with_obj(&interactable.data.obj, interactable.matrix(), 0.0, ray),
                 if (interactable.progress != 0.0 && interactable.progress != 1.0)
                     || interactable.config.disabled
                     || (interactable.data.obj.meshes[0].name == "D_DoorStorage"
@@ -101,6 +101,7 @@ impl Game {
                 intersect_ray_with_mesh(
                     &self.assets.level.items[&item.name].spawns[item.mesh_index].mesh,
                     self.item_matrix(item),
+                    0.0,
                     ray,
                 ),
                 Object::Item(id),
