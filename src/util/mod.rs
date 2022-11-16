@@ -32,8 +32,20 @@ pub fn find_center(mesh: &[geng::obj::Vertex]) -> Vec3<f32> {
     sum / mesh.len() as f32
 }
 
-pub fn intersect_ray_with_triangle(tri: [Vec3<f32>; 3], ray: geng::CameraRay) -> Option<f32> {
+pub fn intersect_ray_with_triangle(
+    mut tri: [Vec3<f32>; 3],
+    ext: f32,
+    ray: geng::CameraRay,
+) -> Option<f32> {
     let n = Vec3::cross(tri[1] - tri[0], tri[2] - tri[0]).normalize_or_zero();
+    let mut new_tri = tri;
+    for i in 0..3 {
+        let j = (i + 1) % 3;
+        let n = Vec3::cross(tri[j] - tri[i], n).normalize_or_zero();
+        new_tri[i] += n * ext;
+        new_tri[j] += n * ext;
+    }
+    tri = new_tri;
     // dot(ray.from + ray.dir * t - tri[0], n) = 0
     if Vec3::dot(ray.dir, n).abs() < EPS {
         return None;
@@ -58,6 +70,7 @@ pub fn intersect_ray_with_triangle(tri: [Vec3<f32>; 3], ray: geng::CameraRay) ->
 pub fn intersect_ray_with_mesh(
     mesh: &ObjMesh,
     matrix: Mat4<f32>,
+    ext: f32,
     ray: geng::CameraRay,
 ) -> Option<f32> {
     mesh.geometry
@@ -65,16 +78,22 @@ pub fn intersect_ray_with_mesh(
         .flat_map(|tri| {
             intersect_ray_with_triangle(
                 [tri[0].a_v, tri[1].a_v, tri[2].a_v].map(|pos| (matrix * pos.extend(1.0)).xyz()),
+                ext,
                 ray,
             )
         })
         .min_by_key(|&x| r32(x))
 }
 
-pub fn intersect_ray_with_obj(obj: &Obj, matrix: Mat4<f32>, ray: geng::CameraRay) -> Option<f32> {
+pub fn intersect_ray_with_obj(
+    obj: &Obj,
+    matrix: Mat4<f32>,
+    ext: f32,
+    ray: geng::CameraRay,
+) -> Option<f32> {
     obj.meshes
         .iter()
-        .flat_map(|mesh| intersect_ray_with_mesh(mesh, matrix, ray))
+        .flat_map(|mesh| intersect_ray_with_mesh(mesh, matrix, ext, ray))
         .min_by_key(|&x| r32(x))
 }
 

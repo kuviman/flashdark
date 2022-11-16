@@ -296,6 +296,15 @@ impl Game {
                     Rgba::new(0.0, 0.0, 0.0, alpha),
                 ),
             );
+            self.geng.draw_2d(
+                framebuffer,
+                &camera2d,
+                &draw_2d::Quad::new(
+                    AABB::point(vec2(0.0, -4.0))
+                        .extend_symmetric(vec2(self.intro_skip_t, 0.1) * 3.0),
+                    Rgba::WHITE,
+                ),
+            );
         }
     }
 

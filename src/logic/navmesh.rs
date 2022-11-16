@@ -55,6 +55,36 @@ impl NavMesh {
         p1
     }
 
+    pub fn find_close_point(&self, p: Vec3<f32>, max_distance: f32) -> Vec3<f32> {
+        let s = self.closest_waypoint(p);
+
+        let mut d = vec![r32(1e9f32); self.waypoints.len()];
+
+        let mut q = std::collections::BinaryHeap::new();
+        d[s] = r32(0.0);
+        q.push((-d[s], s));
+        let mut options = Vec::new();
+        while let Some((dd, v)) = q.pop() {
+            if d[v] > r32(max_distance) {
+                continue;
+            }
+            options.push(v);
+            if dd != -d[v] {
+                continue;
+            }
+            for u in self.edges[v].iter().copied() {
+                let cost = (self.waypoints[v] - self.waypoints[u]).len();
+                let new_d = d[v] + r32(cost);
+                if new_d < d[u] {
+                    d[u] = new_d;
+                    q.push((-d[u], u));
+                }
+            }
+        }
+        let index = *options.choose(&mut global_rng()).unwrap();
+        self.waypoints[index]
+    }
+
     pub fn remove_unreachable_from(&mut self, p: Vec3<f32>) {
         let mut q = std::collections::VecDeque::new();
         let mut reachable = vec![false; self.waypoints.len()];
@@ -99,7 +129,7 @@ impl Game {
         let ver_range = 0.0..1.0;
         const HOR_GRID_SIZE: usize = 50;
         const VER_GRID_SIZE: usize = 5;
-        const MIN_DISTANCE_TO_MESH: f32 = 0.2;
+        const MIN_DISTANCE_TO_MESH: f32 = 0.4;
         let hor_step = 1.0;
         let waypoints: Vec<Vec3<f32>> = {
             let obj = &level.obj;
@@ -121,6 +151,7 @@ impl Game {
                         if let Some(t) = intersect_ray_with_obj(
                             obj,
                             Mat4::identity(),
+                            0.0,
                             geng::CameraRay {
                                 from: p,
                                 dir: vec3(0.0, 0.0, -1.0),
@@ -128,7 +159,7 @@ impl Game {
                         ) {
                             p.z -= t;
                         }
-                        p.z += MIN_DISTANCE_TO_MESH * 2.0;
+                        p.z += MIN_DISTANCE_TO_MESH;
                         if vector_from_obj(obj, Mat4::identity(), p).len() < MIN_DISTANCE_TO_MESH {
                             continue;
                         }
@@ -171,7 +202,12 @@ impl Game {
                     from: waypoints[v],
                     dir: waypoints[u] - waypoints[v],
                 };
-                if let Some(t) = intersect_ray_with_obj(&level.obj, Mat4::identity(), ray) {
+                if let Some(t) = intersect_ray_with_obj(
+                    &level.obj,
+                    Mat4::identity(),
+                    MIN_DISTANCE_TO_MESH - EPS,
+                    ray,
+                ) {
                     if t < 1.0 {
                         continue;
                     }
@@ -182,15 +218,18 @@ impl Game {
                         interactable.typ
                     {
                         if name != "D_DoorMain"
-                            && name != "D_DoorWithHandle"
+                            && name != "D_DoorGuest"
                             && !name.contains("LibraryMovingCloset")
                         {
                             continue;
                         }
                     }
-                    if let Some(t) =
-                        intersect_ray_with_obj(&interactable.obj, Mat4::identity(), ray)
-                    {
+                    if let Some(t) = intersect_ray_with_obj(
+                        &interactable.obj,
+                        Mat4::identity(),
+                        MIN_DISTANCE_TO_MESH - EPS,
+                        ray,
+                    ) {
                         if t < 1.0 {
                             continue 'next_vertex;
                         }
@@ -217,7 +256,9 @@ impl Game {
     }
 
     pub fn draw_debug_navmesh(&self, framebuffer: &mut ugli::Framebuffer) {
-        return;
+        if !self.assets.config.create_navmesh {
+            return;
+        }
         let debug_obj = Obj {
             meshes: vec![ObjMesh {
                 name: "debug navmesh".to_owned(),

@@ -12,14 +12,18 @@ pub struct Monster {
     pub stand_still_time: f32,
     pub pos: Vec3<f32>,
     pub dir: Vec3<f32>,
+    pub scan_timer_going: bool,
     pub target_type: TargetType,
     pub next_pathfind_pos: Vec3<f32>,
+    pub scan_timer: f32,
+    pub next_scan_pos: Vec3<f32>,
     pub next_target_pos: Vec3<f32>,
     pub speed: f32,
     pub loop_sound: geng::SoundEffect,
     pub scream_time: f32,
     pub next_flashdark_detect_time: f32,
     pub pause_time: f32,
+    pub detect_timer: f32,
 }
 
 impl Drop for Monster {
@@ -32,6 +36,10 @@ impl Monster {
     pub fn new(assets: &Assets) -> Self {
         let pos = assets.level.trigger_cubes["GhostSpawn"].center();
         Self {
+            detect_timer: 0.0,
+            scan_timer: 0.0,
+            scan_timer_going: true,
+            next_scan_pos: pos,
             stand_still_time: 0.0,
             next_flashdark_detect_time: assets.config.flashdark_detect_interval,
             scream_time: 0.0,
@@ -58,6 +66,7 @@ impl Game {
             if let Some(ray_t) = intersect_ray_with_obj(
                 obj,
                 matrix,
+                self.assets.config.peek_distance,
                 geng::CameraRay {
                     from: pos,
                     dir: (target - pos).normalize_or_zero(),
@@ -83,37 +92,47 @@ impl Game {
         if self.player.god_mode {
             return false;
         }
-        if (self.monster.pos - self.player.pos).xy().len()
-            > self.assets.config.monster_view_distance
-        {
+        let distance = (self.monster.pos - self.player.pos).xy().len();
+        if distance > self.assets.config.monster_view_distance {
             return false;
         }
+        let fov = if distance < self.assets.config.monster_180_range {
+            180.0
+        } else {
+            self.assets.config.monster_fov
+        };
         if Vec2::dot(
             self.monster.dir.xy().normalize_or_zero(),
             (self.player.pos - self.monster.pos)
                 .xy()
                 .normalize_or_zero(),
-        ) < (self.assets.config.monster_fov / 2.0 * f32::PI / 180.0).cos()
+        ) < (fov / 2.0 * f32::PI / 180.0).cos()
         {
             return false;
         }
         self.can_see(
-            self.monster.pos + vec3(0.0, 0.0, 1.3),
+            self.monster.pos + vec3(0.0, 0.0, 1.0),
             self.player.pos + vec3(0.0, 0.0, self.player.height),
         )
     }
     pub fn monster_walk_to(&mut self, pos: Vec3<f32>, target_type: TargetType) {
+        if target_type != TargetType::Rng {
+            self.monster.scan_timer = self.assets.config.monster_scan_time;
+            self.monster.next_scan_pos = pos;
+        }
         // if target_type != self.monster.target_type {
         if (pos - self.monster.next_target_pos).len() > 0.5
             || target_type != self.monster.target_type
         {
             match target_type {
                 TargetType::Player => {
-                    self.monster.scream_time = 1.0;
-                    let mut effect = self.assets.sfx.ghostScream.effect();
-                    effect.set_position(self.monster.pos.map(|x| x as f64));
-                    // effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
-                    effect.play();
+                    if self.monster.speed == 1.0 {
+                        self.monster.scream_time = 1.0;
+                        let mut effect = self.assets.sfx.ghostScream.effect();
+                        effect.set_position(self.monster.pos.map(|x| x as f64));
+                        // effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
+                        effect.play();
+                    }
                 }
                 TargetType::Noise | TargetType::Flashdark => {
                     let mut effect = self
@@ -140,8 +159,6 @@ impl Game {
             let t_speed = 3.0;
             let k = (((pos - self.monster.pos).len() - s) / (t - s)).clamp(0.0, 1.0);
             self.monster.speed = s_speed * (1.0 - k) + t_speed * k;
-        } else {
-            self.monster.speed = 1.0;
         }
     }
     pub fn check_monster_sfx(&mut self, pos: Vec3<f32>) {
@@ -165,6 +182,30 @@ impl Game {
         }
     }
     pub fn update_monster(&mut self, delta_time: f32) {
+        if self.monster.speed == 1.0 {
+            if let Some((vol, music)) = &mut self.chase_music {
+                *vol -= delta_time as f64;
+                if *vol < 0.0 {
+                    music.stop();
+                    self.chase_music = None;
+                } else {
+                    music.set_volume(*vol);
+                }
+            }
+        } else {
+            if self.chase_music.is_none() && self.monster.scream_time <= 0.0 {
+                self.chase_music = Some((0.0, {
+                    let mut effect = self.assets.music.chase.effect();
+                    effect.set_volume(0.0);
+                    effect.play();
+                    effect
+                }));
+            }
+            if let Some((vol, music)) = &mut self.chase_music {
+                *vol = (*vol + delta_time as f64).min(1.0);
+                music.set_volume(*vol);
+            }
+        }
         let player_inside_house = {
             let door_id = self
                 .interactables
@@ -176,9 +217,23 @@ impl Game {
         if !self.monster_spawned {
             return;
         }
-        self.monster.pause_time -= delta_time;
+        // Scan timer
+        if self.monster.scan_timer_going {
+            self.monster.scan_timer -= delta_time;
+            // Scan ended
+            if self.monster.scan_timer < 0.0 {
+                self.monster.speed = 1.0;
+                self.monster.scan_timer = self.assets.config.monster_scan_time;
+                self.monster.next_scan_pos =
+                    *self.navmesh.waypoints.choose(&mut global_rng()).unwrap();
+                self.monster.next_target_pos = self.monster.next_scan_pos;
+                self.monster.next_pathfind_pos = self.monster.pos;
+            }
+        }
+        self.monster.pause_time -= delta_time * self.monster.speed;
         if (self.monster.pos - self.monster.next_target_pos).xy().len() < 0.1 {
             let mut go_next = true;
+            self.monster.scan_timer_going = true;
             if self.monster.target_type == TargetType::Rng {
                 self.monster.stand_still_time -= delta_time;
                 if self.monster.stand_still_time > 0.0 {
@@ -191,7 +246,11 @@ impl Game {
                     global_rng().gen_range(a..b)
                 };
                 self.monster_walk_to(
-                    *self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
+                    //*self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
+                    self.navmesh.find_close_point(
+                        self.monster.next_scan_pos,
+                        self.assets.config.monster_scan_radius,
+                    ),
                     TargetType::Rng,
                 );
             }
@@ -199,19 +258,20 @@ impl Game {
 
         if player_inside_house {
             if self.monster_sees_player() {
-                self.monster_walk_to(self.player.pos, TargetType::Player);
-            } else if false && self.player.flashdark.on {
-                // REMOVE
-                self.monster.next_flashdark_detect_time -= delta_time;
-                if self.monster.next_flashdark_detect_time < 0.0 {
-                    self.monster.next_flashdark_detect_time =
-                        self.assets.config.flashdark_detect_interval;
-                    if global_rng().gen_bool(self.assets.config.flashdark_detect_probability as f64)
-                    {
-                        self.monster_walk_to(self.player.pos, TargetType::Flashdark);
-                    }
+                self.monster.detect_timer += delta_time;
+                if self.monster.speed != 1.0 {
+                    self.monster.detect_timer = self.assets.config.monster_detect_time;
                 }
+                if self.monster.detect_timer >= self.assets.config.monster_detect_time {
+                    self.monster_walk_to(self.player.pos, TargetType::Player);
+                }
+            } else {
+                self.monster.detect_timer -= delta_time;
             }
+            self.monster.detect_timer = self
+                .monster
+                .detect_timer
+                .clamp(0.0, self.assets.config.monster_detect_time);
         }
 
         if (self.monster.pos - self.player.pos).len() < 0.5 && !self.player.god_mode {
@@ -281,6 +341,8 @@ impl Game {
                     break;
                 } else if self.monster.target_type != TargetType::Player {
                     self.monster.next_target_pos = self.monster.pos;
+                    self.monster.scan_timer = 0.0;
+                    self.monster.scan_timer_going = true;
                     self.monster.stand_still_time = 0.0;
                     let n = v.normalize_or_zero();
                     self.monster.pos += n * (radius - v.len());
@@ -299,7 +361,7 @@ impl Game {
             self.monster.dir = nlerp2(
                 self.monster.dir.xy(),
                 target_dir,
-                (delta_time / 0.2).min(1.0),
+                (delta_time * self.monster.speed / 0.2).min(1.0),
             )
             .extend(0.0);
         }
@@ -312,13 +374,16 @@ impl Game {
         if !self.monster_spawned {
             return;
         }
+        let textures = if self.monster.speed == 1.0 {
+            &self.assets.ghost.normal
+        } else {
+            &self.assets.ghost.chasing
+        };
         let texture = [
-            (&self.assets.ghost.back_left, 30.0),
-            (&self.assets.ghost.left, 90.0),
-            (&self.assets.ghost.front_left, 150.0),
-            (&self.assets.ghost.front_right, 210.0),
-            (&self.assets.ghost.right, 270.0),
-            (&self.assets.ghost.back_right, 330.0),
+            (&textures.left, 90.0),
+            (&textures.front, 180.0),
+            (&textures.right, 270.0),
+            (&textures.back, 0.0),
         ]
         .into_iter()
         .max_by_key(|(_texture, angle)| {

@@ -45,6 +45,7 @@ impl KeyConfiguration {
 static mut BOOLEAN: bool = false;
 
 pub struct Game {
+    chase_music: Option<(f64, geng::SoundEffect)>,
     storage_unlocked: bool,
     key_puzzle_state: KeyPuzzleState,
     monster_spawned: bool,
@@ -89,6 +90,9 @@ impl Drop for Game {
         if let Some(sfx) = &mut self.tv_noise {
             sfx.stop();
         }
+        if let Some((_, sfx)) = &mut self.chase_music {
+            sfx.stop();
+        }
     }
 }
 
@@ -96,7 +100,7 @@ impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
         geng.window().lock_cursor();
 
-        let mut navmesh = if false {
+        let mut navmesh = if assets.config.create_navmesh {
             Self::init_navmesh(geng, &assets.level)
         } else {
             assets.navmesh.clone()
@@ -104,6 +108,7 @@ impl Game {
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
         Self {
+            chase_music: None,
             intro_t: if unsafe { BOOLEAN } { 0.1 } else { 21.0 },
             intro_skip_t: 0.0,
             music: None,
@@ -228,6 +233,7 @@ impl geng::State for Game {
                 self.player.god_mode = !self.player.god_mode;
                 self.ambient_light = self.assets.config.ambient_light_inside_house;
                 self.player.flashdark.dark = 1.0;
+                // self.cutscene_t = 2.9;
                 self.fuse_placed = true;
             }
             geng::Event::KeyDown { key: geng::Key::R }

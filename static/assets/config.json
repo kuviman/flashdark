@@ -1,7 +1,13 @@
 {
+    "create_navmesh": false,
+    "peek_distance": 0.1,
+    "monster_180_range": 1.0,
+    "monster_detect_time": 0.2,
+    "monster_scan_time": 20.0,
+    "monster_scan_radius": 3.0,
     "ghost_stand_still_time": [
-        3,
-        6
+        1,
+        2
     ],
     "monster_fov": 120,
     "monster_view_distance": 10.0,
@@ -14,7 +20,7 @@
     "sky_color": "#0F1E70",
     "footstep_dist": 1.0,
     "max_sound_distance": 10.0,
-    "max_ghost_sound_distance": 5.0,
+    "max_ghost_sound_distance": 3.0,
     "arms_horizontal_length": 1.0,
     "arms_vertical_length": 1.5,
     "parents": {
@@ -22,7 +28,7 @@
     },
     "open_interactables": [],
     "interactables": {
-        "D_DoorWithHandle": {
+        "D_DoorGuest": {
             "disabled": true
         },
         "D_DoorMain": {

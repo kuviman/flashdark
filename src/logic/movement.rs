@@ -63,23 +63,26 @@ impl Game {
         }
         self.player.pos += self.player.vel * delta_time;
 
-        self.player.next_footstep -= self.player.vel.len() * delta_time;
-        if self.player.next_footstep < 0.0 {
-            self.player.next_footstep = self.assets.config.footstep_dist;
-            self.assets
-                .sfx
-                .footsteps
-                .choose(&mut global_rng())
-                .unwrap()
-                .play()
-                .set_volume(0.5);
-            self.assets
-                .sfx
-                .footstepCreaks
-                .choose(&mut global_rng())
-                .unwrap()
-                .play()
-                .set_volume(0.5);
+        if self.player.height == 1.0 {
+            self.player.next_footstep -= self.player.vel.len() * delta_time;
+            if self.player.next_footstep < 0.0 {
+                self.player.next_footstep = self.assets.config.footstep_dist;
+                self.assets
+                    .sfx
+                    .footsteps
+                    .choose(&mut global_rng())
+                    .unwrap()
+                    .play()
+                    .set_volume(0.5);
+                self.assets
+                    .sfx
+                    .footstepCreaks
+                    .choose(&mut global_rng())
+                    .unwrap()
+                    .play()
+                    .set_volume(0.5);
+                self.check_monster_sfx(self.player.pos);
+            }
         }
 
         // Collisions

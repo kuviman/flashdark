@@ -19,13 +19,17 @@ pub fn loop_sound(sound: &mut geng::Sound) {
 }
 
 #[derive(geng::Assets)]
-pub struct GhostAssets {
-    pub front_left: ugli::Texture,
-    pub front_right: ugli::Texture,
-    pub back_left: ugli::Texture,
-    pub back_right: ugli::Texture,
+pub struct GhostDirections {
+    pub front: ugli::Texture,
+    pub back: ugli::Texture,
     pub left: ugli::Texture,
     pub right: ugli::Texture,
+}
+
+#[derive(geng::Assets)]
+pub struct GhostAssets {
+    pub normal: GhostDirections,
+    pub chasing: GhostDirections,
     pub crawling: ugli::Texture,
 }
 
@@ -69,6 +73,8 @@ pub struct Music {
     pub outside: geng::Sound,
     // #[asset(path = "MainCreepyToneAmbient.wav", postprocess = "loop_sound")]
     // pub ambient: geng::Sound,
+    #[asset(path = "ChaseMusic.mp3", postprocess = "loop_sound")]
+    pub chase: geng::Sound,
 }
 
 #[derive(geng::Assets)]
