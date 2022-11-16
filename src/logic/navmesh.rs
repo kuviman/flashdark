@@ -55,6 +55,36 @@ impl NavMesh {
         p1
     }
 
+    pub fn find_close_point(&self, p: Vec3<f32>, max_distance: f32) -> Vec3<f32> {
+        let s = self.closest_waypoint(p);
+
+        let mut d = vec![r32(1e9f32); self.waypoints.len()];
+
+        let mut q = std::collections::BinaryHeap::new();
+        d[s] = r32(0.0);
+        q.push((-d[s], s));
+        let mut options = Vec::new();
+        while let Some((dd, v)) = q.pop() {
+            if d[v] > r32(max_distance) {
+                continue;
+            }
+            options.push(v);
+            if dd != -d[v] {
+                continue;
+            }
+            for u in self.edges[v].iter().copied() {
+                let cost = (self.waypoints[v] - self.waypoints[u]).len();
+                let new_d = d[v] + r32(cost);
+                if new_d < d[u] {
+                    d[u] = new_d;
+                    q.push((-d[u], u));
+                }
+            }
+        }
+        let index = *options.choose(&mut global_rng()).unwrap();
+        self.waypoints[index]
+    }
+
     pub fn remove_unreachable_from(&mut self, p: Vec3<f32>) {
         let mut q = std::collections::VecDeque::new();
         let mut reachable = vec![false; self.waypoints.len()];

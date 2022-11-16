@@ -12,8 +12,11 @@ pub struct Monster {
     pub stand_still_time: f32,
     pub pos: Vec3<f32>,
     pub dir: Vec3<f32>,
+    pub scan_timer_going: bool,
     pub target_type: TargetType,
     pub next_pathfind_pos: Vec3<f32>,
+    pub scan_timer: f32,
+    pub next_scan_pos: Vec3<f32>,
     pub next_target_pos: Vec3<f32>,
     pub speed: f32,
     pub loop_sound: geng::SoundEffect,
@@ -32,6 +35,9 @@ impl Monster {
     pub fn new(assets: &Assets) -> Self {
         let pos = assets.level.trigger_cubes["GhostSpawn"].center();
         Self {
+            scan_timer: 0.0,
+            scan_timer_going: true,
+            next_scan_pos: pos,
             stand_still_time: 0.0,
             next_flashdark_detect_time: assets.config.flashdark_detect_interval,
             scream_time: 0.0,
@@ -103,6 +109,10 @@ impl Game {
         )
     }
     pub fn monster_walk_to(&mut self, pos: Vec3<f32>, target_type: TargetType) {
+        if target_type != TargetType::Rng {
+            self.monster.scan_timer = self.assets.config.monster_scan_time;
+            self.monster.next_scan_pos = pos;
+        }
         // if target_type != self.monster.target_type {
         if (pos - self.monster.next_target_pos).len() > 0.5
             || target_type != self.monster.target_type
@@ -140,8 +150,6 @@ impl Game {
             let t_speed = 3.0;
             let k = (((pos - self.monster.pos).len() - s) / (t - s)).clamp(0.0, 1.0);
             self.monster.speed = s_speed * (1.0 - k) + t_speed * k;
-        } else {
-            self.monster.speed = 1.0;
         }
     }
     pub fn check_monster_sfx(&mut self, pos: Vec3<f32>) {
@@ -176,9 +184,23 @@ impl Game {
         if !self.monster_spawned {
             return;
         }
-        self.monster.pause_time -= delta_time;
+        // Scan timer
+        if self.monster.scan_timer_going {
+            self.monster.scan_timer -= delta_time;
+            // Scan ended
+            if self.monster.scan_timer < 0.0 {
+                self.monster.speed = 1.0;
+                self.monster.scan_timer = self.assets.config.monster_scan_time;
+                self.monster.next_scan_pos =
+                    *self.navmesh.waypoints.choose(&mut global_rng()).unwrap();
+                self.monster.next_target_pos = self.monster.next_scan_pos;
+                self.monster.next_pathfind_pos = self.monster.pos;
+            }
+        }
+        self.monster.pause_time -= delta_time * self.monster.speed;
         if (self.monster.pos - self.monster.next_target_pos).xy().len() < 0.1 {
             let mut go_next = true;
+            self.monster.scan_timer_going = true;
             if self.monster.target_type == TargetType::Rng {
                 self.monster.stand_still_time -= delta_time;
                 if self.monster.stand_still_time > 0.0 {
@@ -191,7 +213,11 @@ impl Game {
                     global_rng().gen_range(a..b)
                 };
                 self.monster_walk_to(
-                    *self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
+                    //*self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
+                    self.navmesh.find_close_point(
+                        self.monster.next_scan_pos,
+                        self.assets.config.monster_scan_radius,
+                    ),
                     TargetType::Rng,
                 );
             }
@@ -281,6 +307,8 @@ impl Game {
                     break;
                 } else if self.monster.target_type != TargetType::Player {
                     self.monster.next_target_pos = self.monster.pos;
+                    self.monster.scan_timer = 0.0;
+                    self.monster.scan_timer_going = true;
                     self.monster.stand_still_time = 0.0;
                     let n = v.normalize_or_zero();
                     self.monster.pos += n * (radius - v.len());
