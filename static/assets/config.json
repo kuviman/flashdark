@@ -1,4 +1,6 @@
 {
+    "monster_180_range": 1.0,
+    "monster_detect_time": 0.2,
     "monster_scan_time": 20.0,
     "monster_scan_radius": 3.0,
     "ghost_stand_still_time": [

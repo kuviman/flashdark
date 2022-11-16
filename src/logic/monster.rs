@@ -23,6 +23,7 @@ pub struct Monster {
     pub scream_time: f32,
     pub next_flashdark_detect_time: f32,
     pub pause_time: f32,
+    pub detect_timer: f32,
 }
 
 impl Drop for Monster {
@@ -35,6 +36,7 @@ impl Monster {
     pub fn new(assets: &Assets) -> Self {
         let pos = assets.level.trigger_cubes["GhostSpawn"].center();
         Self {
+            detect_timer: 0.0,
             scan_timer: 0.0,
             scan_timer_going: true,
             next_scan_pos: pos,
@@ -89,22 +91,26 @@ impl Game {
         if self.player.god_mode {
             return false;
         }
-        if (self.monster.pos - self.player.pos).xy().len()
-            > self.assets.config.monster_view_distance
-        {
+        let distance = (self.monster.pos - self.player.pos).xy().len();
+        if distance > self.assets.config.monster_view_distance {
             return false;
         }
+        let fov = if distance < self.assets.config.monster_180_range {
+            180.0
+        } else {
+            self.assets.config.monster_fov
+        };
         if Vec2::dot(
             self.monster.dir.xy().normalize_or_zero(),
             (self.player.pos - self.monster.pos)
                 .xy()
                 .normalize_or_zero(),
-        ) < (self.assets.config.monster_fov / 2.0 * f32::PI / 180.0).cos()
+        ) < (fov / 2.0 * f32::PI / 180.0).cos()
         {
             return false;
         }
         self.can_see(
-            self.monster.pos + vec3(0.0, 0.0, 1.3),
+            self.monster.pos + vec3(0.0, 0.0, 1.0),
             self.player.pos + vec3(0.0, 0.0, self.player.height),
         )
     }
@@ -119,11 +125,13 @@ impl Game {
         {
             match target_type {
                 TargetType::Player => {
-                    self.monster.scream_time = 1.0;
-                    let mut effect = self.assets.sfx.ghostScream.effect();
-                    effect.set_position(self.monster.pos.map(|x| x as f64));
-                    // effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
-                    effect.play();
+                    if self.monster.speed == 1.0 {
+                        self.monster.scream_time = 1.0;
+                        let mut effect = self.assets.sfx.ghostScream.effect();
+                        effect.set_position(self.monster.pos.map(|x| x as f64));
+                        // effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
+                        effect.play();
+                    }
                 }
                 TargetType::Noise | TargetType::Flashdark => {
                     let mut effect = self
@@ -225,19 +233,20 @@ impl Game {
 
         if player_inside_house {
             if self.monster_sees_player() {
-                self.monster_walk_to(self.player.pos, TargetType::Player);
-            } else if false && self.player.flashdark.on {
-                // REMOVE
-                self.monster.next_flashdark_detect_time -= delta_time;
-                if self.monster.next_flashdark_detect_time < 0.0 {
-                    self.monster.next_flashdark_detect_time =
-                        self.assets.config.flashdark_detect_interval;
-                    if global_rng().gen_bool(self.assets.config.flashdark_detect_probability as f64)
-                    {
-                        self.monster_walk_to(self.player.pos, TargetType::Flashdark);
-                    }
+                self.monster.detect_timer += delta_time;
+                if self.monster.speed != 1.0 {
+                    self.monster.detect_timer = self.assets.config.monster_detect_time;
                 }
+                if self.monster.detect_timer >= self.assets.config.monster_detect_time {
+                    self.monster_walk_to(self.player.pos, TargetType::Player);
+                }
+            } else {
+                self.monster.detect_timer -= delta_time;
             }
+            self.monster.detect_timer = self
+                .monster
+                .detect_timer
+                .clamp(0.0, self.assets.config.monster_detect_time);
         }
 
         if (self.monster.pos - self.player.pos).len() < 0.5 && !self.player.god_mode {
@@ -327,7 +336,7 @@ impl Game {
             self.monster.dir = nlerp2(
                 self.monster.dir.xy(),
                 target_dir,
-                (delta_time / 0.2).min(1.0),
+                (delta_time * self.monster.speed / 0.2).min(1.0),
             )
             .extend(0.0);
         }
