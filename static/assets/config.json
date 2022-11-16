@@ -27,7 +27,7 @@
     },
     "open_interactables": [],
     "interactables": {
-        "D_DoorWithHandle": {
+        "D_DoorGuest": {
             "disabled": true
         },
         "D_DoorMain": {

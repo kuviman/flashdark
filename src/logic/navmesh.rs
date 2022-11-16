@@ -218,7 +218,7 @@ impl Game {
                         interactable.typ
                     {
                         if name != "D_DoorMain"
-                            && name != "D_DoorWithHandle"
+                            && name != "D_DoorGuest"
                             && !name.contains("LibraryMovingCloset")
                         {
                             continue;
