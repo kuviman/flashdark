@@ -181,6 +181,30 @@ impl Game {
         }
     }
     pub fn update_monster(&mut self, delta_time: f32) {
+        if self.monster.speed == 1.0 {
+            if let Some((vol, music)) = &mut self.chase_music {
+                *vol -= delta_time as f64;
+                if *vol < 0.0 {
+                    music.stop();
+                    self.chase_music = None;
+                } else {
+                    music.set_volume(*vol);
+                }
+            }
+        } else {
+            if self.chase_music.is_none() && self.monster.scream_time <= 0.0 {
+                self.chase_music = Some((0.0, {
+                    let mut effect = self.assets.music.chase.effect();
+                    effect.set_volume(0.0);
+                    effect.play();
+                    effect
+                }));
+            }
+            if let Some((vol, music)) = &mut self.chase_music {
+                *vol = (*vol + delta_time as f64).min(1.0);
+                music.set_volume(*vol);
+            }
+        }
         let player_inside_house = {
             let door_id = self
                 .interactables

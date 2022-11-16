@@ -45,6 +45,7 @@ impl KeyConfiguration {
 static mut BOOLEAN: bool = false;
 
 pub struct Game {
+    chase_music: Option<(f64, geng::SoundEffect)>,
     storage_unlocked: bool,
     key_puzzle_state: KeyPuzzleState,
     monster_spawned: bool,
@@ -89,6 +90,9 @@ impl Drop for Game {
         if let Some(sfx) = &mut self.tv_noise {
             sfx.stop();
         }
+        if let Some((_, sfx)) = &mut self.chase_music {
+            sfx.stop();
+        }
     }
 }
 
@@ -104,6 +108,7 @@ impl Game {
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
         Self {
+            chase_music: None,
             intro_t: if unsafe { BOOLEAN } { 0.1 } else { 21.0 },
             intro_skip_t: 0.0,
             music: None,

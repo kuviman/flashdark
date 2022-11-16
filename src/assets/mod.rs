@@ -69,6 +69,8 @@ pub struct Music {
     pub outside: geng::Sound,
     // #[asset(path = "MainCreepyToneAmbient.wav", postprocess = "loop_sound")]
     // pub ambient: geng::Sound,
+    #[asset(path = "ChaseMusic.mp3", postprocess = "loop_sound")]
+    pub chase: geng::Sound,
 }
 
 #[derive(geng::Assets)]
