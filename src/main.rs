@@ -213,14 +213,18 @@ impl Game {
             monster: Monster::new(assets),
             navmesh,
             transition: None,
-            noise: ugli::Texture::new_with(geng.ugli(), vec2(1024, 1024), |_| {
-                Rgba::new(
-                    global_rng().gen(),
-                    global_rng().gen(),
-                    global_rng().gen(),
-                    global_rng().gen(),
-                )
-            }),
+            noise: {
+                let mut texture = ugli::Texture::new_with(geng.ugli(), vec2(1024, 1024), |_| {
+                    Rgba::new(
+                        global_rng().gen(),
+                        global_rng().gen(),
+                        global_rng().gen(),
+                        global_rng().gen(),
+                    )
+                });
+                texture.set_wrap_mode(ugli::WrapMode::Repeat);
+                texture
+            },
             intro_sfx: unsafe { !BOOLEAN }.then(|| assets.sfx.intro_sequence.play()),
         }
     }
