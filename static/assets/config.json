@@ -1,4 +1,14 @@
 {
+    "monster_chase_speed": [
+        [
+            0.5,
+            3.0
+        ],
+        [
+            3.0,
+            2.0
+        ]
+    ],
     "create_navmesh": false,
     "peek_distance": 0.1,
     "monster_180_range": 1.0,

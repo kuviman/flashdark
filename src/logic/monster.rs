@@ -153,10 +153,7 @@ impl Game {
         self.monster.next_target_pos = pos; // TODO ??? self.navmesh.waypoints[self.navmesh.closest_waypoint(pos)];
         self.monster.next_pathfind_pos = self.monster.pos;
         if let TargetType::Player = target_type {
-            let s = 0.5;
-            let s_speed = 5.0;
-            let t = 3.0;
-            let t_speed = 3.0;
+            let ((s, s_speed), (t, t_speed)) = self.assets.config.monster_chase_speed;
             let k = (((pos - self.monster.pos).len() - s) / (t - s)).clamp(0.0, 1.0);
             self.monster.speed = s_speed * (1.0 - k) + t_speed * k;
         }
