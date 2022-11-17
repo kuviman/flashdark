@@ -244,6 +244,11 @@ impl geng::State for Game {
                     &self.assets,
                 ))));
             }
+            geng::Event::KeyDown {
+                key: geng::Key::F11,
+            } => {
+                self.geng.window().toggle_fullscreen();
+            }
             _ => {}
         }
     }
