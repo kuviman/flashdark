@@ -135,6 +135,15 @@ pub fn vector_from_triangle(tri: [Vec3<f32>; 3], p: Vec3<f32>) -> Vec3<f32> {
 pub fn vector_from_obj(mesh: &Obj, matrix: Mat4<f32>, p: Vec3<f32>) -> Vec3<f32> {
     mesh.meshes
         .iter()
+        .filter(|mesh| {
+            if mesh.name.starts_with("B_SmallGrass")
+                || mesh.name.starts_with("B_TallGrass")
+                || mesh.name.starts_with("B_Tree")
+            {
+                return false;
+            }
+            true
+        })
         .flat_map(|mesh| {
             mesh.geometry.chunks(3).map(|tri| {
                 vector_from_triangle(
