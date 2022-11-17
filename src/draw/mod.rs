@@ -306,6 +306,20 @@ impl Game {
                 ),
             );
         }
+
+        // self.geng.draw_2d(
+        //     framebuffer,
+        //     &camera2d,
+        //     &draw_2d::TexturedQuad::new(
+        //         AABB::point(Vec2::ZERO).extend_uniform(2.0),
+        //         self.shadow_calc
+        //             .as_ref()
+        //             .unwrap()
+        //             .shadow_maps
+        //             .get(&LightId(0))
+        //             .unwrap(),
+        //     ),
+        // );
     }
 
     fn update_shadows(&mut self) {
@@ -386,7 +400,8 @@ impl<'a> ugli::Uniforms for LightsUniform<'a> {
         for (i, light) in self.u_lights.iter().enumerate().take(MAX_LIGHTS) {
             visitor.visit(&format!("u_lights[{i}].pos"), &light.pos);
             visitor.visit(&format!("u_lights[{i}].matrix"), &light.matrix);
-            visitor.visit(&format!("u_lights[{i}].shadow_map"), light.shadow_map);
+            // visitor.visit(&format!("u_lights[{i}].shadow_map"), light.shadow_map);
+            visitor.visit(&format!("u_lights_shadow_maps[{i}]"), light.shadow_map);
             visitor.visit(
                 &format!("u_lights[{i}].shadow_size"),
                 &light.shadow_map.size(),

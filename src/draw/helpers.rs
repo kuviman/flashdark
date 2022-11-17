@@ -316,11 +316,12 @@ impl Game {
     }
 
     pub fn light_uniforms(&self) -> LightsUniform {
-        let lights = &self.lights;
+        let mut lights: Vec<&Light> = self.lights.iter().collect();
+        lights.sort_by_key(|light| r32((light.pos - self.camera.pos).len()));
         let shadow_maps = &self.shadow_calc.as_ref().unwrap().shadow_maps;
         LightsUniform {
             u_lights: lights
-                .iter()
+                .into_iter()
                 .filter(|light| {
                     if self.key_puzzle_state == KeyPuzzleState::LightOut && light.id.0 != 0 {
                         return false;
@@ -336,6 +337,7 @@ impl Game {
                         shadow_map,
                     }
                 })
+                .take(10) // TODO: not hardcode
                 .collect(),
         }
     }
