@@ -4,6 +4,7 @@ mod assets;
 mod camera;
 mod draw;
 mod id;
+mod loading_screen;
 mod logic;
 mod util;
 
@@ -11,6 +12,7 @@ pub use assets::*;
 pub use camera::*;
 pub use draw::*;
 pub use id::*;
+pub use loading_screen::*;
 pub use logic::*;
 pub use util::*;
 
@@ -270,7 +272,7 @@ fn main() {
         &geng,
         geng::LoadingScreen::new(
             &geng,
-            geng::EmptyLoadingScreen,
+            LoadingScreen::new(&geng),
             <Assets as geng::LoadAsset>::load(&geng, &static_path().join("assets")),
             {
                 let geng = geng.clone();
