@@ -164,6 +164,12 @@ impl Game {
         if mesh.name == "PlayerSpawn" {
             return;
         }
+        if let Some(i) = mesh.name.strip_prefix("S_PianoKeys") {
+            let i = i.chars().next().unwrap().to_digit(10).unwrap();
+            if i != ((self.time * 4.0) as u32) % 4 {
+                return;
+            }
+        }
         if self.fuse_spawned && mesh.name.contains("SwingingSwing") {
             let center = self.assets.level.trigger_cubes["SwingingSwing"].center();
             matrix = matrix

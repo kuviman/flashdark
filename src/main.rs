@@ -48,6 +48,7 @@ static mut BOOLEAN: bool = false;
 
 pub struct Game {
     chase_music: Option<(f64, geng::SoundEffect)>,
+    piano_music: geng::SoundEffect,
     storage_unlocked: bool,
     key_puzzle_state: KeyPuzzleState,
     monster_spawned: bool,
@@ -95,6 +96,7 @@ impl Drop for Game {
         if let Some((_, sfx)) = &mut self.chase_music {
             sfx.stop();
         }
+        self.piano_music.stop();
     }
 }
 
@@ -110,6 +112,25 @@ impl Game {
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
         Self {
+            piano_music: {
+                let mut sfx = assets.music.piano.effect();
+                sfx.set_position(
+                    find_center(
+                        &assets
+                            .level
+                            .obj
+                            .meshes
+                            .iter()
+                            .find(|mesh| mesh.name == "S_Piano")
+                            .unwrap()
+                            .geometry,
+                    )
+                    .map(|x| x as f64),
+                );
+                sfx.set_max_distance(2.0);
+                sfx.play();
+                sfx
+            },
             chase_music: None,
             intro_t: if unsafe { BOOLEAN } { 0.1 } else { 21.0 },
             intro_skip_t: 0.0,
