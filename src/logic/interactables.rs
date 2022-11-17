@@ -154,8 +154,8 @@ impl Game {
             let mut tv_noise = self.assets.sfx.tvStatic.effect();
             let pos = self.assets.level.trigger_cubes["GhostSpawn"].center();
             tv_noise.set_position(pos.map(|x| x as f64));
-            tv_noise.set_ref_distance((pos - self.camera.pos).len() as f64);
-            tv_noise.set_max_distance(self.assets.config.max_sound_distance);
+            // tv_noise.set_ref_distance((pos - self.camera.pos).len() as f64);
+            tv_noise.set_max_distance(2.0);
             tv_noise.play();
             self.swing_sfx.take().unwrap().stop();
             self.tv_noise = Some(tv_noise);

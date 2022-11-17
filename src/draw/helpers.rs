@@ -170,6 +170,15 @@ impl Game {
                 return;
             }
         }
+        if let Some(i) = mesh.name.strip_prefix("AF_TV_Static") {
+            if self.key_puzzle_state == KeyPuzzleState::Finish {
+                return;
+            }
+            let i = i.chars().next().unwrap().to_digit(10).unwrap();
+            if i != ((self.time * 10.0) as u32) % 2 + 1 {
+                return;
+            }
+        }
         if self.fuse_spawned && mesh.name.contains("SwingingSwing") {
             let center = self.assets.level.trigger_cubes["SwingingSwing"].center();
             matrix = matrix
