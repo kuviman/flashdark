@@ -45,9 +45,9 @@ impl Game {
     pub fn toggle_flashdark(&mut self) {
         self.player.flashdark.on = !self.player.flashdark.on;
         if self.player.flashdark.on {
-            self.assets.sfx.flashOn.play();
+            self.assets.sfx.flash_on.play();
         } else {
-            self.assets.sfx.flashOff.play();
+            self.assets.sfx.flash_off.play();
         }
 
         self.monster.next_flashdark_detect_time = self.assets.config.flashdark_detect_interval;

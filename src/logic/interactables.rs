@@ -151,7 +151,7 @@ impl Game {
         // Fix the fuse
         if interactable.data.obj.meshes[0].name == "I_FusePlaceholder" {
             self.fuse_placed = true;
-            let mut tv_noise = self.assets.sfx.tvStatic.effect();
+            let mut tv_noise = self.assets.sfx.tv_static.effect();
             let pos = self.assets.level.trigger_cubes["GhostSpawn"].center();
             tv_noise.set_position(pos.map(|x| x as f64));
             // tv_noise.set_ref_distance((pos - self.camera.pos).len() as f64);
@@ -186,18 +186,18 @@ impl Game {
             self.assets.sfx.get_by_name(sfx)
         } else if interactable.data.obj.meshes[0].name.starts_with("D") {
             if interactable.open {
-                &self.assets.sfx.doorClose
+                &self.assets.sfx.door_close
             } else {
-                &self.assets.sfx.doorOpen
+                &self.assets.sfx.door_open
             }
         } else if interactable.data.obj.meshes[0].name.starts_with("I_") {
             if interactable.open {
-                &self.assets.sfx.drawerClose
+                &self.assets.sfx.drawer_close
             } else {
-                &self.assets.sfx.drawerOpen
+                &self.assets.sfx.drawer_open
             }
         } else {
-            &self.assets.sfx.drawerOpen // Girl sound?
+            &self.assets.sfx.drawer_open // Girl sound?
         };
         let mut effect = sfx.effect();
         if let Some(volume) = interactable.config.sfx_volume {

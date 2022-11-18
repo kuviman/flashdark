@@ -87,7 +87,7 @@ impl Game {
                             parent_interactable: None,
                             pos: spawn.pos,
                         });
-                        let mut swing_sfx = self.assets.sfx.swingLoop.effect();
+                        let mut swing_sfx = self.assets.sfx.swing_loop.effect();
                         swing_sfx.set_position(
                             self.assets.level.trigger_cubes["SwingingSwing"]
                                 .center()

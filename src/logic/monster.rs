@@ -51,7 +51,7 @@ impl Monster {
             speed: 1.0,
             pause_time: 0.0,
             loop_sound: {
-                let mut effect = assets.sfx.ghostLoop.effect();
+                let mut effect = assets.sfx.ghost_loop.effect();
                 effect.set_max_distance(assets.config.max_sound_distance);
                 effect.play();
                 effect
@@ -128,7 +128,7 @@ impl Game {
                 TargetType::Player => {
                     if self.monster.speed == 1.0 {
                         self.monster.scream_time = 1.0;
-                        let mut effect = self.assets.sfx.ghostScream.effect();
+                        let mut effect = self.assets.sfx.ghost_scream.effect();
                         effect.set_position(self.monster.pos.map(|x| x as f64));
                         // effect.set_max_distance(self.assets.config.max_sound_distance * 5.0);
                         effect.play();
@@ -138,7 +138,7 @@ impl Game {
                     let mut effect = self
                         .assets
                         .sfx
-                        .ghostAlarmed
+                        .ghost_alarmed
                         .choose(&mut global_rng())
                         .unwrap()
                         .effect();

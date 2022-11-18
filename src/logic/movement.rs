@@ -76,7 +76,7 @@ impl Game {
                     .set_volume(0.5);
                 self.assets
                     .sfx
-                    .footstepCreaks
+                    .footstep_creaks
                     .choose(&mut global_rng())
                     .unwrap()
                     .play()

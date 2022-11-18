@@ -247,12 +247,6 @@ impl geng::State for Game {
 
         // TODO: remove
         match event {
-            geng::Event::KeyDown { key: geng::Key::J } => {
-                let mut effect = self.assets.jumpscare.effect();
-                effect.set_position(Vec3::ZERO);
-                effect.set_max_distance(5.0);
-                effect.play();
-            }
             geng::Event::KeyDown { key: geng::Key::P } => {
                 self.monster.next_target_pos = self.player.pos;
             }
