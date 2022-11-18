@@ -156,3 +156,53 @@ pub fn vector_from_obj(mesh: &Obj, matrix: Mat4<f32>, p: Vec3<f32>) -> Vec3<f32>
         .min_by_key(|v| r32(v.len()))
         .unwrap()
 }
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Button {
+    Key(geng::Key),
+    Mouse(#[serde(with = "mouse_button")] geng::MouseButton),
+}
+
+impl Button {
+    pub fn matches(&self, event: &geng::Event) -> bool {
+        match *event {
+            geng::Event::KeyDown { key } => *self == Self::Key(key),
+            geng::Event::MouseDown { button, .. } => *self == Self::Mouse(button),
+            _ => false,
+        }
+    }
+    pub fn is_pressed(&self, geng: &Geng) -> bool {
+        match *self {
+            Button::Key(key) => geng.window().is_key_pressed(key),
+            Button::Mouse(button) => geng.window().is_button_pressed(button),
+        }
+    }
+}
+
+mod mouse_button {
+    use super::*;
+
+    pub fn serialize<S>(value: &geng::MouseButton, ser: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        format!("Mouse{value:?}").serialize(ser)
+    }
+
+    pub fn deserialize<'de, D>(de: D) -> Result<geng::MouseButton, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(de)?;
+        if let Some(s) = s.strip_prefix("Mouse") {
+            return Ok(match s {
+                "Left" => geng::MouseButton::Left,
+                "Right" => geng::MouseButton::Right,
+                "Middle" => geng::MouseButton::Middle,
+                _ => panic!(),
+            });
+        }
+        unreachable!()
+    }
+}

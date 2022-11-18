@@ -8,8 +8,13 @@ impl Game {
         self.player.rot_h = normalize_angle(self.player.rot_h);
 
         const CROUCH_TIME: f32 = 0.2;
-        if self.geng.window().is_key_pressed(geng::Key::LCtrl)
-            || self.geng.window().is_key_pressed(geng::Key::C)
+        if self
+            .assets
+            .config
+            .controls
+            .crouch
+            .iter()
+            .any(|button| button.is_pressed(&self.geng))
         {
             self.player.height += (0.5 - self.player.height).clamp(-delta_time / CROUCH_TIME, 1.0);
         } else {
@@ -23,23 +28,43 @@ impl Game {
             walk_speed *= 3.0;
         }
         let mut mov = vec2(0.0, 0.0);
-        if self.geng.window().is_key_pressed(geng::Key::W)
-            || self.geng.window().is_key_pressed(geng::Key::Up)
+        if self
+            .assets
+            .config
+            .controls
+            .move_forward
+            .iter()
+            .any(|button| button.is_pressed(&self.geng))
         {
             mov.y += 1.0;
         }
-        if self.geng.window().is_key_pressed(geng::Key::A)
-            || self.geng.window().is_key_pressed(geng::Key::Left)
+        if self
+            .assets
+            .config
+            .controls
+            .move_left
+            .iter()
+            .any(|button| button.is_pressed(&self.geng))
         {
             mov.x -= 1.0;
         }
-        if self.geng.window().is_key_pressed(geng::Key::S)
-            || self.geng.window().is_key_pressed(geng::Key::Down)
+        if self
+            .assets
+            .config
+            .controls
+            .move_backward
+            .iter()
+            .any(|button| button.is_pressed(&self.geng))
         {
             mov.y -= 1.0;
         }
-        if self.geng.window().is_key_pressed(geng::Key::D)
-            || self.geng.window().is_key_pressed(geng::Key::Right)
+        if self
+            .assets
+            .config
+            .controls
+            .move_right
+            .iter()
+            .any(|button| button.is_pressed(&self.geng))
         {
             mov.x += 1.0;
         }

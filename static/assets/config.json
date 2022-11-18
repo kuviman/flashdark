@@ -1,4 +1,44 @@
 {
+    "controls": {
+        "crouch": [
+            "LCtrl",
+            "C"
+        ],
+        "interact": [
+            "MouseLeft",
+            "E",
+            "MouseRight"
+        ],
+        "god_mode": [
+            "L"
+        ],
+        "toggle_fullscreen": [
+            "F11"
+        ],
+        "toggle_flashdark": [
+            "F"
+        ],
+        "move_forward": [
+            "W",
+            "Up"
+        ],
+        "move_backward": [
+            "S",
+            "Down"
+        ],
+        "move_left": [
+            "A",
+            "Left"
+        ],
+        "move_right": [
+            "D",
+            "Right"
+        ],
+        "drop_item": [
+            "Q",
+            "G"
+        ]
+    },
     "crouch_detect_time_multiplier": 3.0,
     "monster_chase_speed": [
         [

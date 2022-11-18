@@ -23,9 +23,24 @@ pub struct InteractableConfig {
     pub sfx_volume: Option<f64>,
 }
 
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct Controls {
+    pub crouch: Vec<Button>,
+    pub interact: Vec<Button>,
+    pub god_mode: Vec<Button>,
+    pub toggle_fullscreen: Vec<Button>,
+    pub toggle_flashdark: Vec<Button>,
+    pub move_forward: Vec<Button>,
+    pub move_backward: Vec<Button>,
+    pub move_left: Vec<Button>,
+    pub move_right: Vec<Button>,
+    pub drop_item: Vec<Button>,
+}
+
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
 #[asset(json)]
 pub struct Config {
+    pub controls: Controls,
     pub crouch_detect_time_multiplier: f32,
     pub monster_chase_speed: ((f32, f32), (f32, f32)),
     pub create_navmesh: bool,

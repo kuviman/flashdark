@@ -213,26 +213,37 @@ impl Game {
     pub fn handle_clicks(&mut self, event: &geng::Event) {
         if let geng::Event::MouseDown { button, .. } = *event {
             self.geng.window().lock_cursor();
+        }
 
-            match button {
-                geng::MouseButton::Left => {
-                    if let Some(target) = self.look().target {
-                        match target.object {
-                            Object::StaticLevel => {}
-                            Object::Interactable(id) => {
-                                self.click_interactable(id, true, self.player.pos);
-                            }
-                            Object::Item(id) => {
-                                self.click_item(id);
-                            }
-                        }
+        if self
+            .assets
+            .config
+            .controls
+            .interact
+            .iter()
+            .any(|button| button.matches(event))
+        {
+            if let Some(target) = self.look().target {
+                match target.object {
+                    Object::StaticLevel => {}
+                    Object::Interactable(id) => {
+                        self.click_interactable(id, true, self.player.pos);
+                    }
+                    Object::Item(id) => {
+                        self.click_item(id);
                     }
                 }
-                geng::MouseButton::Right => {
-                    self.toggle_flashdark();
-                }
-                _ => {}
             }
+        }
+        if self
+            .assets
+            .config
+            .controls
+            .toggle_flashdark
+            .iter()
+            .any(|button| button.matches(event))
+        {
+            self.toggle_flashdark();
         }
     }
 }

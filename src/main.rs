@@ -245,18 +245,22 @@ impl geng::State for Game {
             self.handle_clicks(&event);
         }
 
-        // TODO: remove
-        match event {
-            geng::Event::KeyDown { key: geng::Key::P } => {
-                self.monster.next_target_pos = self.player.pos;
-            }
-            geng::Event::KeyDown { key: geng::Key::G } => {
+        for button in &self.assets.config.controls.god_mode {
+            if button.matches(&event) {
                 self.player.god_mode = !self.player.god_mode;
                 self.ambient_light = self.assets.config.ambient_light_inside_house;
                 self.player.flashdark.dark = 1.0;
                 // self.cutscene_t = 2.9;
                 self.fuse_placed = true;
             }
+        }
+        for button in &self.assets.config.controls.toggle_fullscreen {
+            if button.matches(&event) {
+                self.geng.window().toggle_fullscreen();
+            }
+        }
+        // TODO: remove
+        match event {
             geng::Event::KeyDown { key: geng::Key::R }
                 if self.geng.window().is_key_pressed(geng::Key::LCtrl) =>
             {
@@ -264,11 +268,6 @@ impl geng::State for Game {
                     &self.geng,
                     &self.assets,
                 ))));
-            }
-            geng::Event::KeyDown {
-                key: geng::Key::F11,
-            } => {
-                self.geng.window().toggle_fullscreen();
             }
             _ => {}
         }
