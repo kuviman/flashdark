@@ -54,8 +54,8 @@ pub struct Assets {
 pub struct Music {
     #[asset(path = "OutsideMusic.mp3", postprocess = "loop_sound")]
     pub outside: geng::Sound,
-    #[asset(path = "ChaseMusic.mp3", postprocess = "loop_sound")]
-    pub chase: geng::Sound,
+    #[asset(path = "ChaseMusic*.mp3", range = "1..=2", postprocess = "loop_sound")]
+    pub chase: Vec<geng::Sound>,
     #[asset(path = "ThePiano.mp3", postprocess = "loop_sound")]
     pub piano: geng::Sound,
 }
@@ -94,6 +94,8 @@ pub struct SfxAssets {
     pub ghost_scream: geng::Sound,
     #[asset(path = "placeObject.mp3")]
     pub place_object: geng::Sound,
+    #[asset(path = "jumpScare1.mp3")]
+    pub jumpscare: geng::Sound,
     #[asset(path = "tvStatic.mp3", postprocess = "loop_sound")]
     pub tv_static: geng::Sound,
     #[asset(path = "ghostAlarmed*.mp3", range = "1..=3")]

@@ -40,9 +40,11 @@ impl Game {
             self.camera.pos += (self.player.pos
                 + vec3(0.0, 0.0, self.player.height)
                 + (vec2(1.0, 0.0).rotate(self.player.rot_h) * self.shake.x).extend(self.shake.y)
-                    * 0.05
+                    * 0.02
                 - self.camera.pos)
                 .clamp_len(..=delta_time);
+
+            self.camera.fov += (1.2 - self.camera.fov).clamp_abs(delta_time);
         } else {
             self.camera.pos = self.player.pos + vec3(0.0, 0.0, self.player.height);
         }

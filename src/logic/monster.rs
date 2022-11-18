@@ -195,7 +195,13 @@ impl Game {
         } else {
             if self.chase_music.is_none() && self.monster.scream_time <= 0.0 {
                 self.chase_music = Some((0.0, {
-                    let mut effect = self.assets.music.chase.effect();
+                    let mut effect = self
+                        .assets
+                        .music
+                        .chase
+                        .choose(&mut global_rng())
+                        .unwrap()
+                        .effect();
                     effect.set_volume(0.0);
                     effect.play();
                     effect
@@ -279,7 +285,11 @@ impl Game {
         }
 
         if (self.monster.pos - self.player.pos).len() < 0.5 && !self.player.god_mode {
-            self.game_over = true;
+            if !self.game_over {
+                self.stop_sounds();
+                self.assets.sfx.jumpscare.play();
+                self.game_over = true;
+            }
             // self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
             //     &self.geng,
             //     &self.assets,

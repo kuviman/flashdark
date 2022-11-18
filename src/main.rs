@@ -91,6 +91,12 @@ pub struct Game {
 
 impl Drop for Game {
     fn drop(&mut self) {
+        self.stop_sounds();
+    }
+}
+
+impl Game {
+    fn stop_sounds(&mut self) {
         if let Some(sfx) = &mut self.music {
             sfx.stop();
         }
@@ -102,9 +108,6 @@ impl Drop for Game {
         }
         self.piano_music.stop();
     }
-}
-
-impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
         geng.window().lock_cursor();
 
@@ -250,8 +253,8 @@ impl geng::State for Game {
         let delta_time = delta_time as f32;
         self.update_impl(delta_time);
         self.next_shake -= delta_time;
-        if self.next_shake < 0.0 {
-            self.next_shake = 0.05;
+        while self.next_shake < 0.0 {
+            self.next_shake += 0.03;
             self.shake = vec2(
                 global_rng().gen_range(-1.0..1.0),
                 global_rng().gen_range(-1.0..1.0),
