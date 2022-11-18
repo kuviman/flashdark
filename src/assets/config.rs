@@ -26,6 +26,7 @@ pub struct InteractableConfig {
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
 #[asset(json)]
 pub struct Config {
+    pub crouch_detect_time_multiplier: f32,
     pub monster_chase_speed: ((f32, f32), (f32, f32)),
     pub create_navmesh: bool,
     pub peek_distance: f32,

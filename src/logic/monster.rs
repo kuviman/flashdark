@@ -255,7 +255,11 @@ impl Game {
 
         if player_inside_house {
             if self.monster_sees_player() {
-                self.monster.detect_timer += delta_time;
+                self.monster.detect_timer += if self.player.height > 0.75 {
+                    delta_time
+                } else {
+                    delta_time / self.assets.config.crouch_detect_time_multiplier
+                };
                 if self.monster.speed != 1.0 {
                     self.monster.detect_timer = self.assets.config.monster_detect_time;
                 }

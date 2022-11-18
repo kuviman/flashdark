@@ -1,4 +1,5 @@
 {
+    "crouch_detect_time_multiplier": 3.0,
     "monster_chase_speed": [
         [
             0.5,
