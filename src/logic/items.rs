@@ -59,4 +59,16 @@ impl Game {
             })
         }
     }
+
+    pub fn drop_item(&mut self) {
+        if let Some(prev) = self.player.item.take() {
+            self.assets.sfx.generic_pickup.play();
+            self.items.push(Item {
+                name: prev,
+                parent_interactable: None,
+                mesh_index: 0,
+                pos: self.player.pos + vec3(0.0, 0.0, -0.24),
+            })
+        }
+    }
 }

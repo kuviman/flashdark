@@ -219,6 +219,17 @@ impl Game {
             .assets
             .config
             .controls
+            .drop_item
+            .iter()
+            .any(|button| button.matches(event))
+        {
+            self.drop_item();
+        }
+
+        if self
+            .assets
+            .config
+            .controls
             .interact
             .iter()
             .any(|button| button.matches(event))
