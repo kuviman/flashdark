@@ -65,9 +65,9 @@ impl Game {
                 for (mesh_index, spawn) in data.spawns.iter().enumerate() {
                     self.items.push(Item {
                         name: name.clone(),
+                        matrix: Mat4::translate(spawn.pos),
                         mesh_index,
                         parent_interactable: spawn.parent_interactable.clone(),
-                        pos: spawn.pos,
                     });
                 }
             }

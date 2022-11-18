@@ -83,9 +83,9 @@ impl Game {
                         let spawn = &data.spawns[spawn_index];
                         self.items.push(Item {
                             name: name.to_owned(),
+                            matrix: Mat4::translate(spawn.pos),
                             mesh_index: spawn_index,
                             parent_interactable: None,
-                            pos: spawn.pos,
                         });
                         let mut swing_sfx = self.assets.sfx.swing_loop.effect();
                         swing_sfx.set_position(

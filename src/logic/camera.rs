@@ -115,6 +115,7 @@ impl Game {
             return;
         }
         if let geng::Event::MouseMove { delta, .. } = *event {
+            // info!("{delta:?}");
             let delta = delta.map(|x| x as f32);
             self.player.rot_h -= delta.x * self.sens;
             self.player.rot_v = (self.player.rot_v + delta.y * self.sens)
