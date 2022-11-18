@@ -47,6 +47,10 @@ impl KeyConfiguration {
 static mut BOOLEAN: bool = false;
 
 pub struct Game {
+    shake: Vec2<f32>,
+    next_shake: f32,
+    game_over: bool,
+    game_over_t: f32,
     chase_music: Option<(f64, geng::SoundEffect)>,
     piano_music: geng::SoundEffect,
     storage_unlocked: bool,
@@ -112,6 +116,10 @@ impl Game {
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
         Self {
+            shake: Vec2::ZERO,
+            next_shake: 0.0,
+            game_over: false,
+            game_over_t: 0.0,
             piano_music: {
                 let mut sfx = assets.music.piano.effect();
                 sfx.set_position(
@@ -228,11 +236,42 @@ impl Game {
             intro_sfx: unsafe { !BOOLEAN }.then(|| assets.sfx.intro_sequence.play()),
         }
     }
+
+    pub fn reset(&mut self) {
+        self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
+            &self.geng,
+            &self.assets,
+        ))));
+    }
 }
 
 impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
-        self.update_impl(delta_time as f32);
+        let delta_time = delta_time as f32;
+        self.update_impl(delta_time);
+        self.next_shake -= delta_time;
+        if self.next_shake < 0.0 {
+            self.next_shake = 0.05;
+            self.shake = vec2(
+                global_rng().gen_range(-1.0..1.0),
+                global_rng().gen_range(-1.0..1.0),
+            );
+        }
+        if self.game_over {
+            self.game_over_t += delta_time;
+            self.player.height += (1.0 - self.player.height) * (delta_time / 0.1).min(1.0);
+            let dv = self.monster.pos + vec3(0.0, 0.0, 1.0)
+                - (self.player.pos + vec3(0.0, 0.0, self.player.height));
+            let target_rot_h = dv.xy().arg() - f32::PI / 2.0; // + self.shake.x * 0.05;
+            let target_rot_v = vec2(dv.xy().len(), dv.z).arg(); // + self.shake.y * 0.05;
+            self.player.rot_h +=
+                normalize_angle(target_rot_h - self.player.rot_h) * (delta_time / 0.1).min(1.0);
+            self.player.rot_v += (target_rot_v - self.player.rot_v) * (delta_time / 0.1).min(1.0);
+            self.lock_controls = true;
+            if self.game_over_t > 3.0 {
+                self.reset();
+            }
+        }
     }
 
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
@@ -264,10 +303,7 @@ impl geng::State for Game {
             geng::Event::KeyDown { key: geng::Key::R }
                 if self.geng.window().is_key_pressed(geng::Key::LCtrl) =>
             {
-                self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
-                    &self.geng,
-                    &self.assets,
-                ))));
+                self.reset();
             }
             _ => {}
         }

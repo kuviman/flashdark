@@ -288,6 +288,7 @@ impl Game {
 
         if self.intro_t > 0.0 {
             let alpha = ((self.intro_t - 2.0) / 3.0).clamp(0.0, 1.0);
+            // self.camera.fov
             self.geng.draw_2d(
                 framebuffer,
                 &camera2d,
@@ -303,6 +304,18 @@ impl Game {
                     AABB::point(vec2(0.0, -4.0))
                         .extend_symmetric(vec2(self.intro_skip_t, 0.1) * 3.0),
                     Rgba::WHITE,
+                ),
+            );
+        }
+
+        if self.game_over {
+            let alpha = ((self.game_over_t - 1.5) / 1.0).clamp(0.0, 1.0);
+            self.geng.draw_2d(
+                framebuffer,
+                &camera2d,
+                &draw_2d::Quad::new(
+                    AABB::point(Vec2::ZERO).extend_uniform(100.0),
+                    Rgba::new(0.0, 0.0, 0.0, alpha),
                 ),
             );
         }

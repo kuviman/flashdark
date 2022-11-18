@@ -179,6 +179,9 @@ impl Game {
         }
     }
     pub fn update_monster(&mut self, delta_time: f32) {
+        if self.game_over {
+            return;
+        }
         if self.monster.speed == 1.0 {
             if let Some((vol, music)) = &mut self.chase_music {
                 *vol -= delta_time as f64;
@@ -276,10 +279,11 @@ impl Game {
         }
 
         if (self.monster.pos - self.player.pos).len() < 0.5 && !self.player.god_mode {
-            self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
-                &self.geng,
-                &self.assets,
-            ))));
+            self.game_over = true;
+            // self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
+            //     &self.geng,
+            //     &self.assets,
+            // ))));
         }
         if (self.monster.pos - self.monster.next_pathfind_pos).len() < 0.1 {
             self.monster.next_pathfind_pos = self
@@ -380,21 +384,25 @@ impl Game {
         } else {
             &self.assets.ghost.chasing
         };
-        let texture = [
-            (&textures.left, 90.0),
-            (&textures.front, 180.0),
-            (&textures.right, 270.0),
-            (&textures.back, 0.0),
-        ]
-        .into_iter()
-        .max_by_key(|(_texture, angle)| {
-            r32(Vec2::dot(
-                self.monster.dir.xy(),
-                vec2(0.0, 1.0).rotate(self.camera.rot_h + angle * f32::PI / 180.0),
-            ))
-        })
-        .unwrap()
-        .0;
+        let texture = if self.game_over {
+            &textures.front
+        } else {
+            [
+                (&textures.left, 90.0),
+                (&textures.front, 180.0),
+                (&textures.right, 270.0),
+                (&textures.back, 0.0),
+            ]
+            .into_iter()
+            .max_by_key(|(_texture, angle)| {
+                r32(Vec2::dot(
+                    self.monster.dir.xy(),
+                    vec2(0.0, 1.0).rotate(self.camera.rot_h + angle * f32::PI / 180.0),
+                ))
+            })
+            .unwrap()
+            .0
+        };
 
         if self.monster_sees_player() {
             // texture = &self.assets.hand;
