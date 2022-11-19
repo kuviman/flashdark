@@ -25,6 +25,7 @@ impl Game {
         let delta_time = delta_time.min(1.0 / 30.0);
         self.time += delta_time;
 
+        self.update_lights(delta_time);
         self.update_movement(delta_time);
         self.update_camera(delta_time);
         self.update_flashdark(delta_time);

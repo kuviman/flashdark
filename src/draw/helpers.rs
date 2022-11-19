@@ -348,7 +348,12 @@ impl Game {
                     LightUniform {
                         pos: light.pos,
                         matrix: light.matrix(shadow_map.size().map(|x| x as f32)),
-                        intensity: light.intensity,
+                        intensity: light.intensity
+                            * if light.flicker_time <= 0.0 {
+                                1.0
+                            } else {
+                                self.rng.get(10.0) * 0.5 + 0.5
+                            },
                         shadow_map,
                     }
                 })

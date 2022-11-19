@@ -31,11 +31,15 @@ impl Game {
 
         // actually flicker LUL
         if self.player.flashdark.on && self.intro_t < 0.0 {
-            self.monster.next_flashdark_detect_time -= delta_time;
-            if self.monster.next_flashdark_detect_time < 0.0 {
-                self.monster.next_flashdark_detect_time =
-                    self.assets.config.flashdark_detect_interval;
-                if global_rng().gen_bool(self.assets.config.flashdark_detect_probability as f64) {
+            self.monster.next_flashdark_flicker_time -= delta_time;
+            if self.monster.next_flashdark_flicker_time < 0.5 {
+                self.lights.get_mut(&LightId(0)).unwrap().flicker_time =
+                    self.monster.next_flashdark_flicker_time;
+            }
+            if self.monster.next_flashdark_flicker_time < 0.0 {
+                self.monster.next_flashdark_flicker_time =
+                    self.assets.config.flashdark_flicker_interval;
+                if global_rng().gen_bool(self.assets.config.flashdark_turn_off_probability as f64) {
                     self.toggle_flashdark();
                 }
             }
@@ -50,7 +54,7 @@ impl Game {
             self.assets.sfx.flash_off.play();
         }
 
-        self.monster.next_flashdark_detect_time = self.assets.config.flashdark_detect_interval;
+        self.monster.next_flashdark_flicker_time = self.assets.config.flashdark_flicker_interval;
         self.check_monster_sfx(self.player.pos);
 
         // Key puzzle

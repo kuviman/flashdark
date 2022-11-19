@@ -39,7 +39,8 @@ impl Game {
         if self.game_over {
             self.camera.pos += (self.player.pos
                 + vec3(0.0, 0.0, self.player.height)
-                + (vec2(1.0, 0.0).rotate(self.player.rot_h) * self.shake.x).extend(self.shake.y)
+                + (vec2(1.0, 0.0).rotate(self.player.rot_h) * self.rng.get(30.0))
+                    .extend(self.rng.get(30.0))
                     * 0.02
                 - self.camera.pos)
                 .clamp_len(..=delta_time);

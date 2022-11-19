@@ -1,7 +1,9 @@
 use super::*;
 
+mod rng;
 mod spatial_map;
 
+pub use rng::*;
 pub use spatial_map::*;
 
 pub const EPS: f32 = 1e-7;

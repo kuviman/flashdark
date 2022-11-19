@@ -47,8 +47,8 @@ impl KeyConfiguration {
 static mut BOOLEAN: bool = false;
 
 pub struct Game {
-    shake: Vec2<f32>,
-    next_shake: f32,
+    light_flicker_time: f32,
+    rng: RngState,
     game_over: bool,
     game_over_t: f32,
     chase_music: Option<(f64, geng::SoundEffect)>,
@@ -119,8 +119,8 @@ impl Game {
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
         Self {
-            shake: Vec2::ZERO,
-            next_shake: 0.0,
+            light_flicker_time: 0.0,
+            rng: RngState::new(),
             game_over: false,
             game_over_t: 0.0,
             piano_music: {
@@ -251,15 +251,8 @@ impl Game {
 impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
         let delta_time = delta_time as f32;
+        self.rng.update(delta_time);
         self.update_impl(delta_time);
-        self.next_shake -= delta_time;
-        while self.next_shake < 0.0 {
-            self.next_shake += 0.03;
-            self.shake = vec2(
-                global_rng().gen_range(-1.0..1.0),
-                global_rng().gen_range(-1.0..1.0),
-            );
-        }
         if self.game_over {
             self.game_over_t += delta_time;
             self.player.height += (1.0 - self.player.height) * (delta_time / 0.1).min(1.0);
@@ -271,7 +264,7 @@ impl geng::State for Game {
                 normalize_angle(target_rot_h - self.player.rot_h) * (delta_time / 0.1).min(1.0);
             self.player.rot_v += (target_rot_v - self.player.rot_v) * (delta_time / 0.1).min(1.0);
             self.lock_controls = true;
-            if self.game_over_t > 3.0 {
+            if self.game_over_t > 6.0 {
                 self.reset();
             }
         }

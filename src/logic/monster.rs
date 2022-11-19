@@ -21,7 +21,7 @@ pub struct Monster {
     pub speed: f32,
     pub loop_sound: geng::SoundEffect,
     pub scream_time: f32,
-    pub next_flashdark_detect_time: f32,
+    pub next_flashdark_flicker_time: f32,
     pub pause_time: f32,
     pub detect_timer: f32,
 }
@@ -41,7 +41,7 @@ impl Monster {
             scan_timer_going: true,
             next_scan_pos: pos,
             stand_still_time: 0.0,
-            next_flashdark_detect_time: assets.config.flashdark_detect_interval,
+            next_flashdark_flicker_time: assets.config.flashdark_flicker_interval,
             scream_time: 0.0,
             pos,
             target_type: TargetType::Rng,

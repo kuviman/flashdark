@@ -309,7 +309,7 @@ impl Game {
         }
 
         if self.game_over {
-            let alpha = ((self.game_over_t - 1.5) / 1.0).clamp(0.0, 1.0);
+            let alpha = ((self.game_over_t - 1.5) / 4.0).clamp(0.0, 1.0);
             self.geng.draw_2d(
                 framebuffer,
                 &camera2d,

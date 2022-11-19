@@ -7,6 +7,7 @@ pub struct LightId(pub u64);
 #[derive(Debug, Clone, HasId)]
 pub struct Light {
     pub id: LightId,
+    pub flicker_time: f32,
     pub fov: f32,
     pub pos: Vec3<f32>,
     pub rot_h: f32,
@@ -45,6 +46,7 @@ impl Game {
         let mut lights = Collection::new();
         lights.insert(Light {
             id: id(),
+            flicker_time: 0.0,
             fov: 1.3,
             pos: Vec3::ZERO,
             rot_h: 0.0,
@@ -54,6 +56,7 @@ impl Game {
         lights.extend(assets.level.obj.meshes.iter().filter_map(|mesh| {
             mesh.name.contains("Light").then(|| Light {
                 id: id(),
+                flicker_time: 0.0,
                 fov: 2.0,
                 pos: {
                     let mut sum = Vec3::ZERO;
@@ -68,5 +71,12 @@ impl Game {
             })
         }));
         lights
+    }
+
+    pub fn update_lights(&mut self, delta_time: f32) {
+        for light in &mut self.lights {
+            light.flicker_time -= delta_time;
+            // light.intensity += (target_intensity - light.intensity).clamp_abs(delta_time / 0.)
+        }
     }
 }
