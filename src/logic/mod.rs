@@ -132,20 +132,6 @@ impl Game {
             //     > (self.assets.config.tv_detection_angle * f32::PI / 180.0).cos()
             {
                 self.cutscene_t += delta_time;
-
-                if self.cutscene_t < 0.2 {
-                    self.player.flashdark.on = false;
-                } else if self.cutscene_t < 0.6 {
-                    self.player.flashdark.on = true;
-                } else if self.cutscene_t < 0.8 {
-                    self.player.flashdark.on = false;
-                } else if self.cutscene_t < 1.2 {
-                    self.player.flashdark.on = true;
-                } else if self.cutscene_t < 1.4 {
-                    self.player.flashdark.on = false;
-                } else if self.cutscene_t < 1.8 {
-                    self.player.flashdark.on = true;
-                }
                 if self.cutscene_t > 1.4 {
                     self.player.flashdark.dark = 1.0;
                 }

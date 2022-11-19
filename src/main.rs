@@ -287,6 +287,7 @@ impl geng::State for Game {
                 self.player.flashdark.dark = 1.0;
                 // self.cutscene_t = 2.9;
                 self.fuse_placed = true;
+                self.lights.get_mut(&LightId(0)).unwrap().flicker_time = 2.0;
             }
         }
         for button in &self.assets.config.controls.toggle_fullscreen {
