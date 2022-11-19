@@ -37,6 +37,11 @@
         "drop_item": [
             "Q",
             "G"
+        ],
+        "pause": [
+            "P",
+            "Escape",
+            "Enter"
         ]
     },
     "crouch_detect_time_multiplier": 3.0,

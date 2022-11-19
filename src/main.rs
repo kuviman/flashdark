@@ -303,6 +303,7 @@ impl Game {
 
 impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
+        self.sens = 0.0002 + self.mouse_sens * 0.01;
         let delta_time = delta_time as f32;
         self.rng.update(delta_time);
         self.update_impl(delta_time);
@@ -338,7 +339,7 @@ impl geng::State for Game {
     }
 
     fn handle_event(&mut self, event: geng::Event) {
-        if !self.lock_controls && self.intro_t < 0.0 {
+        if !self.lock_controls && self.intro_t < 0.0 && !self.main_menu && !self.settings {
             self.handle_event_camera(&event);
             self.handle_clicks(&event);
         }
@@ -356,6 +357,18 @@ impl geng::State for Game {
         for button in &self.assets.config.controls.toggle_fullscreen {
             if button.matches(&event) {
                 self.geng.window().toggle_fullscreen();
+            }
+        }
+        if !self.main_menu && self.intro_t < 0.0 {
+            for button in &self.assets.config.controls.pause {
+                if button.matches(&event) {
+                    self.settings = !self.settings;
+                    if !self.main_menu && !self.settings {
+                        self.geng.window().lock_cursor();
+                    } else {
+                        self.geng.window().unlock_cursor();
+                    }
+                }
             }
         }
         // TODO: remove
@@ -382,7 +395,14 @@ impl geng::State for Game {
                         UiAction::Settings => self.settings = true,
                         UiAction::Exit => self.transition = Some(geng::Transition::Pop),
                         UiAction::Play => self.reset(),
-                        UiAction::Back => self.settings = false,
+                        UiAction::Back => {
+                            self.settings = false;
+                            if !self.main_menu {
+                                self.geng.window().lock_cursor();
+                            } else {
+                                self.geng.window().unlock_cursor();
+                            }
+                        }
                         UiAction::ChangeVolume => {
                             self.start_drag = self.ui_mouse_pos;
                         }

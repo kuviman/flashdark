@@ -35,6 +35,7 @@ pub struct Controls {
     pub move_left: Vec<Button>,
     pub move_right: Vec<Button>,
     pub drop_item: Vec<Button>,
+    pub pause: Vec<Button>,
 }
 
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]

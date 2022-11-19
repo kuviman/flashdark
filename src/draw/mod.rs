@@ -246,7 +246,7 @@ impl Game {
             }
         }
 
-        if !self.main_menu {
+        if !self.main_menu && !self.settings {
             // PawnMan20 is like totally hot
             let reticle_texture = (|| {
                 match look.target {
@@ -339,168 +339,183 @@ impl Game {
         //     ),
         // );
 
-        let mouse_pos = camera2d.screen_to_world(
-            self.framebuffer_size,
-            self.geng.window().mouse_pos().map(|x| x as f32),
-        );
-        self.ui_mouse_pos = mouse_pos;
+        if self.main_menu || self.settings {
+            if !self.main_menu {
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::Quad::new(
+                        AABB::point(Vec2::ZERO).extend_uniform(100.0),
+                        Rgba::new(0.0, 0.0, 0.0, 0.5),
+                    ),
+                );
+            }
 
-        let rect_for = |pos: Vec2<f32>, size: f32, texture: &ugli::Texture| -> AABB<f32> {
-            AABB::point(pos)
-                .extend_symmetric(texture.size().map(|x| x as f32) / texture.size().y as f32 * size)
-        };
+            let mouse_pos = camera2d.screen_to_world(
+                self.framebuffer_size,
+                self.geng.window().mouse_pos().map(|x| x as f32),
+            );
+            self.ui_mouse_pos = mouse_pos;
 
-        let mut hovered = None;
-        let mut to_draw = Vec::new();
-        let mut new_hover_ui_action = None;
-        let mut draw_icon = |pos: Vec2<f32>, size: f32, texture, action: Option<UiAction>| {
-            let rect = rect_for(pos, size, texture);
-            let mut color = Rgba::WHITE;
-            if let Some(action) = action {
-                if rect.contains(mouse_pos)
-                    || (self
+            let rect_for = |pos: Vec2<f32>, size: f32, texture: &ugli::Texture| -> AABB<f32> {
+                AABB::point(pos).extend_symmetric(
+                    texture.size().map(|x| x as f32) / texture.size().y as f32 * size,
+                )
+            };
+
+            let mut hovered = None;
+            let mut to_draw = Vec::new();
+            let mut new_hover_ui_action = None;
+            let mut draw_icon = |pos: Vec2<f32>, size: f32, texture, action: Option<UiAction>| {
+                let rect = rect_for(pos, size, texture);
+                let mut color = Rgba::WHITE;
+                if let Some(action) = action {
+                    if rect.contains(mouse_pos)
+                        || (self
+                            .geng
+                            .window()
+                            .is_button_pressed(geng::MouseButton::Left)
+                            && self.hover_ui_action == Some(action))
+                    {
+                        color = Rgba::BLACK;
+                        hovered = Some(pos);
+                        new_hover_ui_action = Some(action);
+                    }
+                }
+                to_draw.push((rect, texture, color));
+            };
+
+            // PawnMan: "I have a suggestion"
+            if self.settings {
+                draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
+                draw_icon(
+                    vec2(0.0, 0.1),
+                    0.2,
+                    &self.assets.ui.label_mouse_sensitivity,
+                    None,
+                );
+                let slider_width = 0.1 * self.assets.ui.slider_line.size().x as f32
+                    / self.assets.ui.slider_line.size().y as f32;
+                draw_icon(vec2(0.0, -0.5), 0.1, &self.assets.ui.slider_line, None);
+                draw_icon(
+                    vec2(-slider_width + slider_width * 2.0 * self.mouse_sens, -0.5),
+                    0.4,
+                    &self.assets.ui.slider_handle1,
+                    Some(UiAction::ChangeMouseSens),
+                );
+                if self.hover_ui_action == Some(UiAction::ChangeMouseSens)
+                    && self
                         .geng
                         .window()
                         .is_button_pressed(geng::MouseButton::Left)
-                        && self.hover_ui_action == Some(action))
                 {
-                    color = Rgba::BLACK;
-                    hovered = Some(pos);
-                    new_hover_ui_action = Some(action);
+                    self.mouse_sens =
+                        ((mouse_pos.x - (-slider_width)) / (slider_width * 2.0)).clamp(0.0, 1.0);
                 }
+                draw_icon(
+                    vec2(0.0, -1.5),
+                    0.2,
+                    &self.assets.ui.label_soundvolume,
+                    None,
+                );
+                draw_icon(vec2(0.0, -2.1), 0.1, &self.assets.ui.slider_line, None);
+                draw_icon(
+                    vec2(-slider_width + slider_width * 2.0 * self.volume, -2.1),
+                    0.4,
+                    &self.assets.ui.slider_handle2,
+                    Some(UiAction::ChangeVolume),
+                );
+                if self.hover_ui_action == Some(UiAction::ChangeVolume)
+                    && self
+                        .geng
+                        .window()
+                        .is_button_pressed(geng::MouseButton::Left)
+                {
+                    self.volume =
+                        ((mouse_pos.x - (-slider_width)) / (slider_width * 2.0)).clamp(0.0, 1.0);
+                }
+                draw_icon(
+                    vec2(5.0, -4.0),
+                    0.5,
+                    &self.assets.ui.icon_back,
+                    Some(UiAction::Back),
+                );
+            } else if self.main_menu {
+                draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
+                draw_icon(
+                    vec2(0.0, 0.1),
+                    0.5,
+                    &self.assets.ui.play,
+                    Some(UiAction::Play),
+                );
+                draw_icon(
+                    vec2(-5.0, -4.0),
+                    0.5,
+                    &self.assets.ui.icon_settings,
+                    Some(UiAction::Settings),
+                );
+                #[cfg(not(target_arch = "wasm32"))]
+                draw_icon(
+                    vec2(5.0, -4.0),
+                    0.5,
+                    &self.assets.ui.icon_door,
+                    Some(UiAction::Exit),
+                );
             }
-            to_draw.push((rect, texture, color));
-        };
 
-        if self.settings {
-            draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
-            draw_icon(
-                vec2(0.0, 0.1),
-                0.2,
-                &self.assets.ui.label_mouse_sensitivity,
-                None,
-            );
-            let slider_width = 0.1 * self.assets.ui.slider_line.size().x as f32
-                / self.assets.ui.slider_line.size().y as f32;
-            draw_icon(vec2(0.0, -0.5), 0.1, &self.assets.ui.slider_line, None);
-            draw_icon(
-                vec2(-slider_width + slider_width * 2.0 * self.mouse_sens, -0.5),
-                0.4,
-                &self.assets.ui.slider_handle1,
-                Some(UiAction::ChangeMouseSens),
-            );
-            if self.hover_ui_action == Some(UiAction::ChangeMouseSens)
-                && self
-                    .geng
-                    .window()
-                    .is_button_pressed(geng::MouseButton::Left)
+            if !self
+                .geng
+                .window()
+                .is_button_pressed(geng::MouseButton::Left)
+                && self.hover_ui_action != new_hover_ui_action
             {
-                self.mouse_sens =
-                    ((mouse_pos.x - (-slider_width)) / (slider_width * 2.0)).clamp(0.0, 1.0);
+                if new_hover_ui_action.is_some() {
+                    self.assets.sfx.flash_on.play();
+                } else {
+                    self.assets.sfx.flash_off.play();
+                }
+                self.hover_ui_action = new_hover_ui_action;
             }
-            draw_icon(
-                vec2(0.0, -1.5),
-                0.2,
-                &self.assets.ui.label_soundvolume,
-                None,
-            );
-            draw_icon(vec2(0.0, -2.1), 0.1, &self.assets.ui.slider_line, None);
-            draw_icon(
-                vec2(-slider_width + slider_width * 2.0 * self.volume, -2.1),
-                0.4,
-                &self.assets.ui.slider_handle2,
-                Some(UiAction::ChangeVolume),
-            );
-            if self.hover_ui_action == Some(UiAction::ChangeVolume)
-                && self
-                    .geng
-                    .window()
-                    .is_button_pressed(geng::MouseButton::Left)
-            {
-                self.volume =
-                    ((mouse_pos.x - (-slider_width)) / (slider_width * 2.0)).clamp(0.0, 1.0);
-            }
-            draw_icon(
-                vec2(5.0, -4.0),
-                0.5,
-                &self.assets.ui.icon_back,
-                Some(UiAction::Back),
-            );
-        } else if self.main_menu {
-            draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
-            draw_icon(
-                vec2(0.0, 0.1),
-                0.5,
-                &self.assets.ui.play,
-                Some(UiAction::Play),
-            );
-            draw_icon(
-                vec2(-5.0, -4.0),
-                0.5,
-                &self.assets.ui.icon_settings,
-                Some(UiAction::Settings),
-            );
-            #[cfg(not(target_arch = "wasm32"))]
-            draw_icon(
-                vec2(5.0, -4.0),
-                0.5,
-                &self.assets.ui.icon_door,
-                Some(UiAction::Exit),
-            );
-        }
 
-        if !self
-            .geng
-            .window()
-            .is_button_pressed(geng::MouseButton::Left)
-            && self.hover_ui_action != new_hover_ui_action
-        {
-            if new_hover_ui_action.is_some() {
-                self.assets.sfx.flash_on.play();
+            if let Some(pos) = hovered {
+                let texture = &self.assets.ui.flashlight;
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::new(
+                        AABB::point(Vec2::ZERO).extend_symmetric(
+                            texture.size().map(|x| x as f32) / texture.size().y as f32,
+                        ),
+                        texture,
+                    )
+                    .translate(vec2(1.0, 0.0))
+                    .scale_uniform(2.0)
+                    .transform(Mat3::rotate((pos - vec2(0.0, -3.0)).arg() + f32::PI))
+                    .translate(pos),
+                );
             } else {
-                self.assets.sfx.flash_off.play();
+                let texture = &self.assets.ui.icon_flashlight;
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::new(
+                        AABB::point(Vec2::ZERO).extend_symmetric(
+                            texture.size().map(|x| x as f32) / texture.size().y as f32,
+                        ),
+                        texture,
+                    )
+                    .scale_uniform(0.1)
+                    .transform(Mat3::rotate(-f32::PI / 3.0))
+                    .translate(mouse_pos),
+                );
             }
-            self.hover_ui_action = new_hover_ui_action;
-        }
-
-        if let Some(pos) = hovered {
-            let texture = &self.assets.ui.flashlight;
-            self.geng.draw_2d(
-                framebuffer,
-                &camera2d,
-                &draw_2d::TexturedQuad::new(
-                    AABB::point(Vec2::ZERO).extend_symmetric(
-                        texture.size().map(|x| x as f32) / texture.size().y as f32,
-                    ),
-                    texture,
-                )
-                .translate(vec2(1.0, 0.0))
-                .scale_uniform(2.0)
-                .transform(Mat3::rotate((pos - vec2(0.0, -3.0)).arg() + f32::PI))
-                .translate(pos),
-            );
-        } else {
-            let texture = &self.assets.ui.icon_flashlight;
-            self.geng.draw_2d(
-                framebuffer,
-                &camera2d,
-                &draw_2d::TexturedQuad::new(
-                    AABB::point(Vec2::ZERO).extend_symmetric(
-                        texture.size().map(|x| x as f32) / texture.size().y as f32,
-                    ),
-                    texture,
-                )
-                .scale_uniform(0.1)
-                .transform(Mat3::rotate(-f32::PI / 3.0))
-                .translate(mouse_pos),
-            );
-        }
-        for (rect, texture, color) in to_draw {
-            self.geng.draw_2d(
-                framebuffer,
-                &camera2d,
-                &draw_2d::TexturedQuad::colored(rect, texture, color),
-            );
+            for (rect, texture, color) in to_draw {
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::colored(rect, texture, color),
+                );
+            }
         }
     }
 
