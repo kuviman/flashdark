@@ -27,6 +27,17 @@ impl Game {
 
         self.update_lights(delta_time);
 
+        // Update audio listener
+        self.geng
+            .audio()
+            .set_listener_position(self.camera.pos.map(|x| x as f64));
+        self.geng.audio().set_listener_orientation(
+            { Mat4::rotate_z(self.camera.rot_h) * vec4(0.0, 1.0, 0.0, 1.0) }
+                .xyz()
+                .map(|x| x as f64),
+            vec3(0.0, 0.0, 1.0),
+        );
+
         if self.main_menu {
             return;
         }

@@ -54,6 +54,8 @@ pub struct Assets {
 pub struct Music {
     #[asset(path = "OutsideMusic.mp3", postprocess = "loop_sound")]
     pub outside: geng::Sound,
+    #[asset(path = "AnxietyMusic.mp3", postprocess = "loop_sound")]
+    pub anxiety: geng::Sound,
     #[asset(path = "ChaseMusic*.mp3", range = "1..=2", postprocess = "loop_sound")]
     pub chase: Vec<geng::Sound>,
     #[asset(path = "ThePiano.mp3", postprocess = "loop_sound")]

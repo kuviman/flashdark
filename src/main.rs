@@ -153,15 +153,33 @@ impl Game {
             chase_music: None,
             intro_t: if unsafe { BOOLEAN } { 0.1 } else { 21.0 },
             intro_skip_t: 0.0,
-            music: None,
+            music: main_menu.then(|| assets.music.anxiety.play()),
             storage_unlocked: false,
             key_puzzle_state: KeyPuzzleState::Begin,
             monster_spawned: false,
             cutscene_t: 0.0,
             lock_controls: false,
             ambient_light: assets.config.ambient_light,
-            tv_noise: None,
-            swing_sfx: None,
+            tv_noise: main_menu.then(|| {
+                let mut tv_noise = assets.sfx.tv_static.effect();
+                let pos = assets.level.trigger_cubes["GhostSpawn"].center();
+                tv_noise.set_position(pos.map(|x| x as f64));
+                // tv_noise.set_ref_distance((pos - self.camera.pos).len() as f64);
+                tv_noise.set_max_distance(2.0);
+                tv_noise.play();
+                tv_noise
+            }),
+            swing_sfx: main_menu.then(|| {
+                let mut swing_sfx = assets.sfx.swing_loop.effect();
+                swing_sfx.set_position(
+                    assets.level.trigger_cubes["SwingingSwing"]
+                        .center()
+                        .map(|x| x as f64),
+                );
+                swing_sfx.set_max_distance(2.0);
+                swing_sfx.play();
+                swing_sfx
+            }),
             current_swing_ref_distance: 10000.0,
             fuse_placed: false,
             time: 0.0,
@@ -191,7 +209,7 @@ impl Game {
                     },
                 ],
             ),
-            fuse_spawned: false,
+            fuse_spawned: main_menu, // LOL
             interactables: Self::initialize_interactables(assets),
             framebuffer_size: vec2(1.0, 1.0),
             geng: geng.clone(),
@@ -262,13 +280,15 @@ impl geng::State for Game {
         let delta_time = delta_time as f32;
         self.rng.update(delta_time);
         self.update_impl(delta_time);
-        self.main_menu_next_camera -= delta_time;
-        if self.main_menu_next_camera < 0.0 {
-            self.main_menu_next_camera = 5.0;
-            self.camera =
-                self.assets.config.main_menu_cameras[self.main_menu_next_camera_index].clone();
-            self.main_menu_next_camera_index += 1;
-            self.main_menu_next_camera_index %= self.assets.config.main_menu_cameras.len();
+        if self.main_menu {
+            self.main_menu_next_camera -= delta_time;
+            if self.main_menu_next_camera < 0.0 {
+                self.main_menu_next_camera = 5.0;
+                self.camera =
+                    self.assets.config.main_menu_cameras[self.main_menu_next_camera_index].clone();
+                self.main_menu_next_camera_index += 1;
+                self.main_menu_next_camera_index %= self.assets.config.main_menu_cameras.len();
+            }
         }
         if self.game_over {
             self.game_over_t += delta_time;

@@ -106,14 +106,16 @@ impl Game {
             rotation: 0.0,
             fov: 10.0,
         };
-        self.geng.draw_2d(
-            framebuffer,
-            &camera2d,
-            &draw_2d::TexturedQuad::new(
-                AABB::point(vec2(-5.0, -4.2)).extend_uniform(2.0),
-                &self.assets.flashdark,
-            ),
-        );
+        if !self.main_menu {
+            self.geng.draw_2d(
+                framebuffer,
+                &camera2d,
+                &draw_2d::TexturedQuad::new(
+                    AABB::point(vec2(-5.0, -4.2)).extend_uniform(2.0),
+                    &self.assets.flashdark,
+                ),
+            );
+        }
         if let Some(name) = &self.player.item {
             let data = &self.assets.level.items[name];
             if name.contains("StudyKey") {

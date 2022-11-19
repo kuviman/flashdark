@@ -51,17 +51,6 @@ impl Game {
         }
         self.camera.rot_h = self.player.rot_h;
         self.camera.rot_v = self.player.rot_v;
-
-        // Update audio listener
-        self.geng
-            .audio()
-            .set_listener_position(self.camera.pos.map(|x| x as f64));
-        self.geng.audio().set_listener_orientation(
-            { Mat4::rotate_z(self.camera.rot_h) * vec4(0.0, 1.0, 0.0, 1.0) }
-                .xyz()
-                .map(|x| x as f64),
-            vec3(0.0, 0.0, 1.0),
-        );
     }
     pub fn look(&self) -> LookAt {
         let mut ray = self
