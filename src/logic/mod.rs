@@ -241,7 +241,9 @@ impl Game {
 
     pub fn handle_clicks(&mut self, event: &geng::Event) {
         if let geng::Event::MouseDown { button, .. } = *event {
-            self.geng.window().lock_cursor();
+            if !self.main_menu {
+                self.geng.window().lock_cursor();
+            }
         }
 
         if self

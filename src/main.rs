@@ -46,10 +46,18 @@ impl KeyConfiguration {
 
 static mut BOOLEAN: bool = false;
 
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum UiAction {
+    Settings,
+    Exit,
+    Play,
+}
+
 pub struct Game {
     main_menu: bool,
     main_menu_next_camera: f32,
     main_menu_next_camera_index: usize,
+    hover_ui_action: Option<UiAction>,
     gf_clock_timer: f32,
     light_flicker_time: f32,
     rng: RngState,
@@ -113,7 +121,10 @@ impl Game {
         self.piano_music.stop();
     }
     pub fn new(geng: &Geng, assets: &Rc<Assets>, main_menu: bool) -> Self {
-        geng.window().lock_cursor();
+        geng.window().set_cursor_type(geng::CursorType::None);
+        if !main_menu {
+            geng.window().lock_cursor();
+        }
 
         let mut navmesh = if assets.config.create_navmesh {
             Self::init_navmesh(geng, &assets.level)
@@ -125,6 +136,7 @@ impl Game {
         Self {
             main_menu,
             main_menu_next_camera: 0.0,
+            hover_ui_action: None,
             main_menu_next_camera_index: 0,
             gf_clock_timer: 0.0,
             light_flicker_time: 0.0,
@@ -283,7 +295,7 @@ impl geng::State for Game {
         if self.main_menu {
             self.main_menu_next_camera -= delta_time;
             if self.main_menu_next_camera < 0.0 {
-                self.main_menu_next_camera = 5.0;
+                self.main_menu_next_camera += 6.0;
                 self.camera =
                     self.assets.config.main_menu_cameras[self.main_menu_next_camera_index].clone();
                 self.main_menu_next_camera_index += 1;

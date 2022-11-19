@@ -48,6 +48,18 @@ pub struct Assets {
     pub navmesh: NavMesh,
     #[asset(path = "SFX")]
     pub sfx: SfxAssets,
+    pub ui: UiAssets,
+}
+
+#[derive(geng::Assets)]
+pub struct UiAssets {
+    pub icon_flashlight: ugli::Texture,
+    pub icon_light: ugli::Texture,
+    pub flashlight: ugli::Texture,
+    pub title: ugli::Texture,
+    pub play: ugli::Texture,
+    pub icon_settings: ugli::Texture,
+    pub icon_door: ugli::Texture,
 }
 
 #[derive(geng::Assets)]
