@@ -49,12 +49,14 @@ static mut BOOLEAN: bool = false;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum UiAction {
+    None,
     Settings,
     Exit,
     Play,
     Back,
     ChangeVolume,
     ChangeMouseSens,
+    Home,
 }
 
 pub struct Game {
@@ -408,6 +410,14 @@ impl geng::State for Game {
                         }
                         UiAction::ChangeMouseSens => {
                             self.start_drag = self.ui_mouse_pos;
+                        }
+                        UiAction::None => {}
+                        UiAction::Home => {
+                            self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
+                                &self.geng,
+                                &self.assets,
+                                true,
+                            ))));
                         }
                     }
                 }

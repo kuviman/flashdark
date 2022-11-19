@@ -366,26 +366,31 @@ impl Game {
             let mut hovered = None;
             let mut to_draw = Vec::new();
             let mut new_hover_ui_action = None;
-            let mut draw_icon = |pos: Vec2<f32>, size: f32, texture, action: Option<UiAction>| {
-                let rect = rect_for(pos, size, texture);
-                let mut color = Rgba::WHITE;
-                if let Some(action) = action {
-                    if rect.contains(mouse_pos)
-                        || (self
-                            .geng
-                            .window()
-                            .is_button_pressed(geng::MouseButton::Left)
-                            && self.hover_ui_action == Some(action))
-                    {
-                        color = Rgba::BLACK;
-                        hovered = Some(pos);
-                        new_hover_ui_action = Some(action);
+            let mut draw_icon =
+                |pos: Vec2<f32>, size: f32, texture, action: Option<UiAction>| -> bool {
+                    let rect = rect_for(pos, size, texture);
+                    let mut color = Rgba::WHITE;
+                    let mut this_hovered = false;
+                    if let Some(action) = action {
+                        if rect.contains(mouse_pos)
+                            || (self
+                                .geng
+                                .window()
+                                .is_button_pressed(geng::MouseButton::Left)
+                                && self.hover_ui_action == Some(action))
+                        {
+                            color = Rgba::BLACK;
+                            hovered = Some(pos);
+                            new_hover_ui_action = Some(action);
+                            this_hovered = true;
+                        }
                     }
-                }
-                to_draw.push((rect, texture, color));
-            };
+                    to_draw.push((rect, texture, color));
+                    this_hovered
+                };
 
             // PawnMan: "I have a suggestion"
+            let mut draw_controls = false;
             if self.settings {
                 draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
                 draw_icon(
@@ -434,12 +439,29 @@ impl Game {
                     self.volume =
                         ((mouse_pos.x - (-slider_width)) / (slider_width * 2.0)).clamp(0.0, 1.0);
                 }
+                if !self.main_menu {
+                    draw_icon(
+                        vec2(-5.0, -4.0),
+                        0.5,
+                        &self.assets.ui.icon_home,
+                        Some(UiAction::Home),
+                    );
+                }
                 draw_icon(
                     vec2(5.0, -4.0),
                     0.5,
                     &self.assets.ui.icon_back,
                     Some(UiAction::Back),
                 );
+                if draw_icon(
+                    vec2(5.0, 1.0),
+                    0.5,
+                    &self.assets.ui.icon_controls,
+                    Some(UiAction::None),
+                ) {
+                    to_draw.pop();
+                    draw_controls = true;
+                }
             } else if self.main_menu {
                 draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
                 draw_icon(
@@ -489,7 +511,7 @@ impl Game {
                         texture,
                     )
                     .translate(vec2(1.0, 0.0))
-                    .scale_uniform(2.0)
+                    .scale_uniform(if draw_controls { 4.0 } else { 2.0 })
                     .transform(Mat3::rotate((pos - vec2(0.0, -3.0)).arg() + f32::PI))
                     .translate(pos),
                 );
@@ -514,6 +536,15 @@ impl Game {
                     framebuffer,
                     &camera2d,
                     &draw_2d::TexturedQuad::colored(rect, texture, color),
+                );
+            }
+            if draw_controls {
+                let texture = &self.assets.ui.label_controls;
+                let rect = rect_for(vec2(5.0, 1.0), 1.0, texture);
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::new(rect, texture),
                 );
             }
         }

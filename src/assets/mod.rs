@@ -57,15 +57,18 @@ pub struct UiAssets {
     pub icon_light: ugli::Texture,
     pub flashlight: ugli::Texture,
     pub title: ugli::Texture,
+    pub label_controls: ugli::Texture,
     pub play: ugli::Texture,
     pub icon_settings: ugli::Texture,
     pub icon_door: ugli::Texture,
+    pub icon_controls: ugli::Texture,
     pub icon_back: ugli::Texture,
     pub label_mouse_sensitivity: ugli::Texture,
     pub label_soundvolume: ugli::Texture,
     pub slider_handle1: ugli::Texture,
     pub slider_handle2: ugli::Texture,
     pub slider_line: ugli::Texture,
+    pub icon_home: ugli::Texture,
 }
 
 #[derive(geng::Assets)]
