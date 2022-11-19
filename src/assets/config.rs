@@ -40,6 +40,7 @@ pub struct Controls {
 #[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
 #[asset(json)]
 pub struct Config {
+    pub main_menu_cameras: Vec<Camera>,
     pub controls: Controls,
     pub crouch_detect_time_multiplier: f32,
     pub monster_chase_speed: ((f32, f32), (f32, f32)),

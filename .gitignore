@@ -2,3 +2,4 @@
 /Cargo.lock
 *.blend1
 PSD/
+/saved_pos.json

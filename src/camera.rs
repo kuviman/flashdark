@@ -1,5 +1,6 @@
 use super::*;
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Camera {
     pub fov: f32,
     pub pos: Vec3<f32>,

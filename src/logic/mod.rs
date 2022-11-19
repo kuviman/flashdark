@@ -26,6 +26,10 @@ impl Game {
         self.time += delta_time;
 
         self.update_lights(delta_time);
+
+        if self.main_menu {
+            return;
+        }
         self.update_movement(delta_time);
         self.update_camera(delta_time);
         self.update_flashdark(delta_time);

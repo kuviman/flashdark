@@ -47,6 +47,9 @@ impl KeyConfiguration {
 static mut BOOLEAN: bool = false;
 
 pub struct Game {
+    main_menu: bool,
+    main_menu_next_camera: f32,
+    main_menu_next_camera_index: usize,
     gf_clock_timer: f32,
     light_flicker_time: f32,
     rng: RngState,
@@ -109,7 +112,7 @@ impl Game {
         }
         self.piano_music.stop();
     }
-    pub fn new(geng: &Geng, assets: &Rc<Assets>) -> Self {
+    pub fn new(geng: &Geng, assets: &Rc<Assets>, main_menu: bool) -> Self {
         geng.window().lock_cursor();
 
         let mut navmesh = if assets.config.create_navmesh {
@@ -120,6 +123,9 @@ impl Game {
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
         Self {
+            main_menu,
+            main_menu_next_camera: 0.0,
+            main_menu_next_camera_index: 0,
             gf_clock_timer: 0.0,
             light_flicker_time: 0.0,
             rng: RngState::new(),
@@ -238,7 +244,7 @@ impl Game {
                 texture.set_wrap_mode(ugli::WrapMode::Repeat);
                 texture
             },
-            intro_sfx: unsafe { !BOOLEAN }.then(|| assets.sfx.intro_sequence.play()),
+            intro_sfx: unsafe { !BOOLEAN && !main_menu }.then(|| assets.sfx.intro_sequence.play()),
         }
     }
 
@@ -246,6 +252,7 @@ impl Game {
         self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
             &self.geng,
             &self.assets,
+            false,
         ))));
     }
 }
@@ -255,6 +262,14 @@ impl geng::State for Game {
         let delta_time = delta_time as f32;
         self.rng.update(delta_time);
         self.update_impl(delta_time);
+        self.main_menu_next_camera -= delta_time;
+        if self.main_menu_next_camera < 0.0 {
+            self.main_menu_next_camera = 5.0;
+            self.camera =
+                self.assets.config.main_menu_cameras[self.main_menu_next_camera_index].clone();
+            self.main_menu_next_camera_index += 1;
+            self.main_menu_next_camera_index %= self.assets.config.main_menu_cameras.len();
+        }
         if self.game_over {
             self.game_over_t += delta_time;
             self.player.height += (1.0 - self.player.height) * (delta_time / 0.1).min(1.0);
@@ -304,6 +319,14 @@ impl geng::State for Game {
             {
                 self.reset();
             }
+            #[cfg(not(target_arch = "wasm32"))]
+            geng::Event::KeyDown { key: geng::Key::I } => {
+                serde_json::to_writer_pretty(
+                    std::fs::File::create("saved_pos.json").unwrap(),
+                    &self.camera,
+                )
+                .unwrap();
+            }
             _ => {}
         }
     }
@@ -329,7 +352,7 @@ fn main() {
             <Assets as geng::LoadAsset>::load(&geng, &static_path().join("assets")),
             {
                 let geng = geng.clone();
-                move |assets| Game::new(&geng, &Rc::new(assets.unwrap()))
+                move |assets| Game::new(&geng, &Rc::new(assets.unwrap()), true)
             },
         ),
     );

@@ -52,6 +52,7 @@ impl Monster {
             pause_time: 0.0,
             loop_sound: {
                 let mut effect = assets.sfx.ghost_loop.effect();
+                effect.set_volume(0.0);
                 effect.set_max_distance(assets.config.max_sound_distance);
                 effect.play();
                 effect
@@ -381,6 +382,7 @@ impl Game {
             .extend(0.0);
         }
 
+        self.monster.loop_sound.set_volume(1.0);
         self.monster
             .loop_sound
             .set_position(self.monster.pos.map(|x| x as f64));
