@@ -47,6 +47,7 @@ impl KeyConfiguration {
 static mut BOOLEAN: bool = false;
 
 pub struct Game {
+    gf_clock_timer: f32,
     light_flicker_time: f32,
     rng: RngState,
     game_over: bool,
@@ -119,6 +120,7 @@ impl Game {
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
         Self {
+            gf_clock_timer: 0.0,
             light_flicker_time: 0.0,
             rng: RngState::new(),
             game_over: false,

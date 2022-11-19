@@ -186,6 +186,16 @@ impl Game {
                 * Mat4::rotate_x(self.time.sin() * 0.5)
                 * Mat4::translate(-center);
         }
+        if mesh.name == "S_GrandfatherClock" {
+            let shake_t = (60.0 - self.gf_clock_timer).clamp(0.0, 1.0);
+            if shake_t < 1.0 {
+                let center = find_center(&mesh.geometry).xy().extend(0.0);
+                matrix = Mat4::translate(center)
+                    * Mat4::rotate_y((self.rng.get(10.0) * 0.5 + 0.5) * 0.02)
+                    * Mat4::translate(-center)
+                    * matrix;
+            }
+        }
         if mesh.name.starts_with("B_") {
             // TODO: only once
             let mut sum = Vec3::ZERO;

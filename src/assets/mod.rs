@@ -64,6 +64,8 @@ pub struct Music {
 pub struct SfxAssets {
     #[asset(path = "HouseAmbient.mp3", postprocess = "loop_sound")]
     pub ambient: geng::Sound,
+    #[asset(path = "clockChime.mp3")]
+    pub grand_clock: geng::Sound,
     #[asset(path = "doorClose.mp3")]
     pub door_close: geng::Sound,
     #[asset(path = "doorLocked.mp3")]

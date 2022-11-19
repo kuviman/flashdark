@@ -195,6 +195,33 @@ impl Game {
             }
             self.key_puzzle_state = KeyPuzzleState::Entered;
         }
+
+        // GF clock
+        self.gf_clock_timer -= delta_time;
+        if self.gf_clock_timer < 0.0
+            && self.assets.level.trigger_cubes["GrandClock"]
+                .horizontal_aabb()
+                .contains(self.player.pos.xy())
+        {
+            self.gf_clock_timer = 60.0;
+            let mut sfx = self.assets.sfx.grand_clock.effect();
+            sfx.set_position(
+                find_center(
+                    &self
+                        .assets
+                        .level
+                        .obj
+                        .meshes
+                        .iter()
+                        .find(|m| m.name == "S_GrandfatherClock")
+                        .unwrap()
+                        .geometry,
+                )
+                .map(|x| x as f64),
+            );
+            sfx.set_max_distance(self.assets.config.max_sound_distance);
+            sfx.play();
+        }
     }
 
     pub fn handle_clicks(&mut self, event: &geng::Event) {
