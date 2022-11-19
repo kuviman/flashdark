@@ -1,3 +1,4 @@
+#![windows_subsystem = "windows"]
 use geng::{prelude::*, Key};
 
 mod assets;
@@ -51,15 +52,23 @@ pub enum UiAction {
     Settings,
     Exit,
     Play,
+    Back,
+    ChangeVolume,
+    ChangeMouseSens,
 }
 
 pub struct Game {
     main_menu: bool,
+    settings: bool,
+    mouse_sens: f32,
+    volume: f32,
     main_menu_next_camera: f32,
     main_menu_next_camera_index: usize,
     hover_ui_action: Option<UiAction>,
     gf_clock_timer: f32,
     light_flicker_time: f32,
+    start_drag: Vec2<f32>,
+    ui_mouse_pos: Vec2<f32>,
     rng: RngState,
     game_over: bool,
     game_over_t: f32,
@@ -134,8 +143,13 @@ impl Game {
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
         Self {
+            start_drag: Vec2::ZERO,
+            ui_mouse_pos: Vec2::ZERO,
+            mouse_sens: 0.5,
+            volume: 0.5,
             main_menu,
             main_menu_next_camera: 0.0,
+            settings: false,
             hover_ui_action: None,
             main_menu_next_camera_index: 0,
             gf_clock_timer: 0.0,
@@ -358,6 +372,25 @@ impl geng::State for Game {
                     &self.camera,
                 )
                 .unwrap();
+            }
+            geng::Event::MouseDown {
+                button: geng::MouseButton::Left,
+                ..
+            } => {
+                if let Some(action) = self.hover_ui_action {
+                    match action {
+                        UiAction::Settings => self.settings = true,
+                        UiAction::Exit => self.transition = Some(geng::Transition::Pop),
+                        UiAction::Play => self.reset(),
+                        UiAction::Back => self.settings = false,
+                        UiAction::ChangeVolume => {
+                            self.start_drag = self.ui_mouse_pos;
+                        }
+                        UiAction::ChangeMouseSens => {
+                            self.start_drag = self.ui_mouse_pos;
+                        }
+                    }
+                }
             }
             _ => {}
         }
