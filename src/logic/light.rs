@@ -74,6 +74,21 @@ impl Game {
     }
 
     pub fn update_lights(&mut self, delta_time: f32) {
+        self.light_flicker_time -= delta_time;
+        if self.light_flicker_time < 0.0 {
+            self.light_flicker_time = 5.0;
+            let light = self
+                .lights
+                .iter_mut()
+                .filter(|l| l.id.0 != 0)
+                .choose(&mut global_rng())
+                .unwrap();
+            light.flicker_time = 0.5;
+            // let mut sfx = self.assets.sfx.light_flicker.effect();
+            // sfx.set_position(light.pos.map(|x| x as f64));
+            // sfx.set_max_distance(self.assets.config.max_sound_distance);
+            // sfx.play();
+        }
         for light in &mut self.lights {
             light.flicker_time -= delta_time;
             // light.intensity += (target_intensity - light.intensity).clamp_abs(delta_time / 0.)

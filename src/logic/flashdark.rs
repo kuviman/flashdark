@@ -62,6 +62,11 @@ impl Game {
             self.key_puzzle_state = KeyPuzzleState::Ready;
             self.ambient_light = self.assets.config.ambient_light_inside_house;
 
+            self.assets.sfx.light_flicker.play();
+            for light in &mut self.lights {
+                light.flicker_time = 0.5;
+            }
+
             for (name, data) in &self.assets.level.items {
                 if !name.contains("StudyKey") {
                     continue;

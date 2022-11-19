@@ -166,6 +166,7 @@ impl Game {
         if interactable.data.obj.meshes[0].name == "D_DoorStudy" {
             if self.key_puzzle_state == KeyPuzzleState::Entered {
                 self.key_puzzle_state = KeyPuzzleState::LightOut;
+                self.assets.sfx.light_flicker.play();
                 self.ambient_light = Rgba::BLACK;
                 self.player.flashdark.on = false;
                 return;
