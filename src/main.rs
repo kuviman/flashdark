@@ -1,5 +1,5 @@
 #![windows_subsystem = "windows"]
-use geng::{prelude::*, Key};
+use geng::prelude::*;
 
 mod assets;
 mod camera;
@@ -58,6 +58,8 @@ pub enum UiAction {
     Back,
     ChangeVolume,
     ChangeMouseSens,
+    IncDifficulty,
+    DecDifficulty,
     Home,
 }
 
@@ -65,13 +67,17 @@ pub enum UiAction {
 pub struct Settings {
     pub mouse_sens: f32,
     pub volume: f32,
+    pub difficulty: usize,
 }
+
+const DEFAULT_DIFF: usize = 0;
 
 impl Default for Settings {
     fn default() -> Self {
         Self {
             mouse_sens: 0.5,
             volume: 0.5,
+            difficulty: 0,
         }
     }
 }
@@ -80,6 +86,7 @@ pub struct Game {
     main_menu: bool,
     in_settings: bool,
     settings: Settings,
+    difficulty: Difficulty,
     main_menu_next_camera: f32,
     main_menu_next_camera_index: usize,
     hover_ui_action: Option<UiAction>,
@@ -175,6 +182,7 @@ impl Game {
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
         Self {
+            difficulty: assets.difficulties[DEFAULT_DIFF].clone(),
             start_drag: Vec2::ZERO,
             ui_mouse_pos: Vec2::ZERO,
             settings: batbox::preferences::load("flashdark.json").unwrap_or_default(),
@@ -338,6 +346,7 @@ impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
         self.sens = 0.0002 + self.settings.mouse_sens * 0.01;
         self.geng.audio().set_volume(self.settings.volume as f64);
+        self.difficulty = self.assets.difficulties[self.settings.difficulty].clone();
         let delta_time = delta_time as f32;
         self.update_particles(delta_time);
         self.rng.update(delta_time);
@@ -455,6 +464,15 @@ impl geng::State for Game {
                                 &self.assets,
                                 true,
                             ))));
+                        }
+                        UiAction::IncDifficulty => {
+                            self.settings.difficulty =
+                                (self.settings.difficulty + 1) % self.assets.difficulties.len()
+                        }
+                        UiAction::DecDifficulty => {
+                            self.settings.difficulty =
+                                (self.settings.difficulty + self.assets.difficulties.len() - 1)
+                                    % self.assets.difficulties.len()
                         }
                     }
                 }

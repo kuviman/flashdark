@@ -394,20 +394,44 @@ impl Game {
             // PawnMan: "I have a suggestion"
             let mut draw_controls = false;
             if self.in_settings {
+                draw_icon(vec2(0.0, -2.0), 0.2, &self.assets.ui.label_difficulty, None);
+                draw_icon(
+                    vec2(0.0, -2.5),
+                    0.15,
+                    [
+                        &self.assets.ui.label_easy,
+                        &self.assets.ui.label_normal,
+                        &self.assets.ui.label_hard,
+                    ][self.settings.difficulty],
+                    None,
+                );
+                draw_icon(
+                    vec2(-2.0, -2.5),
+                    0.2,
+                    &self.assets.ui.icon_arrow_left,
+                    Some(UiAction::DecDifficulty),
+                );
+                draw_icon(
+                    vec2(2.0, -2.5),
+                    0.2,
+                    &self.assets.ui.icon_arrow_right,
+                    Some(UiAction::IncDifficulty),
+                );
+
                 draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
                 draw_icon(
-                    vec2(0.0, 0.1),
+                    vec2(0.0, 1.1),
                     0.2,
                     &self.assets.ui.label_mouse_sensitivity,
                     None,
                 );
                 let slider_width = 0.1 * self.assets.ui.slider_line.size().x as f32
                     / self.assets.ui.slider_line.size().y as f32;
-                draw_icon(vec2(0.0, -0.5), 0.1, &self.assets.ui.slider_line, None);
+                draw_icon(vec2(0.0, 0.5), 0.1, &self.assets.ui.slider_line, None);
                 draw_icon(
                     vec2(
                         -slider_width + slider_width * 2.0 * self.settings.mouse_sens,
-                        -0.5,
+                        0.5,
                     ),
                     0.4,
                     &self.assets.ui.slider_handle1,
@@ -423,16 +447,16 @@ impl Game {
                         ((mouse_pos.x - (-slider_width)) / (slider_width * 2.0)).clamp(0.0, 1.0);
                 }
                 draw_icon(
-                    vec2(0.0, -1.5),
+                    vec2(0.0, -0.5),
                     0.2,
                     &self.assets.ui.label_soundvolume,
                     None,
                 );
-                draw_icon(vec2(0.0, -2.1), 0.1, &self.assets.ui.slider_line, None);
+                draw_icon(vec2(0.0, -1.1), 0.1, &self.assets.ui.slider_line, None);
                 draw_icon(
                     vec2(
                         -slider_width + slider_width * 2.0 * self.settings.volume,
-                        -2.1,
+                        -1.1,
                     ),
                     0.4,
                     &self.assets.ui.slider_handle2,

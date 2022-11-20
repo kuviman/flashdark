@@ -44,29 +44,7 @@
             "Enter"
         ]
     },
-    "crouch_detect_time_multiplier": 3.0,
-    "monster_chase_speed": [
-        [
-            0.5,
-            3.0
-        ],
-        [
-            3.0,
-            2.0
-        ]
-    ],
     "create_navmesh": false,
-    "peek_distance": 0.1,
-    "monster_180_range": 1.0,
-    "monster_detect_time": 0.2,
-    "monster_scan_time": 10.0,
-    "monster_scan_radius": 3.0,
-    "ghost_stand_still_time": [
-        1,
-        2
-    ],
-    "monster_fov": 120,
-    "monster_view_distance": 10.0,
     "flashdark_flicker_interval": 5.0,
     "flashdark_turn_off_probability": 0.3,
     "tv_detection_angle": 30.0,
@@ -76,7 +54,6 @@
     "sky_color": "#0F1E70",
     "footstep_dist": 1.0,
     "max_sound_distance": 10.0,
-    "max_ghost_sound_distance": 3.0,
     "arms_horizontal_length": 1.0,
     "arms_vertical_length": 1.5,
     "parents": {

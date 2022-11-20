@@ -57,6 +57,8 @@ pub struct Assets {
     pub ui: UiAssets,
     #[asset(path = "VFX/dustParticle.png")]
     pub dust_particle: ugli::Texture,
+    #[asset(path = "difficulty/*.json", range = "1..=3")]
+    pub difficulties: Vec<Difficulty>,
 }
 
 #[derive(geng::Assets)]
@@ -77,6 +79,13 @@ pub struct UiAssets {
     pub slider_handle2: ugli::Texture,
     pub slider_line: ugli::Texture,
     pub icon_home: ugli::Texture,
+    pub icon_arrow_left: ugli::Texture,
+    pub icon_arrow_right: ugli::Texture,
+    pub label_difficulty: ugli::Texture,
+    pub label_easy: ugli::Texture,
+    pub label_hard: ugli::Texture,
+    // Donde esta la leche
+    pub label_normal: ugli::Texture,
 }
 
 #[derive(geng::Assets)]
