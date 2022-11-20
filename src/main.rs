@@ -87,6 +87,7 @@ pub struct Game {
     ui_mouse_pos: Vec2<f32>,
     rng: RngState,
     game_over: bool,
+    game_over_sfx: Option<geng::SoundEffect>,
     game_over_t: f32,
     chase_music: Option<(f64, geng::SoundEffect)>,
     piano_music: geng::SoundEffect,
@@ -149,7 +150,11 @@ impl Game {
         if let Some(sfx) = &mut self.intro_sfx {
             sfx.stop();
         }
+        if let Some(sfx) = &mut self.game_over_sfx {
+            sfx.stop();
+        }
         self.piano_music.stop();
+        self.monster.stop_sounds();
     }
     pub fn new(geng: &Geng, assets: &Rc<Assets>, main_menu: bool) -> Self {
         geng.window().set_cursor_type(geng::CursorType::None);
@@ -177,6 +182,7 @@ impl Game {
             light_flicker_time: 0.0,
             rng: RngState::new(),
             game_over: false,
+            game_over_sfx: None,
             game_over_t: 0.0,
             piano_music: {
                 let mut sfx = assets.music.piano.effect();
