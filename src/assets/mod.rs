@@ -133,6 +133,10 @@ pub struct SfxAssets {
     pub place_object: geng::Sound,
     #[asset(path = "gameOverScare.mp3")]
     pub jumpscare: geng::Sound,
+    #[asset(path = "curtainsOpen.mp3")]
+    pub curtains_open: geng::Sound,
+    #[asset(path = "curtainsClose.mp3")]
+    pub curtains_close: geng::Sound,
     #[asset(path = "lightFlicker.mp3")]
     pub light_flicker: geng::Sound,
     #[asset(path = "tvStatic.mp3", postprocess = "loop_sound")]
@@ -152,6 +156,8 @@ impl SfxAssets {
             "doorLocked.mp3" => &self.door_locked,
             "doorUnlocked.mp3" => &self.door_unlocked,
             "fusePlaced.mp3" => &self.fuse_placed,
+            "curtainsOpen.mp3" => &self.curtains_open,
+            "curtainsClose.mp3" => &self.curtains_close,
             _ => unreachable!(),
         }
     }

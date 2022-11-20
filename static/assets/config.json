@@ -85,10 +85,12 @@
     "open_interactables": [],
     "interactables": {
         "I_ShowerCurtain_Open": {
+            "sfx": "curtainsClose.mp3",
             "transform_on_use": "D_ShowerCurtain_Closed"
         },
         "D_ShowerCurtain_Closed": {
             "hidden": true,
+            "sfx": "curtainsOpen.mp3",
             "transform_on_use": "I_ShowerCurtain_Open"
         },
         "D_DoorGuest": {
