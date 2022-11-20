@@ -130,6 +130,7 @@ pub struct Game {
 impl Drop for Game {
     fn drop(&mut self) {
         self.stop_sounds();
+        batbox::preferences::save("flashdark.json", &self.settings);
     }
 }
 
