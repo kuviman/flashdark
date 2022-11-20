@@ -129,6 +129,12 @@ impl Game {
         if let Some((_, sfx)) = &mut self.chase_music {
             sfx.stop();
         }
+        if let Some(sfx) = &mut self.swing_sfx {
+            sfx.stop();
+        }
+        if let Some(sfx) = &mut self.intro_sfx {
+            sfx.stop();
+        }
         self.piano_music.stop();
     }
     pub fn new(geng: &Geng, assets: &Rc<Assets>, main_menu: bool) -> Self {
