@@ -113,9 +113,9 @@ void main() {
             }
         }
         l_shadow /= (2.0 * float(SHADOWS_SOFT) + 1.0) * (2.0 * float(SHADOWS_SOFT) + 1.0);
-        // if (light_pos.z > 1.0) {
-        //     l_shadow = 0.0;
-        // }
+        if (light_pos.z > 1.0 || light_pos.z < 0.0) {
+            l_shadow = 1.0;
+        }
         light_level += (1.0 - l_shadow) * u_lights[light].intensity;// * cos;
     }
     // Ambient

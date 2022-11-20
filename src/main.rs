@@ -7,6 +7,7 @@ mod draw;
 mod id;
 mod loading_screen;
 mod logic;
+mod particles;
 mod util;
 
 pub use assets::*;
@@ -15,6 +16,7 @@ pub use draw::*;
 pub use id::*;
 pub use loading_screen::*;
 pub use logic::*;
+pub use particles::*;
 pub use util::*;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -59,11 +61,25 @@ pub enum UiAction {
     Home,
 }
 
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct Settings {
+    pub mouse_sens: f32,
+    pub volume: f32,
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            mouse_sens: 0.5,
+            volume: 0.5,
+        }
+    }
+}
+
 pub struct Game {
     main_menu: bool,
-    settings: bool,
-    mouse_sens: f32,
-    volume: f32,
+    in_settings: bool,
+    settings: Settings,
     main_menu_next_camera: f32,
     main_menu_next_camera_index: usize,
     hover_ui_action: Option<UiAction>,
@@ -73,6 +89,7 @@ pub struct Game {
     ui_mouse_pos: Vec2<f32>,
     rng: RngState,
     game_over: bool,
+    game_over_sfx: Option<geng::SoundEffect>,
     game_over_t: f32,
     chase_music: Option<(f64, geng::SoundEffect)>,
     piano_music: geng::SoundEffect,
@@ -110,11 +127,13 @@ pub struct Game {
     intro_t: f32,
     intro_skip_t: f32,
     intro_sfx: Option<geng::SoundEffect>,
+    particles: Particles,
 }
 
 impl Drop for Game {
     fn drop(&mut self) {
         self.stop_sounds();
+        batbox::preferences::save("flashdark.json", &self.settings);
     }
 }
 
@@ -129,7 +148,18 @@ impl Game {
         if let Some((_, sfx)) = &mut self.chase_music {
             sfx.stop();
         }
+        if let Some(sfx) = &mut self.swing_sfx {
+            sfx.stop();
+        }
+        if let Some(sfx) = &mut self.intro_sfx {
+            sfx.stop();
+        }
+        // if you're reading this, there's one very important thing you should know:
+        if let Some(sfx) = &mut self.game_over_sfx {
+            sfx.stop();
+        }
         self.piano_music.stop();
+        self.monster.stop_sounds();
     }
     pub fn new(geng: &Geng, assets: &Rc<Assets>, main_menu: bool) -> Self {
         geng.window().set_cursor_type(geng::CursorType::None);
@@ -147,17 +177,17 @@ impl Game {
         Self {
             start_drag: Vec2::ZERO,
             ui_mouse_pos: Vec2::ZERO,
-            mouse_sens: 0.5,
-            volume: 0.5,
+            settings: batbox::preferences::load("flashdark.json").unwrap_or_default(),
             main_menu,
             main_menu_next_camera: 0.0,
-            settings: false,
+            in_settings: false,
             hover_ui_action: None,
             main_menu_next_camera_index: 0,
             gf_clock_timer: 0.0,
             light_flicker_time: 0.0,
             rng: RngState::new(),
             game_over: false,
+            game_over_sfx: None,
             game_over_t: 0.0,
             piano_music: {
                 let mut sfx = assets.music.piano.effect();
@@ -174,7 +204,7 @@ impl Game {
                     )
                     .map(|x| x as f64),
                 );
-                sfx.set_max_distance(2.0);
+                sfx.set_max_distance(4.0);
                 sfx.play();
                 sfx
             },
@@ -291,6 +321,7 @@ impl Game {
                 texture
             },
             intro_sfx: unsafe { !BOOLEAN && !main_menu }.then(|| assets.sfx.intro_sequence.play()),
+            particles: Particles::new(geng),
         }
     }
 
@@ -305,8 +336,10 @@ impl Game {
 
 impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
-        self.sens = 0.0002 + self.mouse_sens * 0.01;
+        self.sens = 0.0002 + self.settings.mouse_sens * 0.01;
+        self.geng.audio().set_volume(self.settings.volume as f64);
         let delta_time = delta_time as f32;
+        self.update_particles(delta_time);
         self.rng.update(delta_time);
         self.update_impl(delta_time);
         if self.main_menu {
@@ -341,7 +374,7 @@ impl geng::State for Game {
     }
 
     fn handle_event(&mut self, event: geng::Event) {
-        if !self.lock_controls && self.intro_t < 0.0 && !self.main_menu && !self.settings {
+        if !self.lock_controls && self.intro_t < 0.0 && !self.main_menu && !self.in_settings {
             self.handle_event_camera(&event);
             self.handle_clicks(&event);
         }
@@ -364,8 +397,11 @@ impl geng::State for Game {
         if !self.main_menu && self.intro_t < 0.0 {
             for button in &self.assets.config.controls.pause {
                 if button.matches(&event) {
-                    self.settings = !self.settings;
-                    if !self.main_menu && !self.settings {
+                    self.in_settings = !self.in_settings;
+                    if !self.in_settings {
+                        batbox::preferences::save("flashdark.json", &self.settings);
+                    }
+                    if !self.main_menu && !self.in_settings {
                         self.geng.window().lock_cursor();
                     } else {
                         self.geng.window().unlock_cursor();
@@ -394,11 +430,12 @@ impl geng::State for Game {
             } => {
                 if let Some(action) = self.hover_ui_action {
                     match action {
-                        UiAction::Settings => self.settings = true,
+                        UiAction::Settings => self.in_settings = true,
                         UiAction::Exit => self.transition = Some(geng::Transition::Pop),
                         UiAction::Play => self.reset(),
                         UiAction::Back => {
-                            self.settings = false;
+                            self.in_settings = false;
+                            batbox::preferences::save("flashdark.json", &self.settings);
                             if !self.main_menu {
                                 self.geng.window().lock_cursor();
                             } else {

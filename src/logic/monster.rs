@@ -28,11 +28,14 @@ pub struct Monster {
 
 impl Drop for Monster {
     fn drop(&mut self) {
-        self.loop_sound.stop();
+        self.stop_sounds();
     }
 }
 
 impl Monster {
+    pub fn stop_sounds(&mut self) {
+        self.loop_sound.stop();
+    }
     pub fn new(assets: &Assets) -> Self {
         let pos = assets.level.trigger_cubes["GhostSpawn"].center();
         Self {
@@ -288,7 +291,7 @@ impl Game {
         if (self.monster.pos - self.player.pos).len() < 0.5 && !self.player.god_mode {
             if !self.game_over {
                 self.stop_sounds();
-                self.assets.sfx.jumpscare.play();
+                self.game_over_sfx = Some(self.assets.sfx.jumpscare.play());
                 self.game_over = true;
             }
             // self.transition = Some(geng::Transition::Switch(Box::new(Game::new(

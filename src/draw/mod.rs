@@ -99,6 +99,8 @@ impl Game {
 
         self.draw_debug_navmesh(framebuffer);
 
+        self.draw_particles(framebuffer);
+
         // UI ---
 
         let camera2d = geng::Camera2d {
@@ -246,7 +248,7 @@ impl Game {
             }
         }
 
-        if !self.main_menu && !self.settings {
+        if !self.main_menu && !self.in_settings {
             // PawnMan20 is like totally hot
             let reticle_texture = (|| {
                 match look.target {
@@ -339,7 +341,7 @@ impl Game {
         //     ),
         // );
 
-        if self.main_menu || self.settings {
+        if self.main_menu || self.in_settings {
             if !self.main_menu {
                 self.geng.draw_2d(
                     framebuffer,
@@ -391,7 +393,7 @@ impl Game {
 
             // PawnMan: "I have a suggestion"
             let mut draw_controls = false;
-            if self.settings {
+            if self.in_settings {
                 draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
                 draw_icon(
                     vec2(0.0, 0.1),
@@ -403,7 +405,10 @@ impl Game {
                     / self.assets.ui.slider_line.size().y as f32;
                 draw_icon(vec2(0.0, -0.5), 0.1, &self.assets.ui.slider_line, None);
                 draw_icon(
-                    vec2(-slider_width + slider_width * 2.0 * self.mouse_sens, -0.5),
+                    vec2(
+                        -slider_width + slider_width * 2.0 * self.settings.mouse_sens,
+                        -0.5,
+                    ),
                     0.4,
                     &self.assets.ui.slider_handle1,
                     Some(UiAction::ChangeMouseSens),
@@ -414,7 +419,7 @@ impl Game {
                         .window()
                         .is_button_pressed(geng::MouseButton::Left)
                 {
-                    self.mouse_sens =
+                    self.settings.mouse_sens =
                         ((mouse_pos.x - (-slider_width)) / (slider_width * 2.0)).clamp(0.0, 1.0);
                 }
                 draw_icon(
@@ -425,7 +430,10 @@ impl Game {
                 );
                 draw_icon(vec2(0.0, -2.1), 0.1, &self.assets.ui.slider_line, None);
                 draw_icon(
-                    vec2(-slider_width + slider_width * 2.0 * self.volume, -2.1),
+                    vec2(
+                        -slider_width + slider_width * 2.0 * self.settings.volume,
+                        -2.1,
+                    ),
                     0.4,
                     &self.assets.ui.slider_handle2,
                     Some(UiAction::ChangeVolume),
@@ -436,7 +444,7 @@ impl Game {
                         .window()
                         .is_button_pressed(geng::MouseButton::Left)
                 {
-                    self.volume =
+                    self.settings.volume =
                         ((mouse_pos.x - (-slider_width)) / (slider_width * 2.0)).clamp(0.0, 1.0);
                 }
                 if !self.main_menu {
