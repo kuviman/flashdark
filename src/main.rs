@@ -200,7 +200,7 @@ impl Game {
                     )
                     .map(|x| x as f64),
                 );
-                sfx.set_max_distance(2.0);
+                sfx.set_max_distance(4.0);
                 sfx.play();
                 sfx
             },
