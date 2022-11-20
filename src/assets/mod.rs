@@ -18,6 +18,12 @@ pub fn loop_sound(sound: &mut geng::Sound) {
     sound.looped = true;
 }
 
+pub fn loop_sound_all(sounds: &mut [geng::Sound]) {
+    for sound in sounds {
+        loop_sound(sound);
+    }
+}
+
 #[derive(geng::Assets)]
 pub struct GhostDirections {
     pub front: ugli::Texture,
@@ -77,7 +83,11 @@ pub struct Music {
     pub outside: geng::Sound,
     #[asset(path = "AnxietyMusic.mp3", postprocess = "loop_sound")]
     pub anxiety: geng::Sound,
-    #[asset(path = "ChaseMusic*.mp3", range = "1..=2", postprocess = "loop_sound")]
+    #[asset(
+        path = "ChaseMusic*.mp3",
+        range = "1..=2",
+        postprocess = "loop_sound_all"
+    )]
     pub chase: Vec<geng::Sound>,
     #[asset(path = "ThePiano.mp3", postprocess = "loop_sound")]
     pub piano: geng::Sound,
