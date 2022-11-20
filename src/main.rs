@@ -59,11 +59,25 @@ pub enum UiAction {
     Home,
 }
 
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct Settings {
+    pub mouse_sens: f32,
+    pub volume: f32,
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            mouse_sens: 0.5,
+            volume: 0.5,
+        }
+    }
+}
+
 pub struct Game {
     main_menu: bool,
-    settings: bool,
-    mouse_sens: f32,
-    volume: f32,
+    in_settings: bool,
+    settings: Settings,
     main_menu_next_camera: f32,
     main_menu_next_camera_index: usize,
     hover_ui_action: Option<UiAction>,
@@ -153,11 +167,10 @@ impl Game {
         Self {
             start_drag: Vec2::ZERO,
             ui_mouse_pos: Vec2::ZERO,
-            mouse_sens: 0.5,
-            volume: 0.5,
+            settings: batbox::preferences::load("flashdark.json").unwrap_or_default(),
             main_menu,
             main_menu_next_camera: 0.0,
-            settings: false,
+            in_settings: false,
             hover_ui_action: None,
             main_menu_next_camera_index: 0,
             gf_clock_timer: 0.0,
@@ -311,7 +324,7 @@ impl Game {
 
 impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
-        self.sens = 0.0002 + self.mouse_sens * 0.01;
+        self.sens = 0.0002 + self.settings.mouse_sens * 0.01;
         let delta_time = delta_time as f32;
         self.rng.update(delta_time);
         self.update_impl(delta_time);
@@ -347,7 +360,7 @@ impl geng::State for Game {
     }
 
     fn handle_event(&mut self, event: geng::Event) {
-        if !self.lock_controls && self.intro_t < 0.0 && !self.main_menu && !self.settings {
+        if !self.lock_controls && self.intro_t < 0.0 && !self.main_menu && !self.in_settings {
             self.handle_event_camera(&event);
             self.handle_clicks(&event);
         }
@@ -370,8 +383,11 @@ impl geng::State for Game {
         if !self.main_menu && self.intro_t < 0.0 {
             for button in &self.assets.config.controls.pause {
                 if button.matches(&event) {
-                    self.settings = !self.settings;
-                    if !self.main_menu && !self.settings {
+                    self.in_settings = !self.in_settings;
+                    if !self.in_settings {
+                        batbox::preferences::save("flashdark.json", &self.settings);
+                    }
+                    if !self.main_menu && !self.in_settings {
                         self.geng.window().lock_cursor();
                     } else {
                         self.geng.window().unlock_cursor();
@@ -400,11 +416,12 @@ impl geng::State for Game {
             } => {
                 if let Some(action) = self.hover_ui_action {
                     match action {
-                        UiAction::Settings => self.settings = true,
+                        UiAction::Settings => self.in_settings = true,
                         UiAction::Exit => self.transition = Some(geng::Transition::Pop),
                         UiAction::Play => self.reset(),
                         UiAction::Back => {
-                            self.settings = false;
+                            self.in_settings = false;
+                            batbox::preferences::save("flashdark.json", &self.settings);
                             if !self.main_menu {
                                 self.geng.window().lock_cursor();
                             } else {

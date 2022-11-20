@@ -38,7 +38,7 @@ impl Game {
             vec3(0.0, 0.0, 1.0),
         );
 
-        if self.main_menu || self.settings {
+        if self.main_menu || self.in_settings {
             return;
         }
         self.update_movement(delta_time);
@@ -241,7 +241,7 @@ impl Game {
 
     pub fn handle_clicks(&mut self, event: &geng::Event) {
         if let geng::Event::MouseDown { button, .. } = *event {
-            if !self.main_menu && !self.settings {
+            if !self.main_menu && !self.in_settings {
                 self.geng.window().lock_cursor();
             }
         }
