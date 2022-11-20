@@ -150,6 +150,7 @@ impl Game {
         if let Some(sfx) = &mut self.intro_sfx {
             sfx.stop();
         }
+        // if you're reading this, there's one very important thing you should know:
         if let Some(sfx) = &mut self.game_over_sfx {
             sfx.stop();
         }
