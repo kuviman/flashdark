@@ -332,6 +332,7 @@ impl Game {
 impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
         self.sens = 0.0002 + self.settings.mouse_sens * 0.01;
+        self.geng.audio().set_volume(self.settings.volume as f64);
         let delta_time = delta_time as f32;
         self.rng.update(delta_time);
         self.update_impl(delta_time);
