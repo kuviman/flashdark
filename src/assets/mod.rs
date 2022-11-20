@@ -55,6 +55,8 @@ pub struct Assets {
     #[asset(path = "SFX")]
     pub sfx: SfxAssets,
     pub ui: UiAssets,
+    #[asset(path = "VFX/dustParticle.png")]
+    pub dust_particle: ugli::Texture,
 }
 
 #[derive(geng::Assets)]
@@ -165,4 +167,5 @@ pub struct Shaders {
     pub vertical_sprite: ugli::Program,
     pub obj: ugli::Program,
     pub shadow: ugli::Program,
+    pub particle: ugli::Program,
 }

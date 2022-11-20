@@ -7,6 +7,7 @@ mod draw;
 mod id;
 mod loading_screen;
 mod logic;
+mod particles;
 mod util;
 
 pub use assets::*;
@@ -15,6 +16,7 @@ pub use draw::*;
 pub use id::*;
 pub use loading_screen::*;
 pub use logic::*;
+pub use particles::*;
 pub use util::*;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -125,6 +127,7 @@ pub struct Game {
     intro_t: f32,
     intro_skip_t: f32,
     intro_sfx: Option<geng::SoundEffect>,
+    particles: Particles,
 }
 
 impl Drop for Game {
@@ -318,6 +321,7 @@ impl Game {
                 texture
             },
             intro_sfx: unsafe { !BOOLEAN && !main_menu }.then(|| assets.sfx.intro_sequence.play()),
+            particles: Particles::new(geng),
         }
     }
 
@@ -335,6 +339,7 @@ impl geng::State for Game {
         self.sens = 0.0002 + self.settings.mouse_sens * 0.01;
         self.geng.audio().set_volume(self.settings.volume as f64);
         let delta_time = delta_time as f32;
+        self.update_particles(delta_time);
         self.rng.update(delta_time);
         self.update_impl(delta_time);
         if self.main_menu {

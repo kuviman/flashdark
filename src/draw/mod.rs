@@ -99,6 +99,8 @@ impl Game {
 
         self.draw_debug_navmesh(framebuffer);
 
+        self.draw_particles(framebuffer);
+
         // UI ---
 
         let camera2d = geng::Camera2d {
