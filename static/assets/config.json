@@ -84,6 +84,13 @@
     },
     "open_interactables": [],
     "interactables": {
+        "I_ShowerCurtain_Open": {
+            "transform_on_use": "D_ShowerCurtain_Closed"
+        },
+        "D_ShowerCurtain_Closed": {
+            "hidden": true,
+            "transform_on_use": "I_ShowerCurtain_Open"
+        },
         "D_DoorGuest": {
             "disabled": true
         },
