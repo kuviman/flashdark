@@ -1,0 +1,25 @@
+{
+    "crouch_detect_time_multiplier": 3.0,
+    "monster_chase_speed": [
+        [
+            0.5,
+            3.5
+        ],
+        [
+            3.0,
+            3.0
+        ]
+    ],
+    "peek_distance": 0.1,
+    "monster_180_range": 1.0,
+    "monster_detect_time": 0.2,
+    "monster_scan_time": 15.0,
+    "monster_view_distance": 15.0,
+    "monster_scan_radius": 3.0,
+    "monster_fov": 150,
+    "ghost_stand_still_time": [
+        1,
+        2
+    ],
+    "max_ghost_sound_distance": 5.0
+}

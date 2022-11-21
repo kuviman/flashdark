@@ -70,7 +70,7 @@ impl Game {
             if let Some(ray_t) = intersect_ray_with_obj(
                 obj,
                 matrix,
-                self.assets.config.peek_distance,
+                self.difficulty.peek_distance,
                 geng::CameraRay {
                     from: pos,
                     dir: (target - pos).normalize_or_zero(),
@@ -97,13 +97,13 @@ impl Game {
             return false;
         }
         let distance = (self.monster.pos - self.player.pos).xy().len();
-        if distance > self.assets.config.monster_view_distance {
+        if distance > self.difficulty.monster_view_distance {
             return false;
         }
-        let fov = if distance < self.assets.config.monster_180_range {
+        let fov = if distance < self.difficulty.monster_180_range {
             180.0
         } else {
-            self.assets.config.monster_fov
+            self.difficulty.monster_fov
         };
         if Vec2::dot(
             self.monster.dir.xy().normalize_or_zero(),
@@ -121,7 +121,7 @@ impl Game {
     }
     pub fn monster_walk_to(&mut self, pos: Vec3<f32>, target_type: TargetType) {
         if target_type != TargetType::Rng {
-            self.monster.scan_timer = self.assets.config.monster_scan_time;
+            self.monster.scan_timer = self.difficulty.monster_scan_time;
             self.monster.next_scan_pos = pos;
         }
         // if target_type != self.monster.target_type {
@@ -157,7 +157,7 @@ impl Game {
         self.monster.next_target_pos = pos; // TODO ??? self.navmesh.waypoints[self.navmesh.closest_waypoint(pos)];
         self.monster.next_pathfind_pos = self.monster.pos;
         if let TargetType::Player = target_type {
-            let ((s, s_speed), (t, t_speed)) = self.assets.config.monster_chase_speed;
+            let ((s, s_speed), (t, t_speed)) = self.difficulty.monster_chase_speed;
             let k = (((pos - self.monster.pos).len() - s) / (t - s)).clamp(0.0, 1.0);
             self.monster.speed = s_speed * (1.0 - k) + t_speed * k;
         }
@@ -177,8 +177,7 @@ impl Game {
         if !self.monster_spawned {
             return;
         }
-        if (pos - self.monster.pos).xy().len() < self.assets.config.max_ghost_sound_distance as f32
-        {
+        if (pos - self.monster.pos).xy().len() < self.difficulty.max_ghost_sound_distance as f32 {
             self.monster_walk_to(pos, TargetType::Noise);
         }
     }
@@ -233,7 +232,7 @@ impl Game {
             // Scan ended
             if self.monster.scan_timer < 0.0 {
                 self.monster.speed = 1.0;
-                self.monster.scan_timer = self.assets.config.monster_scan_time;
+                self.monster.scan_timer = self.difficulty.monster_scan_time;
                 self.monster.next_scan_pos =
                     *self.navmesh.waypoints.choose(&mut global_rng()).unwrap();
                 self.monster.next_target_pos = self.monster.next_scan_pos;
@@ -252,14 +251,14 @@ impl Game {
             }
             if go_next {
                 self.monster.stand_still_time = {
-                    let (a, b) = self.assets.config.ghost_stand_still_time;
+                    let (a, b) = self.difficulty.ghost_stand_still_time;
                     global_rng().gen_range(a..b)
                 };
                 self.monster_walk_to(
                     //*self.navmesh.waypoints.choose(&mut global_rng()).unwrap(),
                     self.navmesh.find_close_point(
                         self.monster.next_scan_pos,
-                        self.assets.config.monster_scan_radius,
+                        self.difficulty.monster_scan_radius,
                     ),
                     TargetType::Rng,
                 );
@@ -271,12 +270,12 @@ impl Game {
                 self.monster.detect_timer += if self.player.height > 0.75 {
                     delta_time
                 } else {
-                    delta_time / self.assets.config.crouch_detect_time_multiplier
+                    delta_time / self.difficulty.crouch_detect_time_multiplier
                 };
                 if self.monster.speed != 1.0 {
-                    self.monster.detect_timer = self.assets.config.monster_detect_time;
+                    self.monster.detect_timer = self.difficulty.monster_detect_time;
                 }
-                if self.monster.detect_timer >= self.assets.config.monster_detect_time {
+                if self.monster.detect_timer >= self.difficulty.monster_detect_time {
                     self.monster_walk_to(self.player.pos, TargetType::Player);
                 }
             } else {
@@ -285,7 +284,7 @@ impl Game {
             self.monster.detect_timer = self
                 .monster
                 .detect_timer
-                .clamp(0.0, self.assets.config.monster_detect_time);
+                .clamp(0.0, self.difficulty.monster_detect_time);
         }
 
         if (self.monster.pos - self.player.pos).len() < 0.5 && !self.player.god_mode {

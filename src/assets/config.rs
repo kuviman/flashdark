@@ -23,6 +23,22 @@ pub struct InteractableConfig {
     pub sfx_volume: Option<f64>,
 }
 
+#[derive(geng::Assets, Deserialize, Serialize, Clone, Debug)]
+#[asset(json)]
+pub struct Difficulty {
+    pub peek_distance: f32,
+    pub monster_180_range: f32,
+    pub monster_detect_time: f32,
+    pub monster_scan_time: f32,
+    pub monster_scan_radius: f32,
+    pub ghost_stand_still_time: (f32, f32),
+    pub monster_view_distance: f32,
+    pub monster_fov: f32,
+    pub crouch_detect_time_multiplier: f32,
+    pub monster_chase_speed: ((f32, f32), (f32, f32)),
+    pub max_ghost_sound_distance: f64,
+}
+
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Controls {
     pub crouch: Vec<Button>,
@@ -43,17 +59,7 @@ pub struct Controls {
 pub struct Config {
     pub main_menu_cameras: Vec<Camera>,
     pub controls: Controls,
-    pub crouch_detect_time_multiplier: f32,
-    pub monster_chase_speed: ((f32, f32), (f32, f32)),
     pub create_navmesh: bool,
-    pub peek_distance: f32,
-    pub monster_180_range: f32,
-    pub monster_detect_time: f32,
-    pub monster_scan_time: f32,
-    pub monster_scan_radius: f32,
-    pub ghost_stand_still_time: (f32, f32),
-    pub monster_view_distance: f32,
-    pub monster_fov: f32,
     pub flashdark_flicker_interval: f32,
     pub flashdark_turn_off_probability: f32,
     pub tv_detection_angle: f32,
@@ -63,7 +69,6 @@ pub struct Config {
     pub ambient_light_inside_house: Rgba<f32>,
     pub footstep_dist: f32,
     pub max_sound_distance: f64,
-    pub max_ghost_sound_distance: f64,
     pub arms_horizontal_length: f32,
     pub arms_vertical_length: f32,
     pub parents: HashMap<String, String>,
