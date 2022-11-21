@@ -70,7 +70,7 @@ impl Game {
             }
             if self.intro_t < 0.0 {
                 unsafe {
-                    BOOLEAN = true;
+                    INTRO_SEEN = true;
                 }
                 if let Some(mut sfx) = self.intro_sfx.take() {
                     sfx.stop();

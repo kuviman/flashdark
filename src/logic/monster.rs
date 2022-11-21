@@ -226,6 +226,9 @@ impl Game {
         if !self.monster_spawned {
             return;
         }
+        unsafe {
+            BEEN_INSIDE_HOUSE = true;
+        }
         // Scan timer
         if self.monster.scan_timer_going {
             self.monster.scan_timer -= delta_time;

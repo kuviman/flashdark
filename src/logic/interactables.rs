@@ -157,7 +157,7 @@ impl Game {
             // tv_noise.set_ref_distance((pos - self.camera.pos).len() as f64);
             tv_noise.set_max_distance(2.0);
             tv_noise.play();
-            self.swing_sfx.take().unwrap().stop();
+            // self.swing_sfx.take().unwrap().stop();
             self.tv_noise = Some(tv_noise);
             self.ambient_light = self.assets.config.ambient_light_after_fuse;
         }

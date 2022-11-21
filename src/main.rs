@@ -47,7 +47,8 @@ impl KeyConfiguration {
     }
 }
 
-static mut BOOLEAN: bool = false;
+static mut BEEN_INSIDE_HOUSE: bool = false;
+static mut INTRO_SEEN: bool = false;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum UiAction {
@@ -181,7 +182,7 @@ impl Game {
         };
         navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
 
-        Self {
+        let mut res = Self {
             difficulty: assets.difficulties[DEFAULT_DIFF].clone(),
             start_drag: Vec2::ZERO,
             ui_mouse_pos: Vec2::ZERO,
@@ -217,13 +218,17 @@ impl Game {
                 sfx
             },
             chase_music: None,
-            intro_t: if unsafe { BOOLEAN } { 0.1 } else { 21.0 },
+            intro_t: if unsafe { INTRO_SEEN } { 0.1 } else { 21.0 },
             intro_skip_t: 0.0,
             music: main_menu.then(|| assets.music.anxiety.play()),
             storage_unlocked: false,
             key_puzzle_state: KeyPuzzleState::Begin,
-            monster_spawned: false,
-            cutscene_t: 0.0,
+            monster_spawned: unsafe { BEEN_INSIDE_HOUSE },
+            cutscene_t: if unsafe { BEEN_INSIDE_HOUSE } {
+                2.9
+            } else {
+                0.0
+            },
             lock_controls: false,
             ambient_light: assets.config.ambient_light,
             tv_noise: main_menu.then(|| {
@@ -235,7 +240,7 @@ impl Game {
                 tv_noise.play();
                 tv_noise
             }),
-            swing_sfx: main_menu.then(|| {
+            swing_sfx: (main_menu || unsafe { BEEN_INSIDE_HOUSE }).then(|| {
                 let mut swing_sfx = assets.sfx.swing_loop.effect();
                 swing_sfx.set_position(
                     assets.level.trigger_cubes["SwingingSwing"]
@@ -247,7 +252,7 @@ impl Game {
                 swing_sfx
             }),
             current_swing_ref_distance: 10000.0,
-            fuse_placed: false,
+            fuse_placed: unsafe { BEEN_INSIDE_HOUSE },
             time: 0.0,
             items: Self::initialize_items(assets),
             quad_geometry: ugli::VertexBuffer::new_static(
@@ -275,7 +280,7 @@ impl Game {
                     },
                 ],
             ),
-            fuse_spawned: main_menu, // LOL
+            fuse_spawned: main_menu || unsafe { BEEN_INSIDE_HOUSE }, // LOL
             interactables: Self::initialize_interactables(assets),
             framebuffer_size: vec2(1.0, 1.0),
             geng: geng.clone(),
@@ -328,9 +333,22 @@ impl Game {
                 texture.set_wrap_mode(ugli::WrapMode::Repeat);
                 texture
             },
-            intro_sfx: unsafe { !BOOLEAN && !main_menu }.then(|| assets.sfx.intro_sequence.play()),
+            intro_sfx: unsafe { !INTRO_SEEN && !main_menu }
+                .then(|| assets.sfx.intro_sequence.play()),
             particles: Particles::new(geng),
+        };
+        if unsafe { BEEN_INSIDE_HOUSE } {
+            res.player.item = Some("Fuse".to_owned());
+            res.click_interactable(
+                res.interactables
+                    .iter()
+                    .position(|i| i.data.obj.meshes[0].name == "I_FusePlaceholder")
+                    .unwrap(),
+                true,
+                Vec3::ZERO,
+            );
         }
+        res
     }
 
     pub fn reset(&mut self) {
