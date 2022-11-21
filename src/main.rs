@@ -170,6 +170,12 @@ impl Game {
         self.monster.stop_sounds();
     }
     pub fn new(geng: &Geng, assets: &Rc<Assets>, main_menu: bool) -> Self {
+        if main_menu {
+            unsafe {
+                BEEN_INSIDE_HOUSE = false;
+                INTRO_SEEN = false;
+            }
+        }
         geng.window().set_cursor_type(geng::CursorType::None);
         if !main_menu {
             geng.window().lock_cursor();
