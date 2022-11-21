@@ -486,6 +486,8 @@ impl geng::State for Game {
 }
 
 fn main() {
+    // panic!("Hello there?"); WTF
+
     logger::init().unwrap();
     geng::setup_panic_handler();
 

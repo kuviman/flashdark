@@ -66,10 +66,6 @@ impl geng::LoadAsset for LevelData {
             let mut obj = <Obj as geng::LoadAsset>::load(&geng, &path.join("roomMVP.obj")).await?;
 
             obj.meshes.retain(|mesh| {
-                if mesh.name.starts_with("RDC_") {
-                    // TODO rooms
-                    return false;
-                }
                 if mesh.name.starts_with("H_") {
                     // TODO window holes?
                     return false;
@@ -110,6 +106,7 @@ impl geng::LoadAsset for LevelData {
 
             let mut skybox = None;
             let mut trigger_cubes = HashMap::new();
+            let mut room_data = Vec::new();
             for i in (0..obj.meshes.len()).rev() {
                 // info!("{:?}", obj.meshes[i].name);
                 let name = &obj.meshes[i].name;
@@ -117,16 +114,45 @@ impl geng::LoadAsset for LevelData {
                     skybox = Some(obj.meshes.remove(i));
                     continue;
                 }
-                let trigger_name = if let Some(name) = name.strip_prefix("TC_") {
-                    Some(name)
-                } else if name == "GhostSpawn" {
-                    Some(name.as_str())
-                } else {
-                    None
-                };
-                if let Some(name) = trigger_name {
+                let name = name.to_owned();
+                {
+                    let trigger_name = if let Some(name) = name.strip_prefix("TC_") {
+                        Some(name)
+                    } else if name == "GhostSpawn" {
+                        Some(name.as_str())
+                    } else {
+                        None
+                    };
+                    if let Some(name) = trigger_name {
+                        let name = name.to_owned();
+                        info!("Found trigger cube: {:?}", name);
+                        let mesh = obj.meshes.remove(i);
+                        let mut min = mesh.geometry[0].a_v;
+                        let mut max = mesh.geometry[0].a_v;
+                        for v in mesh.geometry.iter() {
+                            min.x = min.x.min(v.a_v.x);
+                            min.y = min.y.min(v.a_v.y);
+                            min.z = min.z.min(v.a_v.z);
+                            max.x = max.x.max(v.a_v.x);
+                            max.y = max.y.max(v.a_v.y);
+                            max.z = max.z.max(v.a_v.z);
+                        }
+                        trigger_cubes.insert(
+                            name,
+                            TriggerCube {
+                                min_x: min.x,
+                                min_y: min.y,
+                                min_z: min.z,
+                                max_x: max.x,
+                                max_y: max.y,
+                                max_z: max.z,
+                            },
+                        );
+                    }
+                }
+                if let Some(name) = name.strip_prefix("RDC_") {
                     let name = name.to_owned();
-                    info!("Found trigger cube: {:?}", name);
+                    info!("Found room data: {:?}", name);
                     let mesh = obj.meshes.remove(i);
                     let mut min = mesh.geometry[0].a_v;
                     let mut max = mesh.geometry[0].a_v;
@@ -138,17 +164,14 @@ impl geng::LoadAsset for LevelData {
                         max.y = max.y.max(v.a_v.y);
                         max.z = max.z.max(v.a_v.z);
                     }
-                    trigger_cubes.insert(
-                        name,
-                        TriggerCube {
-                            min_x: min.x,
-                            min_y: min.y,
-                            min_z: min.z,
-                            max_x: max.x,
-                            max_y: max.y,
-                            max_z: max.z,
-                        },
-                    );
+                    room_data.push(TriggerCube {
+                        min_x: min.x,
+                        min_y: min.y,
+                        min_z: min.z,
+                        max_x: max.x,
+                        max_y: max.y,
+                        max_z: max.z,
+                    });
                 }
             }
 
@@ -343,6 +366,7 @@ impl geng::LoadAsset for LevelData {
             key_configs.insert("TheStudyKeyPuzzleSolution".to_owned(), hint_key_config);
 
             Ok(LevelData {
+                room_data,
                 skybox: skybox.unwrap(),
                 key_configs,
                 storage_lock_combination,

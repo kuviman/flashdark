@@ -88,7 +88,7 @@ impl Game {
         }
         self.player.pos += self.player.vel * delta_time;
 
-        if self.player.height == 1.0 {
+        if self.player.height == 1.0 && !self.player.god_mode {
             self.player.next_footstep -= self.player.vel.len() * delta_time;
             if self.player.next_footstep < 0.0 {
                 self.player.next_footstep = self.assets.config.footstep_dist;

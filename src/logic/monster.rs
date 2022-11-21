@@ -233,8 +233,34 @@ impl Game {
             if self.monster.scan_timer < 0.0 {
                 self.monster.speed = 1.0;
                 self.monster.scan_timer = self.difficulty.monster_scan_time;
-                self.monster.next_scan_pos =
-                    *self.navmesh.waypoints.choose(&mut global_rng()).unwrap();
+                self.monster.next_scan_pos = loop {
+                    // *self.navmesh.waypoints.choose(&mut global_rng()).unwrap();
+                    let current_room = self
+                        .assets
+                        .level
+                        .room_data
+                        .iter()
+                        .position(|room| room.horizontal_aabb().contains(self.monster.pos.xy()))
+                        .unwrap_or(0);
+                    let room = loop {
+                        let room = global_rng().gen_range(0..self.assets.level.room_data.len());
+                        if room != current_room {
+                            break room;
+                        }
+                    };
+                    let room = &self.assets.level.room_data[room];
+                    let room_aabb = room.horizontal_aabb();
+                    if let Some(res) = self
+                        .navmesh
+                        .waypoints
+                        .iter()
+                        .copied()
+                        .filter(|&p| room_aabb.contains(p.xy()))
+                        .choose(&mut global_rng())
+                    {
+                        break res;
+                    }
+                };
                 self.monster.next_target_pos = self.monster.next_scan_pos;
                 self.monster.next_pathfind_pos = self.monster.pos;
             }
