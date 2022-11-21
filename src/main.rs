@@ -136,6 +136,7 @@ pub struct Game {
     intro_skip_t: f32,
     intro_sfx: Option<geng::SoundEffect>,
     particles: Particles,
+    level: LevelData,
 }
 
 impl Drop for Game {
@@ -170,6 +171,7 @@ impl Game {
         self.monster.stop_sounds();
     }
     pub fn new(geng: &Geng, assets: &Rc<Assets>, main_menu: bool) -> Self {
+        let level = LevelData::generate(geng, &assets.level_obj);
         if main_menu {
             unsafe {
                 BEEN_INSIDE_HOUSE = false;
@@ -182,11 +184,11 @@ impl Game {
         }
 
         let mut navmesh = if assets.config.create_navmesh {
-            Self::init_navmesh(geng, &assets.level)
+            Self::init_navmesh(geng, &level)
         } else {
             assets.navmesh.clone()
         };
-        navmesh.remove_unreachable_from(assets.level.trigger_cubes["GhostSpawn"].center());
+        navmesh.remove_unreachable_from(level.trigger_cubes["GhostSpawn"].center());
 
         let mut res = Self {
             difficulty: assets.difficulties[DEFAULT_DIFF].clone(),
@@ -208,8 +210,7 @@ impl Game {
                 let mut sfx = assets.music.piano.effect();
                 sfx.set_position(
                     find_center(
-                        &assets
-                            .level
+                        &level
                             .obj
                             .meshes
                             .iter()
@@ -239,7 +240,7 @@ impl Game {
             ambient_light: assets.config.ambient_light,
             tv_noise: main_menu.then(|| {
                 let mut tv_noise = assets.sfx.tv_static.effect();
-                let pos = assets.level.trigger_cubes["GhostSpawn"].center();
+                let pos = level.trigger_cubes["GhostSpawn"].center();
                 tv_noise.set_position(pos.map(|x| x as f64));
                 // tv_noise.set_ref_distance((pos - self.camera.pos).len() as f64);
                 tv_noise.set_max_distance(2.0);
@@ -249,7 +250,7 @@ impl Game {
             swing_sfx: (main_menu || unsafe { BEEN_INSIDE_HOUSE }).then(|| {
                 let mut swing_sfx = assets.sfx.swing_loop.effect();
                 swing_sfx.set_position(
-                    assets.level.trigger_cubes["SwingingSwing"]
+                    level.trigger_cubes["SwingingSwing"]
                         .center()
                         .map(|x| x as f64),
                 );
@@ -260,7 +261,7 @@ impl Game {
             current_swing_ref_distance: 10000.0,
             fuse_placed: unsafe { BEEN_INSIDE_HOUSE },
             time: 0.0,
-            items: Self::initialize_items(assets),
+            items: Self::initialize_items(assets, &level),
             quad_geometry: ugli::VertexBuffer::new_static(
                 geng.ugli(),
                 vec![
@@ -287,12 +288,12 @@ impl Game {
                 ],
             ),
             fuse_spawned: main_menu || unsafe { BEEN_INSIDE_HOUSE }, // LOL
-            interactables: Self::initialize_interactables(assets),
+            interactables: Self::initialize_interactables(assets, &level),
             framebuffer_size: vec2(1.0, 1.0),
             geng: geng.clone(),
             assets: assets.clone(),
             player: Player {
-                pos: assets.level.spawn_point,
+                pos: level.spawn_point,
                 height: 1.0,
                 vel: Vec3::ZERO,
                 rot_h: 0.0,
@@ -311,7 +312,7 @@ impl Game {
                 god_mode: false,
             },
             camera: Camera {
-                pos: assets.level.spawn_point,
+                pos: level.spawn_point,
                 fov: f32::PI / 2.0,
                 rot_h: 0.0,
                 rot_v: 0.0,
@@ -324,7 +325,7 @@ impl Game {
             }),
             shadow_calc: Some(ShadowCalculation::new()),
             lights: Self::initialize_lights(assets),
-            monster: Monster::new(assets),
+            monster: Monster::new(assets, &level),
             navmesh,
             transition: None,
             noise: {
@@ -342,6 +343,7 @@ impl Game {
             intro_sfx: unsafe { !INTRO_SEEN && !main_menu }
                 .then(|| assets.sfx.intro_sequence.play()),
             particles: Particles::new(geng),
+            level,
         };
         if unsafe { BEEN_INSIDE_HOUSE } {
             res.player.item = Some("Fuse".to_owned());

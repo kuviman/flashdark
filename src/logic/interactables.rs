@@ -48,15 +48,14 @@ impl InteractableState {
 }
 
 impl Game {
-    pub fn initialize_interactables(assets: &Assets) -> Vec<InteractableState> {
+    pub fn initialize_interactables(assets: &Assets, level: &LevelData) -> Vec<InteractableState> {
         let initial_storage_lock_config: [u8; 4] = loop {
             let config = std::array::from_fn(|_| global_rng().gen_range(0..4));
-            if config != assets.level.storage_lock_combination {
+            if config != level.storage_lock_combination {
                 break config;
             }
         };
-        assets
-            .level
+        level
             .interactables
             .iter()
             .filter_map(|data| {
@@ -152,7 +151,7 @@ impl Game {
         if interactable.data.obj.meshes[0].name == "I_FusePlaceholder" {
             self.fuse_placed = true;
             let mut tv_noise = self.assets.sfx.tv_static.effect();
-            let pos = self.assets.level.trigger_cubes["GhostSpawn"].center();
+            let pos = self.level.trigger_cubes["GhostSpawn"].center();
             tv_noise.set_position(pos.map(|x| x as f64));
             // tv_noise.set_ref_distance((pos - self.camera.pos).len() as f64);
             tv_noise.set_max_distance(2.0);
@@ -254,7 +253,6 @@ impl Game {
                 progress: 0.0,
                 extra_hacky_library_moving_closet_progress: 0.0,
                 data: self
-                    .assets
                     .level
                     .interactables
                     .iter()
@@ -325,7 +323,7 @@ impl Game {
                     .to_digit(10)
                     .unwrap() as u8
             });
-            if current_lock_combination == self.assets.level.storage_lock_combination {
+            if current_lock_combination == self.level.storage_lock_combination {
                 self.interactables
                     .retain(|i| !i.data.obj.meshes[0].name.contains("StorageButton"));
                 self.storage_unlocked = true;

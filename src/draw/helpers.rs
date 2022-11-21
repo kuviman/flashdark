@@ -180,7 +180,7 @@ impl Game {
             }
         }
         if self.fuse_spawned && mesh.name.contains("SwingingSwing") {
-            let center = self.assets.level.trigger_cubes["SwingingSwing"].center();
+            let center = self.level.trigger_cubes["SwingingSwing"].center();
             matrix = matrix
                 * Mat4::translate(center)
                 * Mat4::rotate_x(self.time.sin() * 0.5)
@@ -296,7 +296,7 @@ impl Game {
                 continue;
             }
             if self.fuse_spawned && mesh.name.contains("SwingingSwing") {
-                let center = self.assets.level.trigger_cubes["SwingingSwing"].center();
+                let center = self.level.trigger_cubes["SwingingSwing"].center();
                 matrix = matrix
                     * Mat4::translate(center)
                     * Mat4::rotate_x(self.time.sin() * 0.5)

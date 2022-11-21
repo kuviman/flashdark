@@ -67,7 +67,7 @@ impl Game {
                 light.flicker_time = 0.5;
             }
 
-            for (name, data) in &self.assets.level.items {
+            for (name, data) in &self.level.items {
                 if !name.contains("StudyKey") {
                     continue;
                 }
@@ -81,7 +81,6 @@ impl Game {
                 }
             }
             let data = self
-                .assets
                 .level
                 .interactables
                 .iter()

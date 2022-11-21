@@ -53,7 +53,7 @@ impl Game {
             rot_v: 0.0,
             intensity: 1.0,
         });
-        lights.extend(assets.level.obj.meshes.iter().filter_map(|mesh| {
+        lights.extend(assets.level_obj.meshes.iter().filter_map(|mesh| {
             mesh.name.contains("Light").then(|| Light {
                 id: id(),
                 flicker_time: 0.0,

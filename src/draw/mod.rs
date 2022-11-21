@@ -34,7 +34,7 @@ impl Game {
         );
         self.draw_skybox_mesh(
             framebuffer,
-            &self.assets.level.skybox,
+            &self.level.skybox,
             Mat4::translate(self.camera.pos),
         );
 
@@ -42,12 +42,7 @@ impl Game {
 
         let look = self.look();
 
-        self.draw_obj(
-            framebuffer,
-            &self.assets.level.obj,
-            Mat4::identity(),
-            Rgba::WHITE,
-        );
+        self.draw_obj(framebuffer, &self.level.obj, Mat4::identity(), Rgba::WHITE);
 
         for (id, interactable) in self.interactables.iter().enumerate() {
             if interactable.config.transparent {
@@ -64,7 +59,7 @@ impl Game {
         }
 
         for (id, item) in self.items.iter().enumerate() {
-            let data = &self.assets.level.items[&item.name].spawns[item.mesh_index];
+            let data = &self.level.items[&item.name].spawns[item.mesh_index];
             let texture = &*data.mesh.material.texture.as_deref().unwrap();
             let dark_texture = data
                 .mesh
@@ -90,8 +85,7 @@ impl Game {
             self.draw_billboard(
                 framebuffer,
                 &self.assets.ghost.crawling,
-                self.assets.level.trigger_cubes["GhostSpawn"].center()
-                    + vec3(1.0 - t, 0.0, 0.0) * 0.5,
+                self.level.trigger_cubes["GhostSpawn"].center() + vec3(1.0 - t, 0.0, 0.0) * 0.5,
                 t,
                 0.0,
             );
@@ -119,7 +113,7 @@ impl Game {
             );
         }
         if let Some(name) = &self.player.item {
-            let data = &self.assets.level.items[name];
+            let data = &self.level.items[name];
             if name.contains("StudyKey") {
                 let texture = if self.player.flashdark.on {
                     data.spawns[0]
@@ -131,7 +125,7 @@ impl Game {
                 } else {
                     data.spawns[0].mesh.material.texture.as_deref().unwrap()
                 };
-                let key_config = &self.assets.level.key_configs[name];
+                let key_config = &self.level.key_configs[name];
 
                 let transform = Mat3::translate(vec2(5.0, -4.2))
                     * Mat3::scale_uniform(2.0)
@@ -270,7 +264,7 @@ impl Game {
                             if let Some(requirement) = requirement {
                                 if self.player.item.as_deref() != Some(requirement) {
                                     return &self.assets.require_item;
-                                    // self.assets.level.items[requirement].spawns[0]
+                                    // self.level.items[requirement].spawns[0]
                                     //     .mesh
                                     //     .material
                                     //     .texture
@@ -612,7 +606,7 @@ impl Game {
             self.obj_shadow(
                 &light,
                 &mut shadow_framebuffer,
-                &self.assets.level.obj,
+                &self.level.obj,
                 Mat4::identity(),
                 &self.assets.shaders.shadow,
                 &self.white_texture,

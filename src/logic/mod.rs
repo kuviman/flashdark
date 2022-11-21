@@ -83,7 +83,7 @@ impl Game {
                 }
                 self.music = Some(self.assets.music.outside.play());
             }
-            self.player.pos = self.assets.level.spawn_point - vec3(0.0, self.intro_t, 0.0);
+            self.player.pos = self.level.spawn_point - vec3(0.0, self.intro_t, 0.0);
         }
 
         // Activating the swing
@@ -94,7 +94,7 @@ impl Game {
                     if !self.fuse_spawned {
                         self.fuse_spawned = true;
                         let name = "Fuse";
-                        let data = &self.assets.level.items[name];
+                        let data = &self.level.items[name];
                         let spawn_index = global_rng().gen_range(0..data.spawns.len());
                         let spawn = &data.spawns[spawn_index];
                         self.items.push(Item {
@@ -105,7 +105,7 @@ impl Game {
                         });
                         let mut swing_sfx = self.assets.sfx.swing_loop.effect();
                         swing_sfx.set_position(
-                            self.assets.level.trigger_cubes["SwingingSwing"]
+                            self.level.trigger_cubes["SwingingSwing"]
                                 .center()
                                 .xy()
                                 .extend(self.camera.pos.z)
@@ -118,7 +118,7 @@ impl Game {
             }
         }
         if let Some(sfx) = &mut self.swing_sfx {
-            let pos = self.assets.level.trigger_cubes["SwingingSwing"]
+            let pos = self.level.trigger_cubes["SwingingSwing"]
                 .center()
                 .xy()
                 .extend(self.camera.pos.z);
@@ -133,14 +133,14 @@ impl Game {
 
         // Activate the monster cutscene
         if self.fuse_placed && self.cutscene_t < 3.0 {
-            let tv_pos = self.assets.level.trigger_cubes["GhostSpawn"].center();
+            let tv_pos = self.level.trigger_cubes["GhostSpawn"].center();
             let camera_dir = self
                 .camera
                 .pixel_ray(self.framebuffer_size, self.framebuffer_size / 2.0)
                 .dir
                 .normalize_or_zero();
             let tv_dir = (tv_pos - self.camera.pos).normalize_or_zero();
-            let trigger_box = &self.assets.level.trigger_cubes["TVLookTrigger"];
+            let trigger_box = &self.level.trigger_cubes["TVLookTrigger"];
             if true
             // trigger_box.horizontal_aabb().contains(self.player.pos.xy())
             // && Vec3::dot(camera_dir, tv_dir)
@@ -171,7 +171,7 @@ impl Game {
                             })
                             .unwrap(),
                         false,
-                        self.assets.level.trigger_cubes["HouseEntrance"].center(),
+                        self.level.trigger_cubes["HouseEntrance"].center(),
                     );
                     self.monster_spawned = true;
                 }
@@ -179,7 +179,7 @@ impl Game {
         }
 
         // Entering the house
-        if self.assets.level.trigger_cubes["HouseEntrance"]
+        if self.level.trigger_cubes["HouseEntrance"]
             .horizontal_aabb()
             .contains(self.player.pos.xy())
         {
@@ -195,7 +195,7 @@ impl Game {
         }
 
         // Enter study room
-        if self.assets.level.trigger_cubes["TriggerStudyEntrance"]
+        if self.level.trigger_cubes["TriggerStudyEntrance"]
             .horizontal_aabb()
             .contains(self.player.pos.xy())
             && self.key_puzzle_state == KeyPuzzleState::Begin
@@ -214,7 +214,7 @@ impl Game {
         // GF clock
         self.gf_clock_timer -= delta_time;
         if self.gf_clock_timer < 0.0
-            && self.assets.level.trigger_cubes["GrandClock"]
+            && self.level.trigger_cubes["GrandClock"]
                 .horizontal_aabb()
                 .contains(self.player.pos.xy())
         {
@@ -223,7 +223,6 @@ impl Game {
             sfx.set_position(
                 find_center(
                     &self
-                        .assets
                         .level
                         .obj
                         .meshes

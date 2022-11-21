@@ -8,9 +8,9 @@ pub struct Item {
 }
 
 impl Game {
-    pub fn initialize_items(assets: &Assets) -> Vec<Item> {
+    pub fn initialize_items(assets: &Assets, level: &LevelData) -> Vec<Item> {
         let mut items = Vec::new();
-        for (name, data) in assets.level.items.iter().filter(|(name, _data)| {
+        for (name, data) in level.items.iter().filter(|(name, _data)| {
             if name.contains("Fuse") {
                 return false;
             }

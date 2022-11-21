@@ -122,7 +122,7 @@ impl Game {
                         self.player.pos += n * (radius - v.len());
                     }
                 };
-                check(&self.assets.level.obj, Mat4::identity());
+                check(&self.level.obj, Mat4::identity());
                 for interactable in &self.interactables {
                     check(&interactable.data.obj, interactable.matrix());
                 }

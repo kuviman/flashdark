@@ -74,7 +74,7 @@ impl Game {
             }
         };
         update_target(
-            intersect_ray_with_obj(&self.assets.level.obj, Mat4::identity(), 0.0, ray),
+            intersect_ray_with_obj(&self.level.obj, Mat4::identity(), 0.0, ray),
             Object::StaticLevel,
         );
         for (id, interactable) in self.interactables.iter().enumerate() {
@@ -100,7 +100,7 @@ impl Game {
         for (id, item) in self.items.iter().enumerate() {
             update_target(
                 intersect_ray_with_mesh(
-                    &self.assets.level.items[&item.name].spawns[item.mesh_index].mesh,
+                    &self.level.items[&item.name].spawns[item.mesh_index].mesh,
                     self.item_matrix(item),
                     0.0,
                     ray,

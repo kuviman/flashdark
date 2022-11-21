@@ -36,8 +36,8 @@ impl Monster {
     pub fn stop_sounds(&mut self) {
         self.loop_sound.stop();
     }
-    pub fn new(assets: &Assets) -> Self {
-        let pos = assets.level.trigger_cubes["GhostSpawn"].center();
+    pub fn new(assets: &Assets, level: &LevelData) -> Self {
+        let pos = level.trigger_cubes["GhostSpawn"].center();
         Self {
             detect_timer: 0.0,
             scan_timer: 0.0,
@@ -82,7 +82,7 @@ impl Game {
             }
             true
         };
-        if !check(&self.assets.level.obj, Mat4::identity()) {
+        if !check(&self.level.obj, Mat4::identity()) {
             return false;
         }
         for interactable in &self.interactables {
@@ -239,19 +239,18 @@ impl Game {
                 self.monster.next_scan_pos = loop {
                     // *self.navmesh.waypoints.choose(&mut global_rng()).unwrap();
                     let current_room = self
-                        .assets
                         .level
                         .room_data
                         .iter()
                         .position(|room| room.horizontal_aabb().contains(self.monster.pos.xy()))
                         .unwrap_or(0);
                     let room = loop {
-                        let room = global_rng().gen_range(0..self.assets.level.room_data.len());
+                        let room = global_rng().gen_range(0..self.level.room_data.len());
                         if room != current_room {
                             break room;
                         }
                     };
-                    let room = &self.assets.level.room_data[room];
+                    let room = &self.level.room_data[room];
                     let room_aabb = room.horizontal_aabb();
                     if let Some(res) = self
                         .navmesh

@@ -49,7 +49,8 @@ pub struct Assets {
     pub flashdark: ugli::Texture,
     #[asset(path = "Music")]
     pub music: Music,
-    pub level: LevelData,
+    #[asset(path = "level/roomMVP.obj")]
+    pub level_obj: Obj,
     pub config: Config,
     pub navmesh: NavMesh,
     #[asset(path = "SFX")]
