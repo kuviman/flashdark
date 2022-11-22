@@ -582,6 +582,12 @@ impl Game {
             if light.id.0 != 0 && shadow_calc.shadow_maps.contains_key(&light.id) {
                 continue;
             }
+            if light.id.0 == 0
+                && self.player.flashdark.strength == 0.0
+                && shadow_calc.shadow_maps.contains_key(&light.id)
+            {
+                continue;
+            }
             // Get shadow map texture and depth buffer for the light
             let shadow_map = shadow_calc.shadow_maps.entry(light.id).or_insert_with(|| {
                 let mut texture =
