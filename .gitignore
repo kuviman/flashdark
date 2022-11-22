@@ -3,3 +3,6 @@
 *.blend1
 PSD/
 /saved_pos.json
+/flamegraph.svg
+/perf.data
+/perf.data.old
