@@ -84,6 +84,7 @@ impl Default for Settings {
 }
 
 pub struct Game {
+    draw_calls: Cell<usize>,
     main_menu: bool,
     in_settings: bool,
     settings: Settings,
@@ -236,6 +237,7 @@ impl Game {
             } else {
                 0.0
             },
+            draw_calls: Cell::new(0),
             lock_controls: false,
             ambient_light: assets.config.ambient_light,
             tv_noise: main_menu.then(|| {
@@ -405,7 +407,9 @@ impl geng::State for Game {
     }
 
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
+        self.draw_calls.set(0);
         self.draw_impl(framebuffer);
+        info!("Draw calls: {}", self.draw_calls.get());
     }
 
     fn handle_event(&mut self, event: geng::Event) {

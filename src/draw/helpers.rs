@@ -18,6 +18,7 @@ impl Game {
         struct Vertex {
             a_pos: Vec2<f32>,
         }
+        self.draw_calls.set(self.draw_calls.get() + 1);
         ugli::draw(
             framebuffer,
             program,
@@ -134,6 +135,7 @@ impl Game {
         matrix: Mat4<f32>,
     ) {
         let texture = mesh.material.texture.as_deref().unwrap();
+        self.draw_calls.set(self.draw_calls.get() + 1);
         ugli::draw(
             framebuffer,
             &self.assets.shaders.skybox,
@@ -235,6 +237,7 @@ impl Game {
             });
         let lights = self.light_uniforms();
 
+        self.draw_calls.set(self.draw_calls.get() + 1);
         ugli::draw(
             framebuffer,
             &self.assets.shaders.obj,
@@ -317,6 +320,7 @@ impl Game {
                 // continue; // Ignore billboards for lighting for now
             }
             let texture = mesh.material.texture.as_deref().unwrap_or(white_texture);
+            self.draw_calls.set(self.draw_calls.get() + 1);
             ugli::draw(
                 framebuffer,
                 shadow_shader,
