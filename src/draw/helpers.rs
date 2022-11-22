@@ -263,6 +263,7 @@ impl Game {
                 blend_mode: Some(ugli::BlendMode::default()),
                 depth_func: Some(ugli::DepthFunc::Less),
                 cull_face: None, // TODO: maybe but probably not
+                reset_uniforms: false,
                 ..default()
             },
         );
@@ -334,6 +335,7 @@ impl Game {
                     // blend_mode: Some(ugli::BlendMode::default()),
                     depth_func: Some(ugli::DepthFunc::Less),
                     cull_face,
+                    reset_uniforms: false,
                     ..default()
                 },
             );
