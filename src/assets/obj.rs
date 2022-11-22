@@ -185,6 +185,34 @@ impl geng::LoadAsset for Obj {
                     }
                 }
             }
+            for i in (0..meshes.len()).rev() {
+                for j in ((i + 1)..meshes.len()).rev() {
+                    fn mergable(name: &str) -> bool {
+                        if name.starts_with("D")
+                            || name.starts_with("I")
+                            || name.starts_with("RDC")
+                            || name.starts_with("TC")
+                            || name.contains("Spawn")
+                            || name.contains("Light")
+                        {
+                            return false;
+                        }
+                        true
+                    }
+                    if meshes[i].material.name == meshes[j].material.name
+                        && mergable(&meshes[i].name)
+                        && mergable(&meshes[j].name)
+                    {
+                        let append = meshes
+                            .remove(j)
+                            .geometry
+                            .iter()
+                            .cloned()
+                            .collect::<Vec<_>>();
+                        meshes[i].geometry.extend(append);
+                    }
+                }
+            }
             Ok(Obj {
                 meshes,
                 // size,
