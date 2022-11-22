@@ -185,17 +185,6 @@ impl geng::LoadAsset for Obj {
                     }
                 }
             }
-            let size = meshes
-                .iter()
-                .flat_map(|mesh| {
-                    mesh.geometry
-                        .iter()
-                        .map(|vertex| r32(vec2(vertex.a_v.x, vertex.a_v.z).len()))
-                })
-                .max()
-                .unwrap()
-                .as_f32();
-            debug!("{:?} size is {:?}", path.file_name().unwrap(), size);
             Ok(Obj {
                 meshes,
                 // size,
