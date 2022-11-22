@@ -198,7 +198,8 @@ impl Game {
                     * matrix;
             }
         }
-        if mesh.name.starts_with("B_") {
+        // TODO
+        if false && mesh.name.starts_with("B_") {
             // TODO: only once
             let mut sum = Vec3::ZERO;
             for v in &*mesh.geometry {
@@ -306,7 +307,8 @@ impl Game {
                     * Mat4::rotate_x(self.time.sin() * 0.5)
                     * Mat4::translate(-center);
             }
-            if mesh.name.starts_with("B_") {
+            // TODO
+            if false && mesh.name.starts_with("B_") {
                 // // TODO: only once
                 let mut sum = Vec3::ZERO;
                 for v in &*mesh.geometry {

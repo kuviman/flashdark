@@ -194,6 +194,7 @@ impl geng::LoadAsset for Obj {
                             || name.starts_with("TC")
                             || name.contains("Spawn")
                             || name.contains("Light")
+                        // TODO || name.starts_with("B_")
                         {
                             return false;
                         }
