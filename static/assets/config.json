@@ -1,8 +1,6 @@
 {
     "controls": {
         "crouch": [
-            "LCtrl",
-            "LShift",
             "C"
         ],
         "interact": [

@@ -14,6 +14,7 @@ pub struct Player {
     pub pos: Vec3<f32>,
     pub vel: Vec3<f32>,
     pub height: f32,
+    pub crouch: bool,
     pub rot_h: f32,
     pub rot_v: f32,
     pub flashdark: Flashdark,

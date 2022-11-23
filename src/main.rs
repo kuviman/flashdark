@@ -301,6 +301,7 @@ impl Game {
             geng: geng.clone(),
             assets: assets.clone(),
             player: Player {
+                crouch: false,
                 pos: level.spawn_point,
                 height: 1.0,
                 vel: Vec3::ZERO,
@@ -422,6 +423,16 @@ impl geng::State for Game {
         if !self.lock_controls && self.intro_t < 0.0 && !self.main_menu && !self.in_settings {
             self.handle_event_camera(&event);
             self.handle_clicks(&event);
+            if self
+                .assets
+                .config
+                .controls
+                .crouch
+                .iter()
+                .any(|button| button.matches(&event))
+            {
+                self.player.crouch = !self.player.crouch;
+            }
         }
 
         for button in &self.assets.config.controls.god_mode {

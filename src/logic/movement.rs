@@ -8,14 +8,7 @@ impl Game {
         self.player.rot_h = normalize_angle(self.player.rot_h);
 
         const CROUCH_TIME: f32 = 0.2;
-        if self
-            .assets
-            .config
-            .controls
-            .crouch
-            .iter()
-            .any(|button| button.is_pressed(&self.geng))
-        {
+        if self.player.crouch {
             self.show_crouch_tutorial = false;
             self.player.height += (0.5 - self.player.height).clamp(-delta_time / CROUCH_TIME, 1.0);
         } else {
