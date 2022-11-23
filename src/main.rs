@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+#![cfg_attr(not(feature = "console"), windows_subsystem = "windows")]
 use geng::prelude::*;
 
 mod assets;
@@ -516,8 +516,6 @@ impl geng::State for Game {
 }
 
 fn main() {
-    // panic!("Hello there?"); WTF
-
     logger::init().unwrap();
     geng::setup_panic_handler();
 
