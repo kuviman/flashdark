@@ -215,6 +215,8 @@ impl geng::LoadAsset for Obj {
                             || name.contains("Symbol")
                             || name.contains("SwingingSwing")
                             || name.contains("SingingGirl")
+                            || name.contains("S_PianoKeys")
+                            || name.starts_with("AF_")
                         // TODO || name.starts_with("B_")
                         {
                             return false;
