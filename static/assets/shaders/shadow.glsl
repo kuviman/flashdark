@@ -2,14 +2,16 @@ varying vec2 v_uv;
 
 #ifdef VERTEX_SHADER
 attribute vec3 a_v;
+attribute vec3 a_bv;
 attribute vec2 a_vt;
+uniform float u_camera_rot;
 uniform mat4 u_projection_matrix;
 uniform mat4 u_view_matrix;
 uniform mat4 u_model_matrix;
 uniform mat3 u_texture_matrix;
 void main() {
     v_uv = (u_texture_matrix * vec3(a_vt, 1.0)).xy;
-    gl_Position = u_projection_matrix * u_view_matrix * u_model_matrix * vec4(a_v, 1.0);
+    gl_Position = u_projection_matrix * u_view_matrix * u_model_matrix * vec4(a_v + vec3(rotate(a_bv.xy, u_camera_rot), a_bv.z), 1.0);
 }
 #endif
 

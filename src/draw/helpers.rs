@@ -335,6 +335,7 @@ impl Game {
                         u_shadow_size: framebuffer.size(),
                         u_texture: texture,
                         u_texture_matrix: Mat3::identity(),
+                        u_camera_rot: self.camera.rot_h,
                     },
                     geng::camera3d_uniforms(light, framebuffer.size().map(|x| x as f32)),
                 ),
