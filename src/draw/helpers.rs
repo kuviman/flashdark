@@ -160,6 +160,7 @@ impl Game {
         framebuffer: &mut ugli::Framebuffer,
         mesh: &ObjMesh,
         matrix: Mat4<f32>,
+        texture_matrix: Mat3<f32>,
         color: Rgba<f32>,
     ) {
         let mut matrix = matrix;
@@ -239,6 +240,7 @@ impl Game {
         let lights = self.light_uniforms();
 
         self.draw_calls.set(self.draw_calls.get() + 1);
+
         ugli::draw(
             framebuffer,
             &self.assets.shaders.obj,
@@ -257,7 +259,7 @@ impl Game {
                     u_noise: &self.noise,
                     u_camera_rot: self.camera.rot_h,
                     u_texture: texture,
-                    u_texture_matrix: Mat3::identity(),
+                    u_texture_matrix: texture_matrix,
                     u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
                     u_darkness: if self.fuse_placed || self.main_menu { 1000.0 } else { -6.0 },
                 },
@@ -282,7 +284,7 @@ impl Game {
         color: Rgba<f32>,
     ) {
         for mesh in &obj.meshes {
-            self.draw_mesh(framebuffer, mesh, matrix, color);
+            self.draw_mesh(framebuffer, mesh, matrix, Mat3::identity(), color);
         }
     }
 

@@ -50,10 +50,23 @@ impl Game {
             }
             // let highlight =
             //     look.target.as_ref().map(|target| target.object) == Some(Object::Interactable(id));
-            self.draw_obj(
+            let mesh = &interactable.data.obj.meshes[0];
+            self.draw_mesh(
                 framebuffer,
-                &interactable.data.obj,
+                &mesh,
                 interactable.matrix(),
+                if mesh.name.starts_with("B_Candle") {
+                    if interactable.open {
+                        Mat3::identity()
+                    } else {
+                        Mat3::translate(vec2(
+                            0.25 * ((self.time / 0.1).floor() as i32 % 3 + 1) as f32,
+                            0.0,
+                        ))
+                    }
+                } else {
+                    Mat3::identity()
+                },
                 Rgba::WHITE,
             );
         }
@@ -74,7 +87,13 @@ impl Game {
             // } else {
             //     Rgba::WHITE
             // };
-            self.draw_mesh(framebuffer, &data.mesh, self.item_matrix(item), Rgba::WHITE);
+            self.draw_mesh(
+                framebuffer,
+                &data.mesh,
+                self.item_matrix(item),
+                Mat3::identity(),
+                Rgba::WHITE,
+            );
         }
 
         self.draw_monster(framebuffer);

@@ -219,6 +219,7 @@ impl LevelData {
             }
             if obj.meshes[i].name.starts_with("I_")
                 || obj.meshes[i].name.starts_with("B_SingingGirl")
+                || obj.meshes[i].name.starts_with("B_Candle")
             {
                 let mesh = obj.meshes.remove(i);
                 info!("{}", mesh.name);
