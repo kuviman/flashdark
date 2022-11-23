@@ -233,13 +233,16 @@ impl Game {
                         })
                         .unwrap_or(self.level.room_data.iter().next().unwrap())
                         .0;
-                    let room = self
-                        .level
-                        .room_data
-                        .keys()
-                        .filter(|&name| name != current_room)
-                        .choose(&mut global_rng())
-                        .unwrap();
+                    let room = if self.player_inside_house {
+                        self.level
+                            .room_data
+                            .keys()
+                            .filter(|&name| name != current_room)
+                            .choose(&mut global_rng())
+                            .unwrap()
+                    } else {
+                        "StudyRoom"
+                    };
                     let room = &self.level.room_data[room];
                     let room_aabb = room.horizontal_aabb();
                     if let Some(res) = self
