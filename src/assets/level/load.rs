@@ -218,6 +218,7 @@ impl LevelData {
                 || obj.meshes[i].name.starts_with("B_SingingGirl")
             {
                 let mesh = obj.meshes.remove(i);
+                info!("{}", mesh.name);
                 let front_face = mesh
                     .geometry
                     .chunks(3)

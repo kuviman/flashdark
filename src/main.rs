@@ -409,7 +409,7 @@ impl geng::State for Game {
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         self.draw_calls.set(0);
         self.draw_impl(framebuffer);
-        info!("Draw calls: {}", self.draw_calls.get());
+        // info!("Draw calls: {}", self.draw_calls.get());
     }
 
     fn handle_event(&mut self, event: geng::Event) {

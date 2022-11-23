@@ -79,7 +79,9 @@ pub fn intersect_ray_with_mesh(
         .chunks(3)
         .flat_map(|tri| {
             intersect_ray_with_triangle(
-                [tri[0].a_v, tri[1].a_v, tri[2].a_v].map(|pos| (matrix * pos.extend(1.0)).xyz()),
+                [tri[0], tri[1], tri[2]]
+                    .map(|v| v.a_v + v.a_bv)
+                    .map(|pos| (matrix * pos.extend(1.0)).xyz()),
                 ext,
                 ray,
             )
