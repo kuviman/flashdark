@@ -357,7 +357,11 @@ impl Game {
             let radius = 0.25;
             if v.len() < radius {
                 let mut can_open = true;
-                if name == "D_DoorStudy" && !self.player_inside_house {
+                if name == "D_DoorStudy"
+                    && (!self.player_inside_house
+                        || (self.key_puzzle_state != KeyPuzzleState::Begin
+                            && self.key_puzzle_state != KeyPuzzleState::Finish))
+                {
                     can_open = false;
                 }
                 // COPYPASTE YAY

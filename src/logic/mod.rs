@@ -190,6 +190,7 @@ impl Game {
                 .position(|interactable| interactable.data.obj.meshes[0].name == "D_DoorMain")
                 .unwrap();
             if self.interactables[door_id].open {
+                self.show_crouch_tutorial = true;
                 self.click_interactable(door_id, false, Vec3::ZERO);
                 self.monster_walk_to(
                     self.navmesh.waypoints[self

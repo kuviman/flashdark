@@ -168,6 +168,14 @@ impl Game {
                 self.assets.sfx.light_flicker.play();
                 self.ambient_light = Rgba::BLACK;
                 self.player.flashdark.on = false;
+                self.monster.pos = self.level.room_data["Kitchen"]
+                    .center()
+                    .xy()
+                    .extend(self.monster.pos.z);
+                self.monster.scream_time = 0.0;
+                self.monster.scan_timer_going = true;
+                self.monster.next_pathfind_pos = self.monster.pos;
+                self.monster.next_target_pos = self.monster.pos;
                 return;
             }
         }
@@ -283,6 +291,15 @@ impl Game {
             self.items.retain(|item| !item.name.contains("StudyKey"));
             self.interactables
                 .retain(|i| !i.data.obj.meshes[0].name.contains("I_HintKey"));
+
+            self.click_interactable(
+                self.interactables
+                    .iter()
+                    .position(|i| i.data.obj.meshes[0].name == "D_DoorStudy")
+                    .unwrap(),
+                false,
+                Vec3::ZERO,
+            );
         }
 
         // Library puzzle
