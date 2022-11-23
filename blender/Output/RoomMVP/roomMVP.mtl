@@ -1,5 +1,5 @@
 # Blender MTL File: 'roomMVP.blend'
-# Material Count: 36
+# Material Count: 54
 
 newmtl BookshelfMat
 Ns 225.000000
@@ -102,6 +102,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd DoorTextures.png
+map_d DoorTextures.png
 
 newmtl DrawerMat
 Ns 225.000000
@@ -113,6 +114,30 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd DrawerTexture.png
+
+newmtl FenceGateMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd GATE_HalfSM.png
+map_d GATE_HalfSM.png
+
+newmtl FenceMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 1.000000 1.000000 0.500000 Fence.png
+map_d -s 1.000000 1.000000 0.500000 Fence.png
 
 newmtl FloorMarble
 Ns 225.000000
@@ -185,6 +210,18 @@ illum 2
 map_Kd FuseboxTexture.png
 map_d FuseboxTexture.png
 
+newmtl GrandfatherClockMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd GrandfatherClockTexture.png
+map_d GrandfatherClockTexture.png
+
 newmtl GrassMat
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
@@ -242,6 +279,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd KitchenCounterTexture.png
+map_d KitchenCounterTexture.png
 
 newmtl None
 Ns 500
@@ -250,6 +288,53 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
+
+newmtl PentagramMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd pentagram.png
+map_d pentagram.png
+
+newmtl PianoMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd PianoTexture.png
+map_d PianoTexture.png
+
+newmtl RoofMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd RoofTexture.png
+
+newmtl ShowerMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd ShowerTexture.png
+map_d ShowerTexture.png
 
 newmtl SingingGirlDoneMat
 Ns 225.000000
@@ -274,6 +359,53 @@ d 1.000000
 illum 2
 map_Kd littleGirl.png
 map_d littleGirl.png
+
+newmtl SkySphereMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd skysphere.png
+
+newmtl SmallGrassAMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd smolGrass_01.png
+map_d smolGrass_01.png
+
+newmtl SmallGrassBMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd smolGrass_02.png
+map_d smolGrass_02.png
+
+newmtl SmallGrassCMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd smolGrass_03.png
+map_d smolGrass_03.png
 
 newmtl SofaMat
 Ns 225.000000
@@ -321,6 +453,89 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd TVTexture.png
+
+newmtl TableMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd TableTexture.png
+
+newmtl TallGrassAMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd tallGrass_01.png
+map_d tallGrass_01.png
+
+newmtl TallGrassBMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd tallGrass_02.png
+map_d tallGrass_02.png
+
+newmtl TallGrassCMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd tallGrass_03.png
+map_d tallGrass_03.png
+
+newmtl TreeAMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd tree01.png
+map_d tree01.png
+
+newmtl TreeBMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd tree02.png
+map_d tree02.png
+
+newmtl TreeCMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd tree03.png
+map_d tree03.png
 
 newmtl WallMat
 Ns 225.000000
@@ -397,6 +612,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+map_Kd -s 1.000000 1.000000 0.500000 Wallpaper_04.png
 
 newmtl WindowMat
 Ns 225.000000
