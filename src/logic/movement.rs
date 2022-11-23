@@ -16,6 +16,7 @@ impl Game {
             .iter()
             .any(|button| button.is_pressed(&self.geng))
         {
+            self.show_crouch_tutorial = false;
             self.player.height += (0.5 - self.player.height).clamp(-delta_time / CROUCH_TIME, 1.0);
         } else {
             self.player.height += (1.0 - self.player.height).clamp(-1.0, delta_time / CROUCH_TIME);

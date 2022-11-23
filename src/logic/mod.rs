@@ -183,6 +183,7 @@ impl Game {
             .horizontal_aabb()
             .contains(self.player.pos.xy())
         {
+            self.player_inside_house = true;
             let door_id = self
                 .interactables
                 .iter()

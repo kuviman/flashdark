@@ -40,6 +40,12 @@ pub struct GhostAssets {
 }
 
 #[derive(geng::Assets)]
+pub struct TutorialAssets {
+    pub flashlight: ugli::Texture,
+    pub crouch: ugli::Texture,
+}
+
+#[derive(geng::Assets)]
 pub struct Assets {
     pub shaders: Shaders,
     pub ghost: GhostAssets,
@@ -60,6 +66,7 @@ pub struct Assets {
     pub dust_particle: ugli::Texture,
     #[asset(path = "difficulty/*.json", range = "1..=3")]
     pub difficulties: Vec<Difficulty>,
+    pub tutorial: TutorialAssets,
 }
 
 #[derive(geng::Assets)]

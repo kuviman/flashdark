@@ -39,7 +39,10 @@ impl Game {
             if self.monster.next_flashdark_flicker_time < 0.0 {
                 self.monster.next_flashdark_flicker_time =
                     self.assets.config.flashdark_flicker_interval;
-                if global_rng().gen_bool(self.assets.config.flashdark_turn_off_probability as f64) {
+                if self.show_flashlight_tutorial
+                    || global_rng()
+                        .gen_bool(self.assets.config.flashdark_turn_off_probability as f64)
+                {
                     self.toggle_flashdark();
                 }
             }
@@ -49,6 +52,7 @@ impl Game {
     pub fn toggle_flashdark(&mut self) {
         self.player.flashdark.on = !self.player.flashdark.on;
         if self.player.flashdark.on {
+            self.show_flashlight_tutorial = false;
             self.assets.sfx.flash_on.play();
         } else {
             self.assets.sfx.flash_off.play();

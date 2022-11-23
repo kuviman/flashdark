@@ -84,7 +84,10 @@ impl Default for Settings {
 }
 
 pub struct Game {
+    player_inside_house: bool,
+    show_crouch_tutorial: bool,
     draw_calls: Cell<usize>,
+    show_flashlight_tutorial: bool,
     main_menu: bool,
     in_settings: bool,
     settings: Settings,
@@ -192,6 +195,9 @@ impl Game {
         navmesh.remove_unreachable_from(level.trigger_cubes["GhostSpawn"].center());
 
         let mut res = Self {
+            player_inside_house: false,
+            show_flashlight_tutorial: true,
+            show_crouch_tutorial: true,
             difficulty: assets.difficulties[DEFAULT_DIFF].clone(),
             start_drag: Vec2::ZERO,
             ui_mouse_pos: Vec2::ZERO,

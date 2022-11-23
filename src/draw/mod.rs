@@ -244,47 +244,70 @@ impl Game {
 
         if !self.main_menu && !self.in_settings {
             // PawnMan20 is like totally hot
-            let reticle_texture = (|| {
-                match look.target {
-                    None => &self.assets.reticle,
-                    Some(target) => match target.object {
-                        Object::StaticLevel => &self.assets.reticle,
-                        Object::Interactable(id) => {
-                            let interactable = &self.interactables[id];
 
-                            // Copypasta mmmm
-                            let mut requirement = interactable.config.require_item.as_deref();
-                            if interactable.data.obj.meshes[0]
-                                .name
-                                .starts_with("I_LoosePlank")
-                            {
-                                requirement = Some("Crowbar");
-                            }
-
-                            if let Some(requirement) = requirement {
-                                if self.player.item.as_deref() != Some(requirement) {
-                                    return &self.assets.require_item;
-                                    // self.level.items[requirement].spawns[0]
-                                    //     .mesh
-                                    //     .material
-                                    //     .texture
-                                    //     .unwrap();
-                                }
-                            }
-                            &self.assets.hand
-                        }
-                        Object::Item(id) => &self.assets.hand,
-                    },
+            let tutorial_texture = {
+                let mut texture = None;
+                if self.show_flashlight_tutorial && !self.player.flashdark.on {
+                    texture = Some(&self.assets.tutorial.flashlight);
+                } else if self.show_crouch_tutorial && self.player_inside_house {
+                    texture = Some(&self.assets.tutorial.crouch);
                 }
-            })();
-            self.geng.draw_2d(
-                framebuffer,
-                &camera2d,
-                &draw_2d::TexturedQuad::new(
-                    AABB::point(Vec2::ZERO).extend_uniform(0.5),
-                    reticle_texture,
-                ),
-            );
+                texture
+            };
+            if let Some(texture) = tutorial_texture {
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::new(
+                        AABB::point(Vec2::ZERO).extend_symmetric(
+                            vec2(texture.size().x as f32 / texture.size().y as f32, 1.0) * 5.0,
+                        ),
+                        texture,
+                    ),
+                );
+            } else {
+                let reticle_texture = (|| {
+                    match look.target {
+                        None => &self.assets.reticle,
+                        Some(target) => match target.object {
+                            Object::StaticLevel => &self.assets.reticle,
+                            Object::Interactable(id) => {
+                                let interactable = &self.interactables[id];
+
+                                // Copypasta mmmm
+                                let mut requirement = interactable.config.require_item.as_deref();
+                                if interactable.data.obj.meshes[0]
+                                    .name
+                                    .starts_with("I_LoosePlank")
+                                {
+                                    requirement = Some("Crowbar");
+                                }
+
+                                if let Some(requirement) = requirement {
+                                    if self.player.item.as_deref() != Some(requirement) {
+                                        return &self.assets.require_item;
+                                        // self.level.items[requirement].spawns[0]
+                                        //     .mesh
+                                        //     .material
+                                        //     .texture
+                                        //     .unwrap();
+                                    }
+                                }
+                                &self.assets.hand
+                            }
+                            Object::Item(id) => &self.assets.hand,
+                        },
+                    }
+                })();
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::new(
+                        AABB::point(Vec2::ZERO).extend_uniform(0.5),
+                        reticle_texture,
+                    ),
+                );
+            }
         }
 
         if !self.main_menu && self.intro_t > 0.0 {

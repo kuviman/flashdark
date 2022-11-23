@@ -165,15 +165,7 @@ impl Game {
         }
     }
     pub fn check_monster_sfx(&mut self, pos: Vec3<f32>) {
-        let player_inside_house = {
-            let door_id = self
-                .interactables
-                .iter()
-                .position(|interactable| interactable.data.obj.meshes[0].name == "D_DoorMain")
-                .unwrap();
-            !self.interactables[door_id].open
-        };
-        if !player_inside_house {
+        if !self.player_inside_house {
             return;
         }
         if !self.monster_spawned {
@@ -217,14 +209,6 @@ impl Game {
                 music.set_volume(*vol);
             }
         }
-        let player_inside_house = {
-            let door_id = self
-                .interactables
-                .iter()
-                .position(|interactable| interactable.data.obj.meshes[0].name == "D_DoorMain")
-                .unwrap();
-            !self.interactables[door_id].open
-        };
         if !self.monster_spawned {
             return;
         }
@@ -299,7 +283,7 @@ impl Game {
             }
         }
 
-        if player_inside_house {
+        if self.player_inside_house {
             if self.monster_sees_player() {
                 self.monster.detect_timer += if self.player.height > 0.75 {
                     delta_time
@@ -373,7 +357,7 @@ impl Game {
             let radius = 0.25;
             if v.len() < radius {
                 let mut can_open = true;
-                if name == "D_DoorStudy" && !player_inside_house {
+                if name == "D_DoorStudy" && !self.player_inside_house {
                     can_open = false;
                 }
                 // COPYPASTE YAY
