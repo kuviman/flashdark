@@ -176,7 +176,7 @@ impl Game {
         }
     }
     pub fn update_monster(&mut self, delta_time: f32) {
-        if self.game_over {
+        if self.game_over || self.ending {
             return;
         }
         if self.monster.speed == 1.0 {

@@ -121,7 +121,7 @@ void main() {
         light_level += (1.0 - l_shadow) * u_lights[light].intensity;// * cos;
     }
     // Ambient
-    light_level = max(0.05, light_level);
+    // light_level = max(0.05, light_level);
     vec4 light_color = u_ambient_light_color * (1.0 - light_level) + vec4(1.0, 1.0, 1.0, 1.0) * light_level;
     
     flashdarked *= min(1.0, light_level);

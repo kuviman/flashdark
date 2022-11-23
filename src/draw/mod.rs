@@ -121,7 +121,7 @@ impl Game {
             rotation: 0.0,
             fov: 10.0,
         };
-        if !self.main_menu {
+        if !self.main_menu && !self.ending {
             self.geng.draw_2d(
                 framebuffer,
                 &camera2d,
@@ -131,133 +131,135 @@ impl Game {
                 ),
             );
         }
-        if let Some(name) = &self.player.item {
-            let data = &self.level.items[name];
-            if name.contains("StudyKey") {
-                let texture = if self.player.flashdark.on {
-                    data.spawns[0]
-                        .mesh
-                        .material
-                        .dark_texture
-                        .as_deref()
-                        .unwrap()
+        if !self.ending {
+            if let Some(name) = &self.player.item {
+                let data = &self.level.items[name];
+                if name.contains("StudyKey") {
+                    let texture = if self.player.flashdark.on {
+                        data.spawns[0]
+                            .mesh
+                            .material
+                            .dark_texture
+                            .as_deref()
+                            .unwrap()
+                    } else {
+                        data.spawns[0].mesh.material.texture.as_deref().unwrap()
+                    };
+                    let key_config = &self.level.key_configs[name];
+
+                    let transform = Mat3::translate(vec2(5.0, -4.2))
+                        * Mat3::scale_uniform(2.0)
+                        * Mat3::rotate(-f32::PI * 0.7);
+
+                    let texture_aabb = AABB::point(Vec2::ZERO)
+                        .extend_positive(vec2(0.25, 0.25 / 2.0))
+                        .translate(vec2(
+                            0.25 * key_config.top_color as f32,
+                            0.75 + 0.25 * key_config.top_shape as f32 + 0.25 / 2.0,
+                        ));
+                    self.geng.draw_2d(
+                        framebuffer,
+                        &camera2d,
+                        &draw_2d::TexturedPolygon::new(
+                            vec![
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(-1.0, 0.0),
+                                    a_vt: texture_aabb.bottom_left(),
+                                    a_color: Rgba::WHITE,
+                                },
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(1.0, 0.0),
+                                    a_vt: texture_aabb.bottom_right(),
+                                    a_color: Rgba::WHITE,
+                                },
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(1.0, 1.0),
+                                    a_vt: texture_aabb.top_right(),
+                                    a_color: Rgba::WHITE,
+                                },
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(-1.0, 1.0),
+                                    a_vt: texture_aabb.top_left(),
+                                    a_color: Rgba::WHITE,
+                                },
+                            ],
+                            texture,
+                        )
+                        .transform(transform),
+                    );
+                    let texture_aabb = AABB::point(Vec2::ZERO)
+                        .extend_positive(vec2(0.25, 0.25 / 2.0))
+                        .translate(vec2(
+                            0.25 * key_config.bottom_color as f32,
+                            0.75 + 0.25 * key_config.bottom_shape as f32,
+                        ));
+                    self.geng.draw_2d(
+                        framebuffer,
+                        &camera2d,
+                        &draw_2d::TexturedPolygon::new(
+                            vec![
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(-1.0, -1.0),
+                                    a_vt: texture_aabb.bottom_left(),
+                                    a_color: Rgba::WHITE,
+                                },
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(1.0, -1.0),
+                                    a_vt: texture_aabb.bottom_right(),
+                                    a_color: Rgba::WHITE,
+                                },
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(1.0, 0.0),
+                                    a_vt: texture_aabb.top_right(),
+                                    a_color: Rgba::WHITE,
+                                },
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(-1.0, 0.0),
+                                    a_vt: texture_aabb.top_left(),
+                                    a_color: Rgba::WHITE,
+                                },
+                            ],
+                            texture,
+                        )
+                        .transform(transform),
+                    );
                 } else {
-                    data.spawns[0].mesh.material.texture.as_deref().unwrap()
-                };
-                let key_config = &self.level.key_configs[name];
-
-                let transform = Mat3::translate(vec2(5.0, -4.2))
-                    * Mat3::scale_uniform(2.0)
-                    * Mat3::rotate(-f32::PI * 0.7);
-
-                let texture_aabb = AABB::point(Vec2::ZERO)
-                    .extend_positive(vec2(0.25, 0.25 / 2.0))
-                    .translate(vec2(
-                        0.25 * key_config.top_color as f32,
-                        0.75 + 0.25 * key_config.top_shape as f32 + 0.25 / 2.0,
-                    ));
-                self.geng.draw_2d(
-                    framebuffer,
-                    &camera2d,
-                    &draw_2d::TexturedPolygon::new(
-                        vec![
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(-1.0, 0.0),
-                                a_vt: texture_aabb.bottom_left(),
-                                a_color: Rgba::WHITE,
-                            },
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(1.0, 0.0),
-                                a_vt: texture_aabb.bottom_right(),
-                                a_color: Rgba::WHITE,
-                            },
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(1.0, 1.0),
-                                a_vt: texture_aabb.top_right(),
-                                a_color: Rgba::WHITE,
-                            },
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(-1.0, 1.0),
-                                a_vt: texture_aabb.top_left(),
-                                a_color: Rgba::WHITE,
-                            },
-                        ],
-                        texture,
-                    )
-                    .transform(transform),
-                );
-                let texture_aabb = AABB::point(Vec2::ZERO)
-                    .extend_positive(vec2(0.25, 0.25 / 2.0))
-                    .translate(vec2(
-                        0.25 * key_config.bottom_color as f32,
-                        0.75 + 0.25 * key_config.bottom_shape as f32,
-                    ));
-                self.geng.draw_2d(
-                    framebuffer,
-                    &camera2d,
-                    &draw_2d::TexturedPolygon::new(
-                        vec![
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(-1.0, -1.0),
-                                a_vt: texture_aabb.bottom_left(),
-                                a_color: Rgba::WHITE,
-                            },
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(1.0, -1.0),
-                                a_vt: texture_aabb.bottom_right(),
-                                a_color: Rgba::WHITE,
-                            },
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(1.0, 0.0),
-                                a_vt: texture_aabb.top_right(),
-                                a_color: Rgba::WHITE,
-                            },
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(-1.0, 0.0),
-                                a_vt: texture_aabb.top_left(),
-                                a_color: Rgba::WHITE,
-                            },
-                        ],
-                        texture,
-                    )
-                    .transform(transform),
-                );
-            } else {
-                let texture_aabb = data.texture_aabb;
-                self.geng.draw_2d(
-                    framebuffer,
-                    &camera2d,
-                    &draw_2d::TexturedPolygon::new(
-                        vec![
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(-1.0, -1.0),
-                                a_vt: texture_aabb.bottom_left(),
-                                a_color: Rgba::WHITE,
-                            },
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(1.0, -1.0),
-                                a_vt: texture_aabb.bottom_right(),
-                                a_color: Rgba::WHITE,
-                            },
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(1.0, 1.0),
-                                a_vt: texture_aabb.top_right(),
-                                a_color: Rgba::WHITE,
-                            },
-                            draw_2d::TexturedVertex {
-                                a_pos: vec2(-1.0, 1.0),
-                                a_vt: texture_aabb.top_left(),
-                                a_color: Rgba::WHITE,
-                            },
-                        ],
-                        data.spawns[0].mesh.material.texture.as_deref().unwrap(),
-                    )
-                    .scale(vec2(
-                        2.0 * texture_aabb.width() / texture_aabb.height(),
-                        2.0,
-                    ))
-                    .translate(vec2(5.0, -4.2)),
-                );
+                    let texture_aabb = data.texture_aabb;
+                    self.geng.draw_2d(
+                        framebuffer,
+                        &camera2d,
+                        &draw_2d::TexturedPolygon::new(
+                            vec![
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(-1.0, -1.0),
+                                    a_vt: texture_aabb.bottom_left(),
+                                    a_color: Rgba::WHITE,
+                                },
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(1.0, -1.0),
+                                    a_vt: texture_aabb.bottom_right(),
+                                    a_color: Rgba::WHITE,
+                                },
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(1.0, 1.0),
+                                    a_vt: texture_aabb.top_right(),
+                                    a_color: Rgba::WHITE,
+                                },
+                                draw_2d::TexturedVertex {
+                                    a_pos: vec2(-1.0, 1.0),
+                                    a_vt: texture_aabb.top_left(),
+                                    a_color: Rgba::WHITE,
+                                },
+                            ],
+                            data.spawns[0].mesh.material.texture.as_deref().unwrap(),
+                        )
+                        .scale(vec2(
+                            2.0 * texture_aabb.width() / texture_aabb.height(),
+                            2.0,
+                        ))
+                        .translate(vec2(5.0, -4.2)),
+                    );
+                }
             }
         }
 
@@ -284,7 +286,7 @@ impl Game {
                         texture,
                     ),
                 );
-            } else {
+            } else if !self.ending {
                 let reticle_texture = (|| {
                     match look.target {
                         None => &self.assets.reticle,
@@ -361,6 +363,48 @@ impl Game {
                     Rgba::new(0.0, 0.0, 0.0, alpha),
                 ),
             );
+        }
+
+        if self.ending {
+            if self.ending_t > 10.0 {
+                let alpha = ((self.ending_t - 10.0) / 2.0).clamp(0.0, 1.0);
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::Quad::new(
+                        AABB::point(Vec2::ZERO).extend_uniform(100.0),
+                        Rgba::new(0.0, 0.0, 0.0, alpha),
+                    ),
+                );
+            } else if self.ending_t > 8.0 {
+                let alpha = ((self.ending_t - 8.0) / 2.0).clamp(0.0, 1.0);
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::Quad::new(
+                        AABB::point(Vec2::ZERO).extend_uniform(100.0),
+                        Rgba::new(0.0, 0.0, 0.0, alpha),
+                    ),
+                );
+            }
+            let mut draw_texture = |pos: Vec2<f32>, size: f32, texture: &ugli::Texture| {
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::new(
+                        AABB::point(pos).extend_symmetric(
+                            vec2(texture.size().x as f32 / texture.size().y as f32, 1.0) * size,
+                        ),
+                        texture,
+                    ),
+                );
+            };
+            if self.ending_t > 8.0 {
+                draw_texture(vec2(0.0, 3.0), 1.0, &self.assets.ui.title);
+            }
+            if self.ending_t > 12.0 {
+                draw_texture(vec2(0.0, 1.0), 0.5, &self.assets.tobecontinued);
+            }
         }
 
         // self.geng.draw_2d(

@@ -54,6 +54,9 @@ impl Game {
             intensity: 1.0,
         });
         lights.extend(assets.level_obj.meshes.iter().filter_map(|mesh| {
+            if mesh.name == "B_CeilingLight.008_B_CeilingLight.011" {
+                return None;
+            }
             mesh.name.contains("Light").then(|| Light {
                 id: id(),
                 flicker_time: 0.0,

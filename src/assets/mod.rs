@@ -67,6 +67,7 @@ pub struct Assets {
     #[asset(path = "difficulty/*.json", range = "1..=3")]
     pub difficulties: Vec<Difficulty>,
     pub tutorial: TutorialAssets,
+    pub tobecontinued: ugli::Texture,
 }
 
 #[derive(geng::Assets)]

@@ -129,6 +129,8 @@ pub struct Game {
     fuse_spawned: bool,
     fuse_placed: bool,
     lock_controls: bool,
+    ending: bool,
+    ending_t: f32,
     cutscene_t: f32,
     tv_noise: Option<geng::SoundEffect>,
     swing_sfx: Option<geng::SoundEffect>,
@@ -195,6 +197,8 @@ impl Game {
         navmesh.remove_unreachable_from(level.trigger_cubes["GhostSpawn"].center());
 
         let mut res = Self {
+            ending_t: 0.0,
+            ending: false,
             player_inside_house: false,
             show_flashlight_tutorial: true,
             show_crouch_tutorial: true,
@@ -411,6 +415,61 @@ impl geng::State for Game {
                 self.reset();
             }
         }
+        if self.ending {
+            self.ending_t += delta_time;
+            self.player.height = 1.0;
+            self.lock_controls = true;
+            let target_rot_h = 0.0;
+            let target_rot_v = 0.0;
+            let t = (delta_time / 0.3).min(1.0);
+            self.player.rot_h += (target_rot_h - self.player.rot_h) * t;
+            self.player.rot_v += (target_rot_v - self.player.rot_v) * t;
+            let pentagram_pos = find_center(
+                &self
+                    .assets
+                    .level_obj
+                    .meshes
+                    .iter()
+                    .find(|m| m.name == "S_Pentagram")
+                    .unwrap()
+                    .geometry,
+            )
+            .xy();
+            self.player.pos +=
+                ((pentagram_pos + vec2(0.0, -2.0)).extend(self.player.pos.z) - self.player.pos) * t;
+            self.monster.dir = vec3(0.0, -1.0, 0.0);
+            let monster_move_t = self.ending_t / 2.0;
+            self.player.flashdark.on = false;
+            if monster_move_t < 1.0 {
+                self.monster.pos = (pentagram_pos + (1.0 - monster_move_t) * vec2(3.0, 2.0))
+                    .extend(self.monster.pos.z);
+                self.monster.target_type = TargetType::Rng;
+                self.monster.speed = 1.0;
+            } else {
+                self.monster.pos = pentagram_pos.extend(0.0)
+                    + vec3(self.rng.get(20.0), 0.0, self.rng.get(20.0)) * 0.1
+                    + vec3(0.0, 0.0, -((monster_move_t - 1.0) / 5.0).sqr() * 2.0);
+                self.monster.speed = 10.0;
+                self.monster.target_type = TargetType::Player;
+            }
+
+            if self.ending_t > 10.0 {
+                for i in &mut self.interactables {
+                    if i.data.obj.meshes[0].name.starts_with("B_Candle") {
+                        i.open = false;
+                    }
+                }
+                let t = self.ending_t - 10.0;
+                self.monster.pos = pentagram_pos.extend(0.0) + vec3(0.0, -t, t.powf(0.5) - 1.5);
+            }
+            if self.ending_t > 20.0 {
+                self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
+                    &self.geng,
+                    &self.assets,
+                    true,
+                ))));
+            }
+        }
     }
 
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
@@ -450,7 +509,7 @@ impl geng::State for Game {
                 self.geng.window().toggle_fullscreen();
             }
         }
-        if !self.main_menu && self.intro_t < 0.0 {
+        if !self.main_menu && self.intro_t < 0.0 && !self.ending {
             for button in &self.assets.config.controls.pause {
                 if button.matches(&event) {
                     self.in_settings = !self.in_settings;

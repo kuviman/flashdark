@@ -127,6 +127,33 @@ impl Game {
     pub fn click_interactable(&mut self, id: Id, player: bool, from: Vec3<f32>) {
         let interactable = &mut self.interactables[id];
 
+        if interactable.data.obj.meshes[0].name.starts_with("B_Candle") {
+            interactable.open = true;
+            // TODO: sfx
+            let all_candles = self
+                .interactables
+                .iter()
+                .filter(|i| i.data.obj.meshes[0].name.starts_with("B_Candle"))
+                .count();
+            let lit_candles = self
+                .interactables
+                .iter()
+                .filter(|i| i.data.obj.meshes[0].name.starts_with("B_Candle"))
+                .filter(|i| !i.open)
+                .count();
+            self.ambient_light = Rgba::lerp(
+                Rgba::BLACK,
+                self.assets.config.ambient_light_inside_house,
+                lit_candles as f32 / all_candles as f32,
+            );
+            if lit_candles == 0 {
+                self.lock_controls = true;
+                self.stop_sounds();
+                self.ending = true;
+            }
+            return;
+        }
+
         if self.key_puzzle_state == KeyPuzzleState::LightOut {
             return;
         }

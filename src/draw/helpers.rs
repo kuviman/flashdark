@@ -241,6 +241,12 @@ impl Game {
 
         self.draw_calls.set(self.draw_calls.get() + 1);
 
+        let ambient_light = if mesh.name == "S_Pentagram" || mesh.name.starts_with("B_Candle") {
+            Rgba::WHITE
+        } else {
+            self.ambient_light
+        };
+
         ugli::draw(
             framebuffer,
             &self.assets.shaders.obj,
@@ -253,7 +259,7 @@ impl Game {
                     u_flashdark_angle: f32::PI / 4.0,
                     u_flashdark_strength: self.player.flashdark.strength,
                     u_flashdark_dark: self.player.flashdark.dark,
-                    u_ambient_light_color: self.ambient_light,
+                    u_ambient_light_color: ambient_light,
                     u_model_matrix: matrix,
                     u_color: color,
                     u_noise: &self.noise,
