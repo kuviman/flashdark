@@ -9,9 +9,17 @@ pub struct Material {
     // pub diffuse_color: Rgba<f32>,
 }
 
+#[derive(ugli::Vertex, Debug, Copy, Clone)]
+pub struct Vertex {
+    pub a_v: Vec3<f32>,
+    pub a_bv: Vec3<f32>,
+    pub a_vt: Vec2<f32>,
+    pub a_vn: Vec3<f32>,
+}
+
 pub struct ObjMesh {
     pub name: String,
-    pub geometry: ugli::VertexBuffer<geng::obj::Vertex>,
+    pub geometry: ugli::VertexBuffer<Vertex>,
     pub material: Material,
 }
 
@@ -79,8 +87,9 @@ impl geng::LoadAsset for Obj {
                             s => Some(s.parse().unwrap()),
                         };
                         let i_vn: usize = parts.next().unwrap().parse().unwrap();
-                        geng::obj::Vertex {
+                        Vertex {
                             a_v: v[i_v - 1],
+                            a_bv: Vec3::ZERO,
                             a_vn: vn[i_vn - 1],
                             a_vt: match i_vt {
                                 Some(i_vt) => vt[i_vt - 1],
@@ -185,6 +194,15 @@ impl geng::LoadAsset for Obj {
                     }
                 }
             }
+            for mesh in &mut meshes {
+                if mesh.name.starts_with("B_") {
+                    let center = find_center(&mesh.geometry);
+                    for v in mesh.geometry.iter_mut() {
+                        v.a_bv = v.a_v - center;
+                        v.a_v = center;
+                    }
+                }
+            }
             for i in (0..meshes.len()).rev() {
                 for j in ((i + 1)..meshes.len()).rev() {
                     fn mergable(name: &str) -> bool {
@@ -195,6 +213,8 @@ impl geng::LoadAsset for Obj {
                             || name.contains("Spawn")
                             || name.contains("Light")
                             || name.contains("Symbol")
+                            || name.contains("SwingingSwing")
+                            || name.contains("SingingGirl")
                         // TODO || name.starts_with("B_")
                         {
                             return false;
@@ -215,6 +235,13 @@ impl geng::LoadAsset for Obj {
                     }
                 }
             }
+            info!(
+                "{:?}",
+                meshes
+                    .iter()
+                    .map(|mesh| mesh.name.as_str())
+                    .collect::<Vec<_>>()
+            );
             Ok(Obj {
                 meshes,
                 // size,

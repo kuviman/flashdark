@@ -255,6 +255,7 @@ impl Game {
                     u_model_matrix: matrix,
                     u_color: color,
                     u_noise: &self.noise,
+                    u_camera_rot: self.camera.rot_h,
                     u_texture: texture,
                     u_texture_matrix: Mat3::identity(),
                     u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),

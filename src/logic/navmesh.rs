@@ -275,9 +275,10 @@ impl Game {
                                 * 0.05;
                             let quad = [v + n, u + n, u - n, v - n];
 
-                            fn vertex(p: Vec3<f32>) -> geng::obj::Vertex {
-                                geng::obj::Vertex {
+                            fn vertex(p: Vec3<f32>) -> Vertex {
+                                Vertex {
                                     a_v: p,
+                                    a_bv: Vec3::ZERO,
                                     a_vt: Vec2::ZERO,
                                     a_vn: Vec3::ZERO,
                                 }

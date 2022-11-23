@@ -26,7 +26,7 @@ pub fn nlerp3(a: Vec3<f32>, b: Vec3<f32>, t: f32) -> Vec3<f32> {
     (a * (1.0 - t) + b * t).normalize_or_zero()
 }
 
-pub fn find_center(mesh: &[geng::obj::Vertex]) -> Vec3<f32> {
+pub fn find_center(mesh: &[Vertex]) -> Vec3<f32> {
     let mut sum = Vec3::ZERO;
     for v in mesh {
         sum += v.a_v;

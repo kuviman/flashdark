@@ -27,7 +27,7 @@ impl TriggerCube {
 }
 
 fn update_key_uvs(mesh: &mut ObjMesh, config: KeyConfiguration) {
-    let update = |vertices: &mut [geng::obj::Vertex], (x, y)| {
+    let update = |vertices: &mut [Vertex], (x, y)| {
         for v in vertices {
             v.a_vt.x += 0.25 * x as f32;
             v.a_vt.y += 0.25 * y as f32;

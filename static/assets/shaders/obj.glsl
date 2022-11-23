@@ -12,7 +12,7 @@ struct Light {
     ivec2 shadow_size;
     float intensity;
 };
-const int MAX_LIGHTS = 10;
+const int MAX_LIGHTS = 10; 
 uniform Light u_lights[MAX_LIGHTS];
 uniform sampler2D u_lights_shadow_maps[MAX_LIGHTS];
 
@@ -32,8 +32,10 @@ varying vec4 v_light_pos[MAX_LIGHTS];
 
 #ifdef VERTEX_SHADER
 attribute vec3 a_v;
+attribute vec3 a_bv;
 attribute vec2 a_vt;
 attribute vec3 a_vn;
+uniform float u_camera_rot;
 uniform mat4 u_projection_matrix;
 uniform mat4 u_view_matrix;
 uniform mat4 u_model_matrix;
@@ -50,7 +52,7 @@ void main() {
     // // v_normal = transpose(inverse(mat3(u_model_matrix))) * a_vn;
     v_normal = mat3(u_model_matrix) * a_vn;
     v_uv = (u_texture_matrix * vec3(a_vt, 1.0)).xy;
-    v_world_pos = (u_model_matrix * vec4(a_v, 1.0)).xyz;
+    v_world_pos = (u_model_matrix * vec4(a_v + vec3(rotate(a_bv.xy, u_camera_rot), a_bv.z), 1.0)).xyz;
     // for (int i = 0; i < MAX_LIGHTS; ++i) {
     //     v_light_pos[i] = u_lights[i].matrix * vec4(v_world_pos, 1.0);
     // }
