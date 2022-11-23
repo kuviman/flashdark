@@ -116,7 +116,7 @@ impl LevelData {
 
         let mut skybox = None;
         let mut trigger_cubes = HashMap::new();
-        let mut room_data = Vec::new();
+        let mut room_data = HashMap::new();
         for i in (0..obj.meshes.len()).rev() {
             // info!("{:?}", obj.meshes[i].name);
             let name = &obj.meshes[i].name;
@@ -174,14 +174,17 @@ impl LevelData {
                     max.y = max.y.max(v.a_v.y);
                     max.z = max.z.max(v.a_v.z);
                 }
-                room_data.push(TriggerCube {
-                    min_x: min.x,
-                    min_y: min.y,
-                    min_z: min.z,
-                    max_x: max.x,
-                    max_y: max.y,
-                    max_z: max.z,
-                });
+                room_data.insert(
+                    name,
+                    TriggerCube {
+                        min_x: min.x,
+                        min_y: min.y,
+                        min_z: min.z,
+                        max_x: max.x,
+                        max_y: max.y,
+                        max_z: max.z,
+                    },
+                );
             }
         }
 

@@ -190,6 +190,12 @@ impl Game {
                 .unwrap();
             if self.interactables[door_id].open {
                 self.click_interactable(door_id, false, Vec3::ZERO);
+                self.monster_walk_to(
+                    self.navmesh.waypoints[self
+                        .navmesh
+                        .closest_waypoint(self.level.room_data["Kitchen"].center())],
+                    TargetType::Noise,
+                );
                 self.ambient_light = self.assets.config.ambient_light_inside_house;
             }
         }

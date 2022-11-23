@@ -120,8 +120,10 @@ impl Game {
         )
     }
     pub fn monster_walk_to(&mut self, pos: Vec3<f32>, target_type: TargetType) {
+        info!("Going to {:?}", pos);
         if target_type != TargetType::Rng {
             self.monster.scan_timer = self.difficulty.monster_scan_time;
+            self.monster.scan_timer_going = false;
             self.monster.next_scan_pos = pos;
         }
         // if target_type != self.monster.target_type {
@@ -242,14 +244,18 @@ impl Game {
                         .level
                         .room_data
                         .iter()
-                        .position(|room| room.horizontal_aabb().contains(self.monster.pos.xy()))
-                        .unwrap_or(0);
-                    let room = loop {
-                        let room = global_rng().gen_range(0..self.level.room_data.len());
-                        if room != current_room {
-                            break room;
-                        }
-                    };
+                        .find(|(_name, room)| {
+                            room.horizontal_aabb().contains(self.monster.pos.xy())
+                        })
+                        .unwrap_or(self.level.room_data.iter().next().unwrap())
+                        .0;
+                    let room = self
+                        .level
+                        .room_data
+                        .keys()
+                        .filter(|&name| name != current_room)
+                        .choose(&mut global_rng())
+                        .unwrap();
                     let room = &self.level.room_data[room];
                     let room_aabb = room.horizontal_aabb();
                     if let Some(res) = self
