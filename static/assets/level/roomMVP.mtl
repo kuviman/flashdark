@@ -1,5 +1,5 @@
 # Blender MTL File: 'roomMVP.blend'
-# Material Count: 57
+# Material Count: 56
 
 newmtl BookshelfMat
 Ns 225.000000
@@ -12,18 +12,6 @@ d 1.000000
 illum 2
 map_Kd BookshelfTexture.png
 map_d BookshelfTexture.png
-
-newmtl CandleTexture
-Ns 225.000000
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Kd CandleTexture.png
-map_d CandleTexture.png
 
 newmtl CeilingMat0
 Ns 225.000000
