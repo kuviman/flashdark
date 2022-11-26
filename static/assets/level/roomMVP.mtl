@@ -1,5 +1,5 @@
 # Blender MTL File: 'roomMVP.blend'
-# Material Count: 56
+# Material Count: 60
 
 newmtl BookshelfMat
 Ns 225.000000
@@ -12,6 +12,18 @@ d 1.000000
 illum 2
 map_Kd BookshelfTexture.png
 map_d BookshelfTexture.png
+
+newmtl CandleMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd CandleTexture.png
+map_d CandleTexture.png
 
 newmtl CeilingMat0
 Ns 225.000000
@@ -79,6 +91,30 @@ d 1.000000
 illum 2
 map_Kd ClosetTexture.png
 map_d ClosetTexture.png
+
+newmtl CoffeeTableMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd CoffeeTableTexture.png
+map_d CoffeeTableTexture.png
+
+newmtl CribMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd CribTexture.png
+map_d CribTexture.png
 
 newmtl DarkItemsMat1
 Ns 225.000000
@@ -549,6 +585,18 @@ d 1.000000
 illum 2
 map_Kd tree03.png
 map_d tree03.png
+
+newmtl TreelineMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 1.000000 1.000000 0.250000 TreelineTexture.png
+map_d -s 1.000000 1.000000 0.250000 TreelineTexture.png
 
 newmtl VaseMat
 Ns 225.000000
