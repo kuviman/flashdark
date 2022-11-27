@@ -130,67 +130,8 @@ impl geng::LoadAsset for Obj {
                         current_material = Some(materials[name].clone());
                     }
                 } else if let Some(mtl_path) = line.strip_prefix("mtllib ") {
-                    let mtl_source =
-                        <String as geng::LoadAsset>::load(&geng, &dir.join(mtl_path)).await?;
-                    let mut current_texture = None;
-                    let mut current_dark_texture = None;
-                    let mut current_name = "__unnamed__";
-                    let mut current_ambient_color = Rgba::WHITE;
-                    let mut current_diffuse_color = Rgba::WHITE;
-                    for line in mtl_source.lines().chain(std::iter::once("newmtl _")) {
-                        if let Some(texture_path) = line.strip_prefix("map_Kd ") {
-                            let texture_path = texture_path.split_whitespace().last().unwrap();
-                            // WTF .
-                            if texture_path != "." {
-                                current_texture = Some(
-                                    <ugli::Texture as geng::LoadAsset>::load(
-                                        &geng,
-                                        &dir.join(texture_path),
-                                    )
-                                    .await?,
-                                );
-                                if let Some(texture) = &mut current_texture {
-                                    make_repeated(texture);
-                                }
-                                current_dark_texture = <ugli::Texture as geng::LoadAsset>::load(
-                                    &geng,
-                                    &dir.join(
-                                        texture_path.strip_suffix(".png").unwrap().to_owned()
-                                            + "_Dark.png",
-                                    ),
-                                )
-                                .await
-                                .ok();
-                                if let Some(texture) = &mut current_dark_texture {
-                                    make_repeated(texture);
-                                }
-                            }
-                        } else if let Some(name) = line.strip_prefix("newmtl ") {
-                            let name = name.trim();
-                            materials.insert(
-                                current_name.to_owned(),
-                                Material {
-                                    name: name.to_owned(),
-                                    texture: current_texture.take().map(Rc::new),
-                                    dark_texture: current_dark_texture.take().map(Rc::new),
-                                    // ambient_color: current_ambient_color,
-                                    // diffuse_color: current_diffuse_color,
-                                },
-                            );
-                            current_name = name;
-                        } else if let Some(color) = line.strip_prefix("Ka ") {
-                            let mut parts = color.split_whitespace();
-                            let r: f32 = parts.next().unwrap().parse().unwrap();
-                            let g: f32 = parts.next().unwrap().parse().unwrap();
-                            let b: f32 = parts.next().unwrap().parse().unwrap();
-                            current_ambient_color = Rgba::new(r, g, b, 1.0);
-                        } else if let Some(color) = line.strip_prefix("Kd ") {
-                            let mut parts = color.split_whitespace();
-                            let r: f32 = parts.next().unwrap().parse().unwrap();
-                            let g: f32 = parts.next().unwrap().parse().unwrap();
-                            let b: f32 = parts.next().unwrap().parse().unwrap();
-                            current_diffuse_color = Rgba::new(r, g, b, 1.0);
-                        }
+                    for material in parse_mtl(&geng, dir, &dir.join(mtl_path)).await? {
+                        materials.insert(material.name.clone(), material);
                     }
                 }
             }
@@ -253,4 +194,88 @@ impl geng::LoadAsset for Obj {
         .boxed_local()
     }
     const DEFAULT_EXT: Option<&'static str> = Some("obj");
+}
+
+async fn parse_mtl(
+    geng: &Geng,
+    dir: &std::path::Path,
+    path: &std::path::Path,
+) -> anyhow::Result<Vec<Material>> {
+    struct MaterialFuture {
+        name: String,
+        texture: geng::AssetFuture<Option<ugli::Texture>>,
+        dark_texture: geng::AssetFuture<Option<ugli::Texture>>,
+    }
+
+    impl MaterialFuture {
+        async fn into_future(self) -> Material {
+            let (texture, dark_texture) = future::join(self.texture, self.dark_texture).await;
+            let texture = texture.unwrap().map(Rc::new);
+            let dark_texture = dark_texture.unwrap().map(Rc::new);
+            Material {
+                name: self.name,
+                texture,
+                dark_texture,
+            }
+        }
+    }
+
+    let mut materials = Vec::<MaterialFuture>::new();
+    let mtl_source = <String as geng::LoadAsset>::load(geng, path).await?;
+    let mut current_texture = future::ready(Ok(None)).boxed_local();
+    let mut current_dark_texture = future::ready(Ok(None)).boxed_local();
+    let mut current_name = "__unnamed__";
+    let mut current_ambient_color = Rgba::WHITE;
+    let mut current_diffuse_color = Rgba::WHITE;
+    for line in mtl_source.lines().chain(std::iter::once("newmtl _")) {
+        if let Some(texture_path) = line.strip_prefix("map_Kd ") {
+            let texture_path = texture_path.split_whitespace().last().unwrap();
+            // WTF .
+            if texture_path != "." {
+                current_texture =
+                    <ugli::Texture as geng::LoadAsset>::load(&geng, &dir.join(texture_path))
+                        .map_ok(|mut texture| {
+                            make_repeated(&mut texture);
+                            Some(texture)
+                        })
+                        .boxed_local();
+                current_dark_texture = <ugli::Texture as geng::LoadAsset>::load(
+                    &geng,
+                    &dir.join(texture_path.strip_suffix(".png").unwrap().to_owned() + "_Dark.png"),
+                )
+                .map_ok(|mut texture| {
+                    make_repeated(&mut texture);
+                    Some(texture)
+                })
+                .map(|result| Ok(result.ok().flatten()))
+                .boxed_local();
+            }
+        } else if let Some(name) = line.strip_prefix("newmtl ") {
+            let name = name.trim();
+            materials.push(MaterialFuture {
+                name: current_name.to_owned(),
+                texture: mem::replace(&mut current_texture, future::ready(Ok(None)).boxed_local()),
+                dark_texture: mem::replace(
+                    &mut current_dark_texture,
+                    future::ready(Ok(None)).boxed_local(),
+                ),
+                // ambient_color: current_ambient_color,
+                // diffuse_color: current_diffuse_color,
+            });
+            current_name = name;
+        } else if let Some(color) = line.strip_prefix("Ka ") {
+            let mut parts = color.split_whitespace();
+            let r: f32 = parts.next().unwrap().parse().unwrap();
+            let g: f32 = parts.next().unwrap().parse().unwrap();
+            let b: f32 = parts.next().unwrap().parse().unwrap();
+            current_ambient_color = Rgba::new(r, g, b, 1.0);
+        } else if let Some(color) = line.strip_prefix("Kd ") {
+            let mut parts = color.split_whitespace();
+            let r: f32 = parts.next().unwrap().parse().unwrap();
+            let g: f32 = parts.next().unwrap().parse().unwrap();
+            let b: f32 = parts.next().unwrap().parse().unwrap();
+            current_diffuse_color = Rgba::new(r, g, b, 1.0);
+        }
+    }
+    Ok(future::join_all(materials.into_iter().map(MaterialFuture::into_future)).await)
 }
