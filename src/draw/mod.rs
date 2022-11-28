@@ -343,6 +343,20 @@ impl Game {
                     Rgba::new(0.0, 0.0, 0.0, alpha),
                 ),
             );
+            {
+                let texture = &self.assets.tutorial.intro;
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::colored(
+                        AABB::point(Vec2::ZERO).extend_symmetric(
+                            vec2(texture.size().x as f32 / texture.size().y as f32, 1.0) * 5.0,
+                        ),
+                        texture,
+                        Rgba::new(1.0, 1.0, 1.0, alpha),
+                    ),
+                );
+            }
             self.geng.draw_2d(
                 framebuffer,
                 &camera2d,

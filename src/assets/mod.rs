@@ -43,6 +43,7 @@ pub struct GhostAssets {
 pub struct TutorialAssets {
     pub flashlight: ugli::Texture,
     pub crouch: ugli::Texture,
+    pub intro: ugli::Texture,
 }
 
 #[derive(geng::Assets)]
