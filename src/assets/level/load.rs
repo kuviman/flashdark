@@ -99,6 +99,11 @@ impl LevelData {
                     v.a_vt = vec2((v.a_v.x + v.a_v.y) / 2.0, v.a_v.z / 2.0);
                 }
             }
+            if mesh.name.starts_with("S_Treeline") {
+                for v in mesh.geometry.iter_mut() {
+                    v.a_vt = vec2((v.a_v.x + v.a_v.y), v.a_v.z) / 4.0;
+                }
+            }
 
             if mesh.name == "S_StudySymbol2" {
                 update_storage_lock_uvs(mesh, storage_lock_combination[0]);
