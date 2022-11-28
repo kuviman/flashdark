@@ -188,9 +188,6 @@ impl Game {
             geng.window().lock_cursor();
         }
         geng.window().set_cursor_type(geng::CursorType::None);
-        if !main_menu {
-            geng.window().lock_cursor();
-        }
 
         let mut navmesh = if assets.config.create_navmesh {
             Self::init_navmesh(geng, &level)
