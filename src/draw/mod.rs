@@ -145,7 +145,7 @@ impl Game {
                 framebuffer,
                 &camera2d,
                 &draw_2d::TexturedQuad::new(
-                    AABB::point(vec2(-5.0, -4.2)).extend_uniform(2.0),
+                    AABB::point(vec2(-5.0, -3.5)).extend_uniform(1.5),
                     &self.assets.flashdark,
                 ),
             );
@@ -272,11 +272,9 @@ impl Game {
                             ],
                             data.spawns[0].mesh.material.texture.as_deref().unwrap(),
                         )
-                        .scale(vec2(
-                            2.0 * texture_aabb.width() / texture_aabb.height(),
-                            2.0,
-                        ))
-                        .translate(vec2(5.0, -4.2)),
+                        .translate(vec2(0.0, -0.5))
+                        .scale(vec2(2.0, 2.0 * texture_aabb.height() / texture_aabb.width()) * 0.6)
+                        .translate(vec2(5.0, -3.0)),
                     );
                 }
             }
