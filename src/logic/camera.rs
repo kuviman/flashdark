@@ -94,6 +94,10 @@ impl Game {
                             && self.key_puzzle_state != KeyPuzzleState::Finish))
                     || (interactable.data.obj.meshes[0].name.starts_with("B_Candle")
                         && interactable.open)
+                    || (interactable.data.obj.meshes[0]
+                        .name
+                        .starts_with("I_BookshelfLibrary")
+                        && interactable.open)
                 {
                     Object::StaticLevel
                 } else {
