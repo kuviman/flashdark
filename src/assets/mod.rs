@@ -65,6 +65,8 @@ pub struct Assets {
     pub ui: UiAssets,
     #[asset(path = "VFX/dustParticle.png")]
     pub dust_particle: ugli::Texture,
+    #[asset(path = "VFX/glowParticle.png")]
+    pub glow_particle: ugli::Texture,
     #[asset(path = "difficulty/*.json", range = "1..=3")]
     pub difficulties: Vec<Difficulty>,
     pub tutorial: TutorialAssets,
@@ -188,4 +190,5 @@ pub struct Shaders {
     pub obj: ugli::Program,
     pub shadow: ugli::Program,
     pub particle: ugli::Program,
+    pub shine: ugli::Program,
 }

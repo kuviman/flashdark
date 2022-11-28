@@ -132,7 +132,7 @@ impl Game {
         }
 
         // Activate the monster cutscene
-        if self.fuse_placed && self.cutscene_t < 3.0 {
+        if self.fuse_placed && self.cutscene_t < 5.0 {
             let tv_pos = self.level.trigger_cubes["GhostSpawn"].center();
             let camera_dir = self
                 .camera
@@ -147,9 +147,12 @@ impl Game {
             //     > (self.assets.config.tv_detection_angle * f32::PI / 180.0).cos()
             {
                 self.cutscene_t += delta_time;
-                if self.cutscene_t > 1.4 {
-                    self.player.flashdark.dark = 1.0;
-                }
+                self.monster.next_flashdark_flicker_time = 10.0;
+                self.player.flashdark.on = true;
+                self.player.flashdark.dark = ((self.cutscene_t - 0.5) / 4.0).clamp(0.0, 1.0);
+                // if self.cutscene_t > 1.4 {
+                //     self.player.flashdark.dark = 1.0;
+                // }
                 self.player.height = 1.0; // Uncrouch
                 self.lock_controls = true;
                 let target_rot_h = tv_dir.xy().arg() - f32::PI / 2.0;
@@ -157,11 +160,13 @@ impl Game {
                 let t = (delta_time / 0.3).min(1.0);
                 self.player.rot_h += (target_rot_h - self.player.rot_h) * t;
                 self.player.rot_v += (target_rot_v - self.player.rot_v) * t;
-                self.player.pos +=
-                    (trigger_box.center().xy().extend(self.player.pos.z) - self.player.pos) * t;
+                self.player.pos += ((trigger_box.center().xy() + vec2(0.20, 0.0))
+                    .extend(self.player.pos.z)
+                    - self.player.pos)
+                    * t;
 
                 // End of the cutscene
-                if self.cutscene_t >= 3.0 {
+                if self.cutscene_t >= 5.0 {
                     self.lock_controls = false;
                     self.click_interactable(
                         self.interactables

@@ -31,7 +31,7 @@ void main() {
         discard;
     }
 
-    float n = texture2D(u_noise, v_noise_uv / 10.0).x;
+    float n = texture2D(u_noise, v_noise_uv / 20.0).x;
     if (n < u_dissolve) {
         discard;
     }

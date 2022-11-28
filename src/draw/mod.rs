@@ -99,16 +99,34 @@ impl Game {
         self.draw_monster(framebuffer);
 
         // TV cutscene
-        if self.fuse_placed && self.cutscene_t < 3.0 && self.lock_controls {
-            let t = self.cutscene_t / 3.0;
+        if self.fuse_placed && self.cutscene_t < 5.0 && self.lock_controls {
+            let t = self.cutscene_t / 5.0;
             self.draw_billboard(
                 framebuffer,
-                &self.assets.ghost.crawling,
-                self.level.trigger_cubes["GhostSpawn"].center() + vec3(1.0 - t, 0.0, 0.0) * 0.5,
-                t,
+                &self.assets.ghost.normal.back,
+                self.monster.pos, // self.level.trigger_cubes["GhostSpawn"].center(),
+                0.5 + t,
                 0.0,
-                0.0,
+                1.0 - t * t,
             );
+            self.draw_texture(
+                framebuffer,
+                &self.assets.shaders.shine,
+                &self.assets.glow_particle,
+                vec3(-8.0, -2.6, 0.65),
+                2.0 + (self.time * 10.0).sin() * 0.2,
+                0.0,
+                0.0,
+                Rgba::new(1.0, 1.0, 1.0, (self.time * 20.0).cos() * 0.25 + 0.75),
+            );
+            // self.draw_billboard(
+            //     framebuffer,
+            //     &self.assets.ghost.crawling,
+            //     self.level.trigger_cubes["GhostSpawn"].center() + vec3(1.0 - t, 0.0, 0.0) * 0.5,
+            //     t,
+            //     0.0,
+            //     0.0,
+            // );
         }
 
         self.draw_debug_navmesh(framebuffer);

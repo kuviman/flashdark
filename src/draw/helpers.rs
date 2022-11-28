@@ -10,6 +10,7 @@ impl Game {
         size: f32,
         rot: f32,
         dissolve: f32,
+        color: Rgba<f32>,
     ) {
         let size = vec2(
             size * texture.size().x as f32 / texture.size().y as f32,
@@ -48,6 +49,7 @@ impl Game {
                     u_noise: &self.noise,
                     u_texture: texture,
                     u_dissolve: dissolve,
+                    u_color: color,
                 },
                 geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
             ),
@@ -76,6 +78,7 @@ impl Game {
             size,
             rot,
             dissolve,
+            Rgba::WHITE,
         );
     }
 
