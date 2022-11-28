@@ -75,6 +75,38 @@ uniform sampler2D u_texture;
 uniform sampler2D u_dark_texture;
 uniform sampler2D u_noise;
 
+float get_light_level(int light) {
+    vec2 texel_size = 3.0 / vec2(u_lights[light].shadow_size);
+    
+    vec3 light_pos = get_light_pos(u_lights[light], v_world_pos); // v_light_pos[light].xyz / v_light_pos[light].w * 0.5 + 0.5;
+    vec3 light_dir = normalize(u_lights[light].pos - v_world_pos);
+    vec3 normal = normalize(v_normal);
+    
+    float cos = max(dot(light_dir, normal), 0.0); // TODO: fix bias
+    float bias = 0.01; //max(0.005, 0.01 * (1.0 - cos));
+
+    float l_shadow = 0.0;
+    for (int i = -SHADOWS_SOFT; i <= SHADOWS_SOFT; ++i) {
+        for (int j = -SHADOWS_SOFT; j <= SHADOWS_SOFT; ++j) {
+            // vec2 n = vec2(cnoise(gl_FragCoord.xy), cnoise(gl_FragCoord.xy + vec2(123.0, 456.0)));
+            vec2 n = texture2D(u_noise, gl_FragCoord.xy / 2000.0).xy;
+            vec2 sample_pos = light_pos.xy + vec2(i, j) * texel_size;
+            sample_pos += n * texel_size * 5.0;
+            if (sample_pos.x <= 1.0 && sample_pos.x >= 0.0 && sample_pos.y <= 1.0 && sample_pos.y >= 0.0) {
+                float pcf_depth = get_shadow_map_value(u_lights_shadow_maps[light], sample_pos);
+                l_shadow += light_pos.z - bias > pcf_depth ? 1.0 : 0.0;
+            } else {
+                l_shadow += 1.0;
+            }
+        }
+    }
+    l_shadow /= (2.0 * float(SHADOWS_SOFT) + 1.0) * (2.0 * float(SHADOWS_SOFT) + 1.0);
+    if (light_pos.z > 1.0 || light_pos.z < 0.0) {
+        l_shadow = 1.0;
+    }
+    return (1.0 - l_shadow) * u_lights[light].intensity;// * cos;
+}
+
 void main() {
     // vec4 a = u_lights[0].matrix * vec4(v_world_pos, 1.0);
     // gl_FragColor = vec4(a.xyz / a.w * 0.5 + 0.5, 1.0);
@@ -88,46 +120,21 @@ void main() {
 
     // Shadow
     float light_level = 0.0;
-    for (int light = 0; light < MAX_LIGHTS; ++light) {
+    for (int light = 1; light < MAX_LIGHTS; ++light) {
         if (light >= u_lights_count) { break; }
-        vec2 texel_size = 3.0 / vec2(u_lights[light].shadow_size);
-        
-        vec3 light_pos = get_light_pos(u_lights[light], v_world_pos); // v_light_pos[light].xyz / v_light_pos[light].w * 0.5 + 0.5;
-        vec3 light_dir = normalize(u_lights[light].pos - v_world_pos);
-        vec3 normal = normalize(v_normal);
-        
-        float cos = max(dot(light_dir, normal), 0.0); // TODO: fix bias
-        float bias = 0.01; //max(0.005, 0.01 * (1.0 - cos));
-
-        float l_shadow = 0.0;
-        for (int i = -SHADOWS_SOFT; i <= SHADOWS_SOFT; ++i) {
-            for (int j = -SHADOWS_SOFT; j <= SHADOWS_SOFT; ++j) {
-                // vec2 n = vec2(cnoise(gl_FragCoord.xy), cnoise(gl_FragCoord.xy + vec2(123.0, 456.0)));
-                vec2 n = texture2D(u_noise, gl_FragCoord.xy / 2000.0).xy;
-                vec2 sample_pos = light_pos.xy + vec2(i, j) * texel_size;
-                sample_pos += n * texel_size * 5.0;
-                if (sample_pos.x <= 1.0 && sample_pos.x >= 0.0 && sample_pos.y <= 1.0 && sample_pos.y >= 0.0) {
-                    float pcf_depth = get_shadow_map_value(u_lights_shadow_maps[light], sample_pos);
-                    l_shadow += light_pos.z - bias > pcf_depth ? 1.0 : 0.0;
-                } else {
-                    l_shadow += 1.0;
-                }
-            }
-        }
-        l_shadow /= (2.0 * float(SHADOWS_SOFT) + 1.0) * (2.0 * float(SHADOWS_SOFT) + 1.0);
-        if (light_pos.z > 1.0 || light_pos.z < 0.0) {
-            l_shadow = 1.0;
-        }
-        light_level += (1.0 - l_shadow) * u_lights[light].intensity;// * cos;
+        light_level += get_light_level(light);
     }
+    float flashlight_level = get_light_level(0);
+    light_level += (1.0 - u_flashdark_dark) * flashlight_level;
     // Ambient
     // light_level = max(0.05, light_level);
     vec4 light_color = u_ambient_light_color * (1.0 - light_level) + vec4(1.0, 1.0, 1.0, 1.0) * light_level;
     
-    flashdarked *= min(1.0, light_level);
+    flashdarked *= min(1.0, flashlight_level);
     
-    vec4 normal_color = texture2D(u_texture, v_uv);
+    vec4 normal_color = texture2D(u_texture, v_uv) * light_color;
     vec4 dark_color = texture2D(u_texture, v_uv) * (1.0 - u_flashdark_dark) + texture2D(u_dark_texture, v_uv) * u_flashdark_dark;
+    dark_color.xyz *= light_color.xyz * 0.75;
     vec4 texture_color = (dark_color * flashdarked + normal_color * (1.0 - flashdarked)) * vec4(u_color.xyz, 1.0);
     vec4 fog_color = vec4(0.0, 0.0, 0.0, texture_color.w);
     gl_FragColor = texture_color * (1.0 - fog_factor) + fog_color * fog_factor;
@@ -138,6 +145,6 @@ void main() {
         gl_FragColor.w = u_color.w;
     }
     gl_FragColor.xyz *= 1.0 - smoothstep(u_darkness, u_darkness + 3.0, v_world_pos.y);
-    gl_FragColor.xyz *= light_color.xyz;
+    // gl_FragColor.xyz *= light_color.xyz;
 }
 #endif
