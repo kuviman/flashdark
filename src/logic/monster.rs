@@ -141,16 +141,18 @@ impl Game {
                     }
                 }
                 TargetType::Noise | TargetType::Flashdark => {
-                    let mut effect = self
-                        .assets
-                        .sfx
-                        .ghost_alarmed
-                        .choose(&mut global_rng())
-                        .unwrap()
-                        .effect();
-                    effect.set_position(self.monster.pos.map(|x| x as f64));
-                    // effect.set_max_distance(self.assets.config.max_sound_distance);
-                    effect.play();
+                    if self.monster.speed == 1.0 {
+                        let mut effect = self
+                            .assets
+                            .sfx
+                            .ghost_alarmed
+                            .choose(&mut global_rng())
+                            .unwrap()
+                            .effect();
+                        effect.set_position(self.monster.pos.map(|x| x as f64));
+                        // effect.set_max_distance(self.assets.config.max_sound_distance);
+                        effect.play();
+                    }
                 }
                 TargetType::Rng => {}
             };

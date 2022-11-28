@@ -269,10 +269,12 @@ impl Game {
 
             let tutorial_texture = {
                 let mut texture = None;
+                if self.show_crouch_tutorial && self.player_inside_house {
+                    self.show_flashlight_tutorial = false;
+                    texture = Some(&self.assets.tutorial.crouch);
+                }
                 if self.show_flashlight_tutorial && !self.player.flashdark.on {
                     texture = Some(&self.assets.tutorial.flashlight);
-                } else if self.show_crouch_tutorial && self.player_inside_house {
-                    texture = Some(&self.assets.tutorial.crouch);
                 }
                 texture
             };
