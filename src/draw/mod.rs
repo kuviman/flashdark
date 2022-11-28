@@ -107,6 +107,7 @@ impl Game {
                 self.level.trigger_cubes["GhostSpawn"].center() + vec3(1.0 - t, 0.0, 0.0) * 0.5,
                 t,
                 0.0,
+                0.0,
             );
         }
 
@@ -366,17 +367,7 @@ impl Game {
         }
 
         if self.ending {
-            if self.ending_t > 10.0 {
-                let alpha = ((self.ending_t - 10.0) / 2.0).clamp(0.0, 1.0);
-                self.geng.draw_2d(
-                    framebuffer,
-                    &camera2d,
-                    &draw_2d::Quad::new(
-                        AABB::point(Vec2::ZERO).extend_uniform(100.0),
-                        Rgba::new(0.0, 0.0, 0.0, alpha),
-                    ),
-                );
-            } else if self.ending_t > 8.0 {
+            if self.ending_t > 8.0 && self.ending_t < 15.0 {
                 let alpha = ((self.ending_t - 8.0) / 2.0).clamp(0.0, 1.0);
                 self.geng.draw_2d(
                     framebuffer,
@@ -402,7 +393,7 @@ impl Game {
             if self.ending_t > 8.0 {
                 draw_texture(vec2(0.0, 3.0), 1.0, &self.assets.ui.title);
             }
-            if self.ending_t > 12.0 {
+            if self.ending_t > 15.0 {
                 draw_texture(vec2(0.0, 1.0), 0.5, &self.assets.tobecontinued);
             }
         }

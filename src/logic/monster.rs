@@ -313,6 +313,8 @@ impl Game {
                 self.stop_sounds();
                 self.game_over_sfx = Some(self.assets.sfx.jumpscare.play());
                 self.game_over = true;
+                self.monster.target_type = TargetType::Player;
+                self.monster.speed = 10.0;
             }
             // self.transition = Some(geng::Transition::Switch(Box::new(Game::new(
             //     &self.geng,
@@ -446,7 +448,14 @@ impl Game {
         if self.monster_sees_player() {
             // texture = &self.assets.hand;
         }
-        self.draw_billboard(framebuffer, texture, self.monster.pos, 1.5, 0.0);
+        self.draw_billboard(
+            framebuffer,
+            texture,
+            self.monster.pos,
+            1.5,
+            0.0,
+            ((self.ending_t - 3.0) / 5.0).clamp(0.0, 1.0),
+        );
         // self.draw_sprite(
         //     framebuffer,
         //     texture,

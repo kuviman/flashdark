@@ -179,10 +179,13 @@ impl Game {
     pub fn new(geng: &Geng, assets: &Rc<Assets>, main_menu: bool) -> Self {
         let level = LevelData::generate(geng, &assets.level_obj);
         if main_menu {
+            geng.window().unlock_cursor();
             unsafe {
                 BEEN_INSIDE_HOUSE = false;
                 INTRO_SEEN = false;
             }
+        } else {
+            geng.window().lock_cursor();
         }
         geng.window().set_cursor_type(geng::CursorType::None);
         if !main_menu {
@@ -438,29 +441,35 @@ impl geng::State for Game {
             self.player.pos +=
                 ((pentagram_pos + vec2(0.0, -2.0)).extend(self.player.pos.z) - self.player.pos) * t;
             self.monster.dir = vec3(0.0, -1.0, 0.0);
-            let monster_move_t = self.ending_t / 2.0;
             self.player.flashdark.on = false;
-            if monster_move_t < 1.0 {
-                self.monster.pos = (pentagram_pos + (1.0 - monster_move_t) * vec2(3.0, 2.0))
+            if self.ending_t < 1.0 {
+                let t = self.ending_t;
+                self.monster.pos = (pentagram_pos + vec2(0.5, 2.0) + (1.0 - t) * vec2(2.5, 0.0))
                     .extend(self.monster.pos.z);
                 self.monster.target_type = TargetType::Rng;
                 self.monster.speed = 1.0;
-            } else {
+            } else if self.ending_t < 2.0 {
+                self.monster.target_type = TargetType::Player;
+                self.monster.speed = 10.0;
+            } else if self.ending_t < 3.0 {
+                let t = self.ending_t - 2.0;
+                self.monster.pos =
+                    (pentagram_pos + (1.0 - t) * vec2(0.5, 2.0)).extend(self.monster.pos.z);
+            } else if self.ending_t < 12.0 {
+                let t = (self.ending_t - 3.0) / 9.0;
                 self.monster.pos = pentagram_pos.extend(0.0)
                     + vec3(self.rng.get(20.0), 0.0, self.rng.get(20.0)) * 0.1
-                    + vec3(0.0, 0.0, -((monster_move_t - 1.0) / 5.0).sqr() * 2.0);
-                self.monster.speed = 10.0;
-                self.monster.target_type = TargetType::Player;
+                    + vec3(0.0, 0.0, -(t.sqr() * 2.0));
             }
 
-            if self.ending_t > 10.0 {
+            if self.ending_t > 15.0 {
                 for i in &mut self.interactables {
                     if i.data.obj.meshes[0].name.starts_with("B_Candle") {
                         i.open = false;
                     }
                 }
-                let t = self.ending_t - 10.0;
-                self.monster.pos = pentagram_pos.extend(0.0) + vec3(0.0, -t, t.powf(0.5) - 1.5);
+                // let t = self.ending_t - 10.0;
+                // self.monster.pos = pentagram_pos.extend(0.0) + vec3(0.0, -t, t.powf(0.5) - 1.5);
             }
             if self.ending_t > 20.0 {
                 self.transition = Some(geng::Transition::Switch(Box::new(Game::new(

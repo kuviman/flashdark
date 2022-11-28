@@ -9,6 +9,7 @@ impl Game {
         pos: Vec3<f32>,
         size: f32,
         rot: f32,
+        dissolve: f32,
     ) {
         let size = vec2(
             size * texture.size().x as f32 / texture.size().y as f32,
@@ -44,7 +45,9 @@ impl Game {
                     u_pos: pos,
                     u_size: size,
                     u_rot: rot,
+                    u_noise: &self.noise,
                     u_texture: texture,
+                    u_dissolve: dissolve,
                 },
                 geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
             ),
@@ -63,6 +66,7 @@ impl Game {
         pos: Vec3<f32>,
         size: f32,
         rot: f32,
+        dissolve: f32,
     ) {
         self.draw_texture(
             framebuffer,
@@ -71,62 +75,63 @@ impl Game {
             pos,
             size,
             rot,
+            dissolve,
         );
     }
 
-    pub fn draw_sprite(
-        &self,
-        framebuffer: &mut ugli::Framebuffer,
-        texture: &ugli::Texture,
-        pos: Vec3<f32>,
-        size: f32,
-        rot: f32,
-    ) {
-        self.draw_texture(
-            framebuffer,
-            &self.assets.shaders.sprite,
-            texture,
-            pos,
-            size,
-            rot,
-        );
-    }
+    // pub fn draw_sprite(
+    //     &self,
+    //     framebuffer: &mut ugli::Framebuffer,
+    //     texture: &ugli::Texture,
+    //     pos: Vec3<f32>,
+    //     size: f32,
+    //     rot: f32,
+    // ) {
+    //     self.draw_texture(
+    //         framebuffer,
+    //         &self.assets.shaders.sprite,
+    //         texture,
+    //         pos,
+    //         size,
+    //         rot,
+    //     );
+    // }
 
-    pub fn draw_horizontal_sprite(
-        &self,
-        framebuffer: &mut ugli::Framebuffer,
-        texture: &ugli::Texture,
-        pos: Vec3<f32>,
-        size: f32,
-        rot: f32,
-    ) {
-        self.draw_texture(
-            framebuffer,
-            &self.assets.shaders.horizontal_sprite,
-            texture,
-            pos,
-            size,
-            rot,
-        );
-    }
+    // pub fn draw_horizontal_sprite(
+    //     &self,
+    //     framebuffer: &mut ugli::Framebuffer,
+    //     texture: &ugli::Texture,
+    //     pos: Vec3<f32>,
+    //     size: f32,
+    //     rot: f32,
+    // ) {
+    //     self.draw_texture(
+    //         framebuffer,
+    //         &self.assets.shaders.horizontal_sprite,
+    //         texture,
+    //         pos,
+    //         size,
+    //         rot,
+    //     );
+    // }
 
-    pub fn draw_vertical_sprite(
-        &self,
-        framebuffer: &mut ugli::Framebuffer,
-        texture: &ugli::Texture,
-        pos: Vec3<f32>,
-        size: f32,
-        rot: f32,
-    ) {
-        self.draw_texture(
-            framebuffer,
-            &self.assets.shaders.vertical_sprite,
-            texture,
-            pos,
-            size,
-            rot,
-        );
-    }
+    // pub fn draw_vertical_sprite(
+    //     &self,
+    //     framebuffer: &mut ugli::Framebuffer,
+    //     texture: &ugli::Texture,
+    //     pos: Vec3<f32>,
+    //     size: f32,
+    //     rot: f32,
+    // ) {
+    //     self.draw_texture(
+    //         framebuffer,
+    //         &self.assets.shaders.vertical_sprite,
+    //         texture,
+    //         pos,
+    //         size,
+    //         rot,
+    //     );
+    // }
 
     pub fn draw_skybox_mesh(
         &self,
