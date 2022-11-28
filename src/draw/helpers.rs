@@ -249,7 +249,11 @@ impl Game {
 
         self.draw_calls.set(self.draw_calls.get() + 1);
 
-        let ambient_light = if mesh.name == "S_Pentagram" || mesh.name.starts_with("B_Candle") {
+        let ambient_light = if mesh.name == "S_Pentagram"
+            || mesh.name.starts_with("B_Candle")
+            || mesh.name.starts_with("AF_TV_Static")
+            || mesh.name == "I_HintKey"
+        {
             Rgba::WHITE
         } else {
             self.ambient_light
