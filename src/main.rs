@@ -606,6 +606,7 @@ fn main() {
         vsync: false,
         ..default()
     });
+    geng.audio().set_volume(0.0);
     geng::run(
         &geng,
         geng::LoadingScreen::new(
