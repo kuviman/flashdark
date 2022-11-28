@@ -73,7 +73,6 @@ pub struct Assets {
 #[derive(geng::Assets)]
 pub struct UiAssets {
     pub icon_flashlight: ugli::Texture,
-    pub icon_light: ugli::Texture,
     pub flashlight: ugli::Texture,
     pub title: ugli::Texture,
     pub label_controls: ugli::Texture,

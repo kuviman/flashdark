@@ -486,19 +486,19 @@ impl Game {
                     None,
                 );
                 draw_icon(
-                    vec2(-2.0, -2.5),
-                    0.2,
+                    vec2(-1.5, -2.5),
+                    0.4,
                     &self.assets.ui.icon_arrow_left,
                     Some(UiAction::DecDifficulty),
                 );
                 draw_icon(
-                    vec2(2.0, -2.5),
-                    0.2,
+                    vec2(1.5, -2.5),
+                    0.4,
                     &self.assets.ui.icon_arrow_right,
                     Some(UiAction::IncDifficulty),
                 );
 
-                draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
+                draw_icon(vec2(0.0, 3.0), 1.5, &self.assets.ui.title, None);
                 draw_icon(
                     vec2(0.0, 1.1),
                     0.2,
@@ -554,20 +554,20 @@ impl Game {
                 if !self.main_menu {
                     draw_icon(
                         vec2(-5.0, -4.0),
-                        0.5,
+                        0.7,
                         &self.assets.ui.icon_home,
                         Some(UiAction::Home),
                     );
                 }
                 draw_icon(
                     vec2(5.0, -4.0),
-                    0.5,
+                    0.7,
                     &self.assets.ui.icon_back,
                     Some(UiAction::Back),
                 );
                 if draw_icon(
-                    vec2(5.0, 1.0),
-                    0.5,
+                    vec2(5.0, 0.5),
+                    0.7,
                     &self.assets.ui.icon_controls,
                     Some(UiAction::None),
                 ) {
@@ -575,7 +575,7 @@ impl Game {
                     draw_controls = true;
                 }
             } else if self.main_menu {
-                draw_icon(vec2(0.0, 3.0), 1.0, &self.assets.ui.title, None);
+                draw_icon(vec2(0.0, 3.0), 1.5, &self.assets.ui.title, None);
                 draw_icon(
                     vec2(0.0, 0.1),
                     0.5,
@@ -584,14 +584,14 @@ impl Game {
                 );
                 draw_icon(
                     vec2(-5.0, -4.0),
-                    0.5,
+                    0.7,
                     &self.assets.ui.icon_settings,
                     Some(UiAction::Settings),
                 );
                 #[cfg(not(target_arch = "wasm32"))]
                 draw_icon(
                     vec2(5.0, -4.0),
-                    0.5,
+                    0.7,
                     &self.assets.ui.icon_door,
                     Some(UiAction::Exit),
                 );
@@ -627,21 +627,6 @@ impl Game {
                     .transform(Mat3::rotate((pos - vec2(0.0, -3.0)).arg() + f32::PI))
                     .translate(pos),
                 );
-            } else {
-                let texture = &self.assets.ui.icon_flashlight;
-                self.geng.draw_2d(
-                    framebuffer,
-                    &camera2d,
-                    &draw_2d::TexturedQuad::new(
-                        AABB::point(Vec2::ZERO).extend_symmetric(
-                            texture.size().map(|x| x as f32) / texture.size().y as f32,
-                        ),
-                        texture,
-                    )
-                    .scale_uniform(0.1)
-                    .transform(Mat3::rotate(-f32::PI / 3.0))
-                    .translate(mouse_pos),
-                );
             }
             for (rect, texture, color) in to_draw {
                 self.geng.draw_2d(
@@ -652,12 +637,30 @@ impl Game {
             }
             if draw_controls {
                 let texture = &self.assets.ui.label_controls;
-                let rect = rect_for(vec2(5.0, 1.0), 1.0, texture);
+                let rect = rect_for(vec2(5.0, 0.5), 1.0, texture);
                 self.geng.draw_2d(
                     framebuffer,
                     &camera2d,
                     &draw_2d::TexturedQuad::new(rect, texture),
                 );
+            }
+            if hovered.is_none() {
+                {
+                    let texture = &self.assets.ui.icon_flashlight;
+                    self.geng.draw_2d(
+                        framebuffer,
+                        &camera2d,
+                        &draw_2d::TexturedQuad::new(
+                            AABB::point(Vec2::ZERO).extend_symmetric(
+                                texture.size().map(|x| x as f32) / texture.size().y as f32,
+                            ),
+                            texture,
+                        )
+                        .scale_uniform(0.2)
+                        .transform(Mat3::rotate(-f32::PI / 3.0))
+                        .translate(mouse_pos),
+                    );
+                }
             }
         }
     }
