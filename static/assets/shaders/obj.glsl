@@ -75,11 +75,11 @@ uniform sampler2D u_texture;
 uniform sampler2D u_dark_texture;
 uniform sampler2D u_noise;
 
-float get_light_level(int light) {
-    vec2 texel_size = 3.0 / vec2(u_lights[light].shadow_size);
+float get_light_level(Light light, sampler2D light_shadow_map) {
+    vec2 texel_size = 3.0 / vec2(light.shadow_size);
     
-    vec3 light_pos = get_light_pos(u_lights[light], v_world_pos); // v_light_pos[light].xyz / v_light_pos[light].w * 0.5 + 0.5;
-    vec3 light_dir = normalize(u_lights[light].pos - v_world_pos);
+    vec3 light_pos = get_light_pos(light, v_world_pos); // v_light_pos[light].xyz / v_light_pos[light].w * 0.5 + 0.5;
+    vec3 light_dir = normalize(light.pos - v_world_pos);
     vec3 normal = normalize(v_normal);
     
     float cos = max(dot(light_dir, normal), 0.0); // TODO: fix bias
@@ -93,7 +93,7 @@ float get_light_level(int light) {
             vec2 sample_pos = light_pos.xy + vec2(i, j) * texel_size;
             sample_pos += n * texel_size * 5.0;
             if (sample_pos.x <= 1.0 && sample_pos.x >= 0.0 && sample_pos.y <= 1.0 && sample_pos.y >= 0.0) {
-                float pcf_depth = get_shadow_map_value(u_lights_shadow_maps[light], sample_pos);
+                float pcf_depth = get_shadow_map_value(light_shadow_map, sample_pos);
                 l_shadow += light_pos.z - bias > pcf_depth ? 1.0 : 0.0;
             } else {
                 l_shadow += 1.0;
@@ -104,7 +104,7 @@ float get_light_level(int light) {
     if (light_pos.z > 1.0 || light_pos.z < 0.0) {
         l_shadow = 1.0;
     }
-    return (1.0 - l_shadow) * u_lights[light].intensity;// * cos;
+    return (1.0 - l_shadow) * light.intensity;// * cos;
 }
 
 void main() {
@@ -122,9 +122,9 @@ void main() {
     float light_level = 0.0;
     for (int light = 1; light < MAX_LIGHTS; ++light) {
         if (light >= u_lights_count) { break; }
-        light_level += get_light_level(light);
+        light_level += get_light_level(u_lights[light], u_lights_shadow_maps[light]);
     }
-    float flashlight_level = get_light_level(0);
+    float flashlight_level = get_light_level(u_lights[0], u_lights_shadow_maps[0]);
     light_level += (1.0 - u_flashdark_dark) * flashlight_level;
     // Ambient
     // light_level = max(0.05, light_level);
