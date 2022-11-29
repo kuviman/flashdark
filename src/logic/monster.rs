@@ -327,6 +327,9 @@ impl Game {
             self.monster.next_pathfind_pos = self
                 .navmesh
                 .pathfind(self.monster.pos, self.monster.next_target_pos);
+            if (self.monster.pos - self.monster.next_pathfind_pos).len() < 0.1 {
+                self.monster.next_target_pos = self.monster.pos;
+            }
         }
 
         self.monster.scream_time -= delta_time;
@@ -427,7 +430,9 @@ impl Game {
         } else {
             &self.assets.ghost.chasing
         };
-        let texture = if self.game_over {
+        let texture = if self.ending_t > 3.0 {
+            &self.assets.ghost.dying
+        } else if self.game_over {
             &textures.front
         } else {
             [
@@ -454,7 +459,7 @@ impl Game {
             framebuffer,
             texture,
             self.monster.pos,
-            1.5,
+            if self.ending_t > 3.0 { 2.0 } else { 1.5 },
             0.0,
             ((self.ending_t - 3.0) / 5.0).clamp(0.0, 1.0),
         );

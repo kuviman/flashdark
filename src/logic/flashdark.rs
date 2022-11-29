@@ -43,19 +43,23 @@ impl Game {
                     || global_rng()
                         .gen_bool(self.assets.config.flashdark_turn_off_probability as f64)
                 {
-                    self.toggle_flashdark();
+                    self.toggle_flashdark(true);
                 }
             }
         }
     }
 
-    pub fn toggle_flashdark(&mut self) {
+    pub fn toggle_flashdark(&mut self, broke: bool) {
         self.player.flashdark.on = !self.player.flashdark.on;
         if self.player.flashdark.on {
             self.show_flashlight_tutorial = false;
             self.assets.sfx.flash_on.play();
         } else {
-            self.assets.sfx.flash_off.play();
+            if broke {
+                self.assets.sfx.broken_flashlight.play().set_volume(0.7);
+            } else {
+                self.assets.sfx.flash_off.play();
+            }
         }
 
         self.monster.next_flashdark_flicker_time = self.assets.config.flashdark_flicker_interval;

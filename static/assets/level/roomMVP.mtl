@@ -137,8 +137,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd credits.png
-map_d credits.png
+map_Kd Credits.png
+map_d Credits.png
 
 newmtl CribMat
 Ns 225.000000

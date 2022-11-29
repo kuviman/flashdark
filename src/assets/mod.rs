@@ -36,7 +36,7 @@ pub struct GhostDirections {
 pub struct GhostAssets {
     pub normal: GhostDirections,
     pub chasing: GhostDirections,
-    pub crawling: ugli::Texture,
+    pub dying: ugli::Texture,
 }
 
 #[derive(geng::Assets)]
@@ -67,6 +67,8 @@ pub struct Assets {
     pub dust_particle: ugli::Texture,
     #[asset(path = "VFX/glowParticle.png")]
     pub glow_particle: ugli::Texture,
+    #[asset(path = "VFX/pentagramFire.png")]
+    pub pentagram_fire: ugli::Texture,
     #[asset(path = "difficulty/*.json", range = "1..=3")]
     pub difficulties: Vec<Difficulty>,
     pub tutorial: TutorialAssets,
@@ -113,6 +115,10 @@ pub struct Music {
     pub chase: Vec<geng::Sound>,
     #[asset(path = "ThePiano.mp3", postprocess = "loop_sound")]
     pub piano: geng::Sound,
+    #[asset(path = "MusicBox.mp3")]
+    pub music_box: geng::Sound,
+    #[asset(path = "CreepySinging.mp3")]
+    pub creepy_singing: geng::Sound,
 }
 
 #[derive(geng::Assets)]
@@ -121,6 +127,12 @@ pub struct SfxAssets {
     pub ambient: geng::Sound,
     #[asset(path = "clockChime.mp3")]
     pub grand_clock: geng::Sound,
+    #[asset(path = "blowCandle.mp3")]
+    pub blow_candle: geng::Sound,
+    #[asset(path = "brokenFlashlight.mp3")]
+    pub broken_flashlight: geng::Sound,
+    #[asset(path = "FlashdarkEndingSequence.mp3")]
+    pub ending: geng::Sound,
     #[asset(path = "doorClose.mp3")]
     pub door_close: geng::Sound,
     #[asset(path = "doorLocked.mp3")]
@@ -139,7 +151,7 @@ pub struct SfxAssets {
     pub flash_on: geng::Sound,
     #[asset(path = "swingLoop.mp3", postprocess = "loop_sound")]
     pub swing_loop: geng::Sound,
-    #[asset(path = "fusePlaced.mp3")]
+    #[asset(path = "fusePlacedSequence.mp3")]
     pub fuse_placed: geng::Sound,
     #[asset(path = "introSequence.mp3")]
     pub intro_sequence: geng::Sound,
@@ -149,6 +161,8 @@ pub struct SfxAssets {
     pub ghost_loop: geng::Sound,
     #[asset(path = "ghostScream.mp3")]
     pub ghost_scream: geng::Sound,
+    #[asset(path = "studyLightsOutScare.mp3")]
+    pub study_lights: geng::Sound,
     #[asset(path = "placeObject.mp3")]
     pub place_object: geng::Sound,
     #[asset(path = "gameOverScare.mp3")]
