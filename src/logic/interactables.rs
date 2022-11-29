@@ -220,32 +220,34 @@ impl Game {
 
         let sfx_position = find_center(&interactable.data.obj.meshes[0].geometry);
 
-        let sfx = if let Some(sfx) = interactable.config.sfx.as_deref() {
-            self.assets.sfx.get_by_name(sfx)
-        } else if interactable.data.obj.meshes[0].name.starts_with("D") {
-            if interactable.open {
-                &self.assets.sfx.door_close
+        if self.time != 0.0 {
+            let sfx = if let Some(sfx) = interactable.config.sfx.as_deref() {
+                self.assets.sfx.get_by_name(sfx)
+            } else if interactable.data.obj.meshes[0].name.starts_with("D") {
+                if interactable.open {
+                    &self.assets.sfx.door_close
+                } else {
+                    &self.assets.sfx.door_open
+                }
+            } else if interactable.data.obj.meshes[0].name.starts_with("I_") {
+                if interactable.open {
+                    &self.assets.sfx.drawer_close
+                } else {
+                    &self.assets.sfx.drawer_open
+                }
             } else {
-                &self.assets.sfx.door_open
+                &self.assets.sfx.drawer_open // Girl sound?
+            };
+            let mut effect = sfx.effect();
+            if let Some(volume) = interactable.config.sfx_volume {
+                effect.set_volume(volume);
             }
-        } else if interactable.data.obj.meshes[0].name.starts_with("I_") {
-            if interactable.open {
-                &self.assets.sfx.drawer_close
-            } else {
-                &self.assets.sfx.drawer_open
+            if interactable.data.obj.meshes[0].name != "I_FusePlaceholder" {
+                effect.set_position(sfx_position.map(|x| x as f64));
+                effect.set_max_distance(self.assets.config.max_sound_distance);
             }
-        } else {
-            &self.assets.sfx.drawer_open // Girl sound?
-        };
-        let mut effect = sfx.effect();
-        if let Some(volume) = interactable.config.sfx_volume {
-            effect.set_volume(volume);
+            effect.play();
         }
-        if interactable.data.obj.meshes[0].name != "I_FusePlaceholder" {
-            effect.set_position(sfx_position.map(|x| x as f64));
-            effect.set_max_distance(self.assets.config.max_sound_distance);
-        }
-        effect.play();
 
         if !interactable.open
             && interactable.progress == 0.0
