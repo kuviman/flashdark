@@ -207,6 +207,13 @@ impl Game {
                     * matrix;
             }
         }
+        if mesh.name.starts_with("S_Piano") {
+            let center = find_center(&mesh.geometry).xy().extend(0.0);
+            matrix = Mat4::translate(center)
+                * Mat4::rotate_x((self.rng.get(10.0) * 0.5 + 0.5) * 0.02)
+                * Mat4::translate(-center)
+                * matrix;
+        }
         // TODO
         if false && mesh.name.starts_with("B_") {
             // TODO: only once
