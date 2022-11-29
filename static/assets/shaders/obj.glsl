@@ -67,6 +67,7 @@ void main() {
     //     v_light_pos[i] = u_lights[i].matrix * vec4(v_world_pos, 1.0);
     // }
     v_eye_pos = (u_view_matrix * vec4(v_world_pos, 1.0)).xyz;
+    v_normal *= dot(mat3(u_view_matrix) * v_normal, v_eye_pos) > 0.0 ? -1.0 : 1.0;
     gl_Position = u_projection_matrix * vec4(v_eye_pos, 1.0);
     // gl_Position = u_lights[0].matrix * vec4(v_world_pos, 1.0);
 }
@@ -92,7 +93,10 @@ float get_light_level(Light light, sampler2D light_shadow_map) {
     vec3 light_dir = normalize(light.pos - v_world_pos);
     vec3 normal = normalize(v_normal);
     
-    float cos = max(dot(light_dir, normal), 0.0); // TODO: fix bias
+    float cos = dot(light_dir, normal); // TODO: fix bias
+    if (cos < 0.0) {
+        return 0.0;
+    }
     float bias = max(0.01, 0.1 * (1.0 - cos));
 
     float l_shadow = 0.0;
