@@ -238,8 +238,10 @@ impl Game {
         if let Some(volume) = interactable.config.sfx_volume {
             effect.set_volume(volume);
         }
-        effect.set_position(sfx_position.map(|x| x as f64));
-        effect.set_max_distance(self.assets.config.max_sound_distance);
+        if interactable.data.obj.meshes[0].name != "I_FusePlaceholder" {
+            effect.set_position(sfx_position.map(|x| x as f64));
+            effect.set_max_distance(self.assets.config.max_sound_distance);
+        }
         effect.play();
 
         if !interactable.open
