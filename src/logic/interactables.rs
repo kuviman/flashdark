@@ -89,6 +89,24 @@ impl Game {
             .collect()
     }
 
+    pub fn light_out(&mut self) {
+        self.key_puzzle_state = KeyPuzzleState::LightOut;
+        self.assets.sfx.light_flicker.play();
+        self.ambient_light = Rgba::BLACK;
+        self.player.flashdark.on = false;
+        self.monster.pos = self.level.room_data["Kitchen"]
+            .center()
+            .xy()
+            .extend(self.monster.pos.z);
+        self.monster.scream_time = 0.0;
+        self.monster.scan_timer_going = true;
+        self.monster.next_pathfind_pos = self.monster.pos;
+        self.monster.next_target_pos = self.monster.pos;
+        unsafe {
+            SEEN_LIGHT_OUT = true;
+        }
+    }
+
     pub fn update_interactables(&mut self, delta_time: f32) {
         for interactable in &mut self.interactables {
             let inter_time = if interactable.data.obj.meshes[0]
@@ -194,18 +212,7 @@ impl Game {
         // Key puzzle
         if interactable.data.obj.meshes[0].name == "D_DoorStudy" {
             if self.key_puzzle_state == KeyPuzzleState::Entered {
-                self.key_puzzle_state = KeyPuzzleState::LightOut;
-                self.assets.sfx.light_flicker.play();
-                self.ambient_light = Rgba::BLACK;
-                self.player.flashdark.on = false;
-                self.monster.pos = self.level.room_data["Kitchen"]
-                    .center()
-                    .xy()
-                    .extend(self.monster.pos.z);
-                self.monster.scream_time = 0.0;
-                self.monster.scan_timer_going = true;
-                self.monster.next_pathfind_pos = self.monster.pos;
-                self.monster.next_target_pos = self.monster.pos;
+                self.light_out();
                 return;
             }
         }

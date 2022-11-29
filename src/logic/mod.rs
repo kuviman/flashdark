@@ -225,7 +225,11 @@ impl Game {
             if self.interactables[door_id].open {
                 self.click_interactable(door_id, false, Vec3::ZERO);
             }
-            self.key_puzzle_state = KeyPuzzleState::Entered;
+            if unsafe { SEEN_LIGHT_OUT } {
+                self.light_out();
+            } else {
+                self.key_puzzle_state = KeyPuzzleState::Entered;
+            }
         }
 
         // GF clock

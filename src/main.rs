@@ -49,6 +49,7 @@ impl KeyConfiguration {
 
 static mut BEEN_INSIDE_HOUSE: bool = false;
 static mut INTRO_SEEN: bool = false;
+static mut SEEN_LIGHT_OUT: bool = false;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum UiAction {
@@ -184,6 +185,7 @@ impl Game {
             unsafe {
                 BEEN_INSIDE_HOUSE = false;
                 INTRO_SEEN = false;
+                SEEN_LIGHT_OUT = false;
             }
         } else {
             geng.window().lock_cursor();
