@@ -91,7 +91,7 @@ impl Game {
 
     pub fn light_out(&mut self) {
         self.key_puzzle_state = KeyPuzzleState::LightOut;
-        self.assets.sfx.light_flicker.play();
+        self.assets.sfx.study_lights.play();
         self.ambient_light = Rgba::BLACK;
         self.player.flashdark.on = false;
         self.monster.pos = self.level.room_data["Kitchen"]

@@ -161,6 +161,8 @@ pub struct SfxAssets {
     pub ghost_loop: geng::Sound,
     #[asset(path = "ghostScream.mp3")]
     pub ghost_scream: geng::Sound,
+    #[asset(path = "studyLightsOutScare.mp3")]
+    pub study_lights: geng::Sound,
     #[asset(path = "placeObject.mp3")]
     pub place_object: geng::Sound,
     #[asset(path = "gameOverScare.mp3")]
