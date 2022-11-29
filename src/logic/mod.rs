@@ -301,7 +301,7 @@ impl Game {
             .iter()
             .any(|button| button.matches(event))
         {
-            self.toggle_flashdark();
+            self.toggle_flashdark(false);
         }
     }
 }

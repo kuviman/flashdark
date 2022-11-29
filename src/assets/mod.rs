@@ -125,6 +125,8 @@ pub struct SfxAssets {
     pub grand_clock: geng::Sound,
     #[asset(path = "blowCandle.mp3")]
     pub blow_candle: geng::Sound,
+    #[asset(path = "brokenFlashlight.mp3")]
+    pub broken_flashlight: geng::Sound,
     #[asset(path = "FlashdarkEndingSequence.mp3")]
     pub ending: geng::Sound,
     #[asset(path = "doorClose.mp3")]
