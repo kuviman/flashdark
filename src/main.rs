@@ -243,7 +243,7 @@ impl Game {
             key_puzzle_state: KeyPuzzleState::Begin,
             monster_spawned: unsafe { BEEN_INSIDE_HOUSE },
             cutscene_t: if unsafe { BEEN_INSIDE_HOUSE } {
-                2.9
+                4.9
             } else {
                 0.0
             },

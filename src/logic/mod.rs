@@ -155,15 +155,19 @@ impl Game {
                 // }
                 self.player.height = 1.0; // Uncrouch
                 self.lock_controls = true;
-                let target_rot_h = tv_dir.xy().arg() - f32::PI / 2.0;
-                let target_rot_v = vec2(tv_dir.xy().len(), tv_dir.z).arg();
-                let t = (delta_time / 0.3).min(1.0);
-                self.player.rot_h += (target_rot_h - self.player.rot_h) * t;
-                self.player.rot_v += (target_rot_v - self.player.rot_v) * t;
-                self.player.pos += ((trigger_box.center().xy() + vec2(0.20, 0.0))
-                    .extend(self.player.pos.z)
-                    - self.player.pos)
-                    * t;
+
+                // This if is because ofskippi
+                if self.cutscene_t < 4.0 {
+                    let target_rot_h = tv_dir.xy().arg() - f32::PI / 2.0;
+                    let target_rot_v = vec2(tv_dir.xy().len(), tv_dir.z).arg();
+                    let t = (delta_time / 0.3).min(1.0);
+                    self.player.rot_h += (target_rot_h - self.player.rot_h) * t;
+                    self.player.rot_v += (target_rot_v - self.player.rot_v) * t;
+                    self.player.pos += ((trigger_box.center().xy() + vec2(0.20, 0.0))
+                        .extend(self.player.pos.z)
+                        - self.player.pos)
+                        * t;
+                }
 
                 // End of the cutscene
                 if self.cutscene_t >= 5.0 {
