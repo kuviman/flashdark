@@ -601,6 +601,7 @@ fn main() {
     logger::init().unwrap();
     geng::setup_panic_handler();
     #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(not(feature = "console"))]
     std::panic::set_hook(Box::new({
         fn hook(info: &std::panic::PanicInfo) {
             let mut f = std::fs::File::create(

@@ -9,7 +9,7 @@ impl Game {
         self.player.flashdark.pos = self.player.pos
             + vec2(-0.2, 0.0)
                 .rotate(self.player.rot_h)
-                .extend(self.player.height - 0.2);
+                .extend(self.player.height - 0.1);
 
         // let new_dir =
         //     (self.look().position_or_inf() - self.player.flashdark.pos).normalize_or_zero();

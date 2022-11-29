@@ -726,8 +726,6 @@ impl Game {
                 &mut shadow_framebuffer,
                 &self.level.obj,
                 Mat4::identity(),
-                &self.assets.shaders.shadow,
-                &self.white_texture,
                 Some(ugli::CullFace::Back),
             );
 
@@ -738,8 +736,6 @@ impl Game {
                     &mut shadow_framebuffer,
                     &interactable.data.obj,
                     interactable.matrix(),
-                    &self.assets.shaders.shadow,
-                    &self.white_texture,
                     None,
                 );
             }

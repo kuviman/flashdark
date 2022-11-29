@@ -16,13 +16,23 @@ const int MAX_LIGHTS = 10;
 uniform Light u_lights[MAX_LIGHTS];
 uniform sampler2D u_lights_shadow_maps[MAX_LIGHTS];
 
+float normalize_depth(float depth) {
+    float n = 0.1;
+    float f = 50.0;
+    float z_ndc = 2.0 * depth - 1.0;
+    float z_eye = 2.0 * n * f / (f + n - z_ndc * (f - n));
+    return z_eye;
+}
+
 float get_shadow_map_value(sampler2D shadow_map, vec2 pos) {
-    return unpack4(texture2D(shadow_map, pos));
+    return normalize_depth(unpack4(texture2D(shadow_map, pos)));
 }
 
 vec3 get_light_pos(Light light, vec3 pos) {
     vec4 v = light.matrix * vec4(pos, 1.0);
-    return v.xyz / v.w * 0.5 + 0.5;
+    v.xyz = v.xyz / v.w * 0.5 + 0.5;
+    v.z = normalize_depth(v.z);
+    return v.xyz;
 }
 
 const int SHADOWS_SOFT = 0;
@@ -83,15 +93,14 @@ float get_light_level(Light light, sampler2D light_shadow_map) {
     vec3 normal = normalize(v_normal);
     
     float cos = max(dot(light_dir, normal), 0.0); // TODO: fix bias
-    float bias = 0.01; //max(0.005, 0.01 * (1.0 - cos));
+    float bias = max(0.01, 0.1 * (1.0 - cos));
 
     float l_shadow = 0.0;
     for (int i = -SHADOWS_SOFT; i <= SHADOWS_SOFT; ++i) {
         for (int j = -SHADOWS_SOFT; j <= SHADOWS_SOFT; ++j) {
             // vec2 n = vec2(cnoise(gl_FragCoord.xy), cnoise(gl_FragCoord.xy + vec2(123.0, 456.0)));
-            vec2 n = texture2D(u_noise, gl_FragCoord.xy / 2000.0).xy;
             vec2 sample_pos = light_pos.xy + vec2(i, j) * texel_size;
-            sample_pos += n * texel_size * 5.0;
+            // sample_pos += texture2D(u_noise, gl_FragCoord.xy / 2000.0).xy * texel_size * 5.0;
             if (sample_pos.x <= 1.0 && sample_pos.x >= 0.0 && sample_pos.y <= 1.0 && sample_pos.y >= 0.0) {
                 float pcf_depth = get_shadow_map_value(light_shadow_map, sample_pos);
                 l_shadow += light_pos.z - bias > pcf_depth ? 1.0 : 0.0;
@@ -101,7 +110,7 @@ float get_light_level(Light light, sampler2D light_shadow_map) {
         }
     }
     l_shadow /= (2.0 * float(SHADOWS_SOFT) + 1.0) * (2.0 * float(SHADOWS_SOFT) + 1.0);
-    if (light_pos.z > 1.0 || light_pos.z < 0.0) {
+    if (light_pos.z < 0.0) {
         l_shadow = 1.0;
     }
     return (1.0 - l_shadow) * light.intensity;// * cos;

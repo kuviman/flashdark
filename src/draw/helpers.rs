@@ -312,8 +312,6 @@ impl Game {
         framebuffer: &mut ugli::Framebuffer,
         obj: &Obj,
         matrix: Mat4<f32>,
-        shadow_shader: &ugli::Program,
-        white_texture: &ugli::Texture,
         cull_face: Option<ugli::CullFace>,
     ) {
         for mesh in &obj.meshes {
@@ -342,11 +340,15 @@ impl Game {
                     * Mat4::translate(-center);
                 // continue; // Ignore billboards for lighting for now
             }
-            let texture = mesh.material.texture.as_deref().unwrap_or(white_texture);
+            let texture = mesh
+                .material
+                .texture
+                .as_deref()
+                .unwrap_or(&self.transparent_black_texture);
             self.draw_calls.set(self.draw_calls.get() + 1);
             ugli::draw(
                 framebuffer,
-                shadow_shader,
+                &self.assets.shaders.shadow,
                 ugli::DrawMode::Triangles,
                 &mesh.geometry,
                 (
@@ -362,7 +364,7 @@ impl Game {
                 ugli::DrawParameters {
                     // blend_mode: Some(ugli::BlendMode::default()),
                     depth_func: Some(ugli::DepthFunc::Less),
-                    cull_face,
+                    // cull_face,
                     reset_uniforms: false,
                     ..default()
                 },
