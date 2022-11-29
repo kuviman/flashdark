@@ -129,6 +129,7 @@ impl Game {
 
         if interactable.data.obj.meshes[0].name.starts_with("B_Candle") {
             interactable.open = true;
+
             // TODO: sfx
             let all_candles = self
                 .interactables
@@ -150,7 +151,9 @@ impl Game {
                 self.lock_controls = true;
                 self.stop_sounds();
                 self.ending = true;
+                self.assets.sfx.ending.play();
             }
+            self.assets.sfx.blow_candle.play();
             return;
         }
 

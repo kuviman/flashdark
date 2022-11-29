@@ -399,6 +399,18 @@ impl Game {
         }
 
         if self.ending {
+            if self.ending_t > 3.0 && self.ending_t < 15.0 {
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::colored(
+                        AABB::point(vec2(0.0, self.ending_t * 2.0 - 10.0))
+                            .extend_symmetric(vec2(3.0, 20.0)),
+                        &self.assets.pentagram_fire,
+                        Rgba::new(1.0, 1.0, 1.0, self.rng.get(10.0) * 0.2 + 0.8),
+                    ),
+                );
+            }
             if self.ending_t > 8.0 && self.ending_t < 15.0 {
                 let alpha = ((self.ending_t - 8.0) / 2.0).clamp(0.0, 1.0);
                 self.geng.draw_2d(

@@ -36,7 +36,7 @@ pub struct GhostDirections {
 pub struct GhostAssets {
     pub normal: GhostDirections,
     pub chasing: GhostDirections,
-    pub crawling: ugli::Texture,
+    pub dying: ugli::Texture,
 }
 
 #[derive(geng::Assets)]
@@ -67,6 +67,8 @@ pub struct Assets {
     pub dust_particle: ugli::Texture,
     #[asset(path = "VFX/glowParticle.png")]
     pub glow_particle: ugli::Texture,
+    #[asset(path = "VFX/pentagramFire.png")]
+    pub pentagram_fire: ugli::Texture,
     #[asset(path = "difficulty/*.json", range = "1..=3")]
     pub difficulties: Vec<Difficulty>,
     pub tutorial: TutorialAssets,
@@ -121,6 +123,10 @@ pub struct SfxAssets {
     pub ambient: geng::Sound,
     #[asset(path = "clockChime.mp3")]
     pub grand_clock: geng::Sound,
+    #[asset(path = "blowCandle.mp3")]
+    pub blow_candle: geng::Sound,
+    #[asset(path = "FlashdarkEndingSequence.mp3")]
+    pub ending: geng::Sound,
     #[asset(path = "doorClose.mp3")]
     pub door_close: geng::Sound,
     #[asset(path = "doorLocked.mp3")]
