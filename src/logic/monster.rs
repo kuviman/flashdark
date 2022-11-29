@@ -327,6 +327,9 @@ impl Game {
             self.monster.next_pathfind_pos = self
                 .navmesh
                 .pathfind(self.monster.pos, self.monster.next_target_pos);
+            if (self.monster.pos - self.monster.next_pathfind_pos).len() < 0.1 {
+                self.monster.next_target_pos = self.monster.pos;
+            }
         }
 
         self.monster.scream_time -= delta_time;
