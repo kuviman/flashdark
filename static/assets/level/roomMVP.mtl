@@ -1,5 +1,5 @@
 # Blender MTL File: 'roomMVP.blend'
-# Material Count: 63
+# Material Count: 67
 
 newmtl BedMat
 Ns 225.000000
@@ -91,6 +91,18 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd Ceiling_D.png
+
+newmtl CleaningMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd CleaningTexture.png
+map_d CleaningTexture.png
 
 newmtl ClosetMat
 Ns 225.000000
@@ -353,6 +365,18 @@ illum 2
 map_Kd KitchenCounterTexture.png
 map_d KitchenCounterTexture.png
 
+newmtl KitchenwareMat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd DinnerwareTexture.png
+map_d DinnerwareTexture.png
+
 newmtl None
 Ns 500
 Ka 0.8 0.8 0.8
@@ -384,6 +408,30 @@ d 1.000000
 illum 2
 map_Kd PianoTexture.png
 map_d PianoTexture.png
+
+newmtl PlayRoom1Mat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd PlayRoomItems1.png
+map_d PlayRoomItems1.png
+
+newmtl PlayRoom2Mat
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd PlayRoomItems2.png
+map_d PlayRoomItems2.png
 
 newmtl RoofMat
 Ns 225.000000
