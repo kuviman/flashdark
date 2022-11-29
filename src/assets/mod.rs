@@ -115,6 +115,10 @@ pub struct Music {
     pub chase: Vec<geng::Sound>,
     #[asset(path = "ThePiano.mp3", postprocess = "loop_sound")]
     pub piano: geng::Sound,
+    #[asset(path = "MusicBox.mp3")]
+    pub music_box: geng::Sound,
+    #[asset(path = "CreepySinging.mp3")]
+    pub creepy_singing: geng::Sound,
 }
 
 #[derive(geng::Assets)]

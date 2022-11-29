@@ -96,6 +96,7 @@ pub struct Game {
     main_menu_next_camera_index: usize,
     hover_ui_action: Option<UiAction>,
     gf_clock_timer: f32,
+    creepy_singing_timer: f32,
     light_flicker_time: f32,
     start_drag: Vec2<f32>,
     ui_mouse_pos: Vec2<f32>,
@@ -197,6 +198,7 @@ impl Game {
         navmesh.remove_unreachable_from(level.trigger_cubes["GhostSpawn"].center());
 
         let mut res = Self {
+            creepy_singing_timer: 0.0,
             ending_t: 0.0,
             ending: false,
             player_inside_house: false,

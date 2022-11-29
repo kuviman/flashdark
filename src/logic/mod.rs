@@ -253,6 +253,52 @@ impl Game {
             sfx.set_max_distance(self.assets.config.max_sound_distance);
             sfx.play();
         }
+
+        // Creepy singing
+        self.creepy_singing_timer -= delta_time;
+        if self.creepy_singing_timer < 0.0
+            && self.level.room_data["PlayRoom"]
+                .horizontal_aabb()
+                .contains(self.player.pos.xy())
+        {
+            self.creepy_singing_timer = 120.0;
+            {
+                let mut sfx = self.assets.music.creepy_singing.effect();
+                sfx.set_position(
+                    find_center(
+                        &self
+                            .level
+                            .interactables
+                            .iter()
+                            .map(|i| &i.obj.meshes[0])
+                            .find(|m| m.name == "B_SingingGirl")
+                            .unwrap()
+                            .geometry,
+                    )
+                    .map(|x| x as f64),
+                );
+                sfx.set_max_distance(self.assets.config.max_sound_distance);
+                sfx.play();
+            }
+            {
+                let mut sfx = self.assets.music.music_box.effect();
+                sfx.set_position(
+                    find_center(
+                        &self
+                            .level
+                            .obj
+                            .meshes
+                            .iter()
+                            .find(|m| m.name == "S_MusicBox")
+                            .unwrap()
+                            .geometry,
+                    )
+                    .map(|x| x as f64),
+                );
+                sfx.set_max_distance(self.assets.config.max_sound_distance);
+                sfx.play();
+            }
+        }
     }
 
     pub fn handle_clicks(&mut self, event: &geng::Event) {
