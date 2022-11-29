@@ -253,6 +253,7 @@ impl Game {
             || mesh.name.starts_with("B_Candle")
             || mesh.name.starts_with("AF_TV_Static")
             || mesh.name == "I_HintKey"
+            || mesh.name.contains("StudyKey")
         {
             Rgba::WHITE
         } else {
