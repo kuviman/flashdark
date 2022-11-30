@@ -747,6 +747,9 @@ impl Game {
 
             // Interactables
             for interactable in &self.interactables {
+                if interactable.config.transparent {
+                    continue;
+                }
                 self.obj_shadow(
                     &light,
                     &mut shadow_framebuffer,
