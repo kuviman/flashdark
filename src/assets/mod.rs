@@ -161,6 +161,8 @@ pub struct SfxAssets {
     pub generic_pickup: geng::Sound,
     #[asset(path = "ghostLoop.mp3", postprocess = "loop_sound")]
     pub ghost_loop: geng::Sound,
+    #[asset(path = "ghostChaseLoop.mp3", postprocess = "loop_sound")]
+    pub ghost_chase_loop: geng::Sound,
     #[asset(path = "ghostScream.mp3")]
     pub ghost_scream: geng::Sound,
     #[asset(path = "studyLightsOutScare.mp3")]

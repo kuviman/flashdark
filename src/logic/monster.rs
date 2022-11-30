@@ -20,10 +20,12 @@ pub struct Monster {
     pub next_target_pos: Vec3<f32>,
     pub speed: f32,
     pub loop_sound: geng::SoundEffect,
+    pub chase_loop_sound: geng::SoundEffect,
     pub scream_time: f32,
     pub next_flashdark_flicker_time: f32,
     pub pause_time: f32,
     pub detect_timer: f32,
+    pub chase_fade: f32,
 }
 
 impl Drop for Monster {
@@ -35,10 +37,12 @@ impl Drop for Monster {
 impl Monster {
     pub fn stop_sounds(&mut self) {
         self.loop_sound.stop();
+        self.chase_loop_sound.stop();
     }
     pub fn new(assets: &Assets, level: &LevelData) -> Self {
         let pos = level.trigger_cubes["GhostSpawn"].center();
         Self {
+            chase_fade: 0.0,
             detect_timer: 0.0,
             scan_timer: 0.0,
             scan_timer_going: true,
@@ -55,6 +59,13 @@ impl Monster {
             pause_time: 0.0,
             loop_sound: {
                 let mut effect = assets.sfx.ghost_loop.effect();
+                effect.set_volume(0.0);
+                effect.set_max_distance(assets.config.max_sound_distance);
+                effect.play();
+                effect
+            },
+            chase_loop_sound: {
+                let mut effect = assets.sfx.ghost_chase_loop.effect();
                 effect.set_volume(0.0);
                 effect.set_max_distance(assets.config.max_sound_distance);
                 effect.play();
@@ -416,9 +427,20 @@ impl Game {
             .extend(0.0);
         }
 
-        self.monster.loop_sound.set_volume(1.0);
+        self.monster.chase_fade = (self.monster.chase_fade
+            + if self.monster.speed == 1.0 { -1.0 } else { 1.0 } * delta_time / 0.5)
+            .clamp(0.0, 1.0);
         self.monster
             .loop_sound
+            .set_volume(1.0 - self.monster.chase_fade as f64);
+        self.monster
+            .chase_loop_sound
+            .set_volume(self.monster.chase_fade as f64 * 1.5);
+        self.monster
+            .loop_sound
+            .set_position(self.monster.pos.map(|x| x as f64));
+        self.monster
+            .chase_loop_sound
             .set_position(self.monster.pos.map(|x| x as f64));
     }
     pub fn draw_monster(&mut self, framebuffer: &mut ugli::Framebuffer) {
