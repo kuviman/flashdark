@@ -11,6 +11,7 @@ pub struct Material {
 
 #[derive(ugli::Vertex, Debug, Copy, Clone)]
 pub struct Vertex {
+    pub a_b: f32,
     pub a_v: Vec3<f32>,
     pub a_bv: Vec3<f32>,
     pub a_vt: Vec2<f32>,
@@ -88,6 +89,7 @@ impl geng::LoadAsset for Obj {
                         };
                         let i_vn: usize = parts.next().unwrap().parse().unwrap();
                         Vertex {
+                            a_b: 0.0,
                             a_v: v[i_v - 1],
                             a_bv: Vec3::ZERO,
                             a_vn: vn[i_vn - 1],
@@ -139,6 +141,7 @@ impl geng::LoadAsset for Obj {
                 if mesh.name.starts_with("B_") {
                     let center = find_center(&mesh.geometry);
                     for v in mesh.geometry.iter_mut() {
+                        v.a_b = 1.0;
                         v.a_bv = v.a_v - center;
                         v.a_v = center;
                     }

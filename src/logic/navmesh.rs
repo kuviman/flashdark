@@ -277,6 +277,7 @@ impl Game {
 
                             fn vertex(p: Vec3<f32>) -> Vertex {
                                 Vertex {
+                                    a_b: 0.0,
                                     a_v: p,
                                     a_bv: Vec3::ZERO,
                                     a_vt: Vec2::ZERO,
