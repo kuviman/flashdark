@@ -159,7 +159,7 @@ impl Game {
                         ) {
                             p.z -= t;
                         }
-                        p.z += MIN_DISTANCE_TO_MESH;
+                        p.z += MIN_DISTANCE_TO_MESH + 0.05;
                         if vector_from_obj(obj, Mat4::identity(), p).len() < MIN_DISTANCE_TO_MESH {
                             continue;
                         }

@@ -200,7 +200,7 @@ impl Game {
         }
         geng.window().set_cursor_type(geng::CursorType::None);
 
-        let mut navmesh = if assets.config.create_navmesh {
+        let mut navmesh = if assets.config.create_navmesh && !main_menu {
             Self::init_navmesh(geng, &level)
         } else {
             assets.navmesh.clone()
