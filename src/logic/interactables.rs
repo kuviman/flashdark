@@ -230,6 +230,16 @@ impl Game {
         if self.time != 0.0 {
             let sfx = if let Some(sfx) = interactable.config.sfx.as_deref() {
                 self.assets.sfx.get_by_name(sfx)
+            } else if interactable.data.obj.meshes[0]
+                .name
+                .starts_with("I_LoosePlank")
+            {
+                &self.assets.sfx.plank_removal
+            } else if interactable.data.obj.meshes[0]
+                .name
+                .starts_with("I_StorageButton")
+            {
+                &self.assets.sfx.symbols_puzzle_button
             } else if interactable.data.obj.meshes[0].name.starts_with("D") {
                 if interactable.open {
                     &self.assets.sfx.door_close
@@ -384,6 +394,7 @@ impl Game {
             if current_lock_combination == self.level.storage_lock_combination {
                 self.interactables
                     .retain(|i| !i.data.obj.meshes[0].name.contains("StorageButton"));
+                self.assets.sfx.symbols_puzzle_solved.play();
                 self.storage_unlocked = true;
             }
         }

@@ -129,22 +129,27 @@
         },
         "I_BookshelfLibrary1": {
             "require_item": "Book1",
+            "sfx": "libraryClosetMove.mp3",
             "use_item": true
         },
         "I_BookshelfLibrary2": {
             "require_item": "Book2",
+            "sfx": "libraryClosetMove.mp3",
             "use_item": true
         },
         "I_BookshelfLibrary3": {
             "require_item": "Book5",
+            "sfx": "libraryClosetMove.mp3",
             "use_item": true
         },
         "I_BookshelfLibrary4": {
             "require_item": "Book4",
+            "sfx": "libraryClosetMove.mp3",
             "use_item": true
         },
         "I_BookshelfLibrary5": {
             "require_item": "Book3",
+            "sfx": "libraryClosetMove.mp3",
             "use_item": true
         }
     },

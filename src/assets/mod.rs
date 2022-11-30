@@ -181,6 +181,14 @@ pub struct SfxAssets {
     pub footsteps: Vec<geng::Sound>,
     #[asset(path = "footstepCreak*.mp3", range = "1..=3")]
     pub footstep_creaks: Vec<geng::Sound>,
+    #[asset(path = "plankRemoval.mp3")]
+    pub plank_removal: geng::Sound,
+    #[asset(path = "libraryClosetMove.mp3")]
+    pub library_closet_move: geng::Sound,
+    #[asset(path = "SymbolsPuzzleButton.mp3")]
+    pub symbols_puzzle_button: geng::Sound,
+    #[asset(path = "SymbolsPuzzledSolved.mp3")]
+    pub symbols_puzzle_solved: geng::Sound,
 }
 
 impl SfxAssets {
@@ -192,6 +200,10 @@ impl SfxAssets {
             "fusePlaced.mp3" => &self.fuse_placed,
             "curtainsOpen.mp3" => &self.curtains_open,
             "curtainsClose.mp3" => &self.curtains_close,
+            "plankRemoval.mp3" => &self.plank_removal,
+            "libraryClosetMove.mp3" => &self.library_closet_move,
+            "SymbolsPuzzleButton.mp3" => &self.symbols_puzzle_button,
+            "SymbolsPuzzleSolved.mp3" => &self.symbols_puzzle_solved,
             _ => unreachable!(),
         }
     }
