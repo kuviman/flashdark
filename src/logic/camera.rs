@@ -108,7 +108,12 @@ impl Game {
         for (id, item) in self.items.iter().enumerate() {
             update_target(
                 intersect_ray_with_mesh(
-                    &self.level.items[&item.name].spawns[item.mesh_index].mesh,
+                    &if item.name == "Doll" && item.mesh_index == 1000 {
+                        &self.level.items["Doll_Floor"].spawns[0]
+                    } else {
+                        &self.level.items[&item.name].spawns[item.mesh_index]
+                    }
+                    .mesh,
                     self.item_matrix(item),
                     0.0,
                     ray,

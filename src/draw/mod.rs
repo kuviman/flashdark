@@ -72,7 +72,11 @@ impl Game {
         }
 
         for (id, item) in self.items.iter().enumerate() {
-            let data = &self.level.items[&item.name].spawns[item.mesh_index];
+            let data = if item.name == "Doll" && item.mesh_index == 1000 {
+                &self.level.items["Doll_Floor"].spawns[0]
+            } else {
+                &self.level.items[&item.name].spawns[item.mesh_index]
+            };
             let texture = &*data.mesh.material.texture.as_deref().unwrap();
             let dark_texture = data
                 .mesh

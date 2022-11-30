@@ -48,15 +48,12 @@ impl Game {
     }
 
     pub fn create_dropped(&mut self, name: String) {
-        let mut matrix = Mat4::translate(self.player.pos + vec3(0.0, 0.0, -0.24));
-        if name == "Doll" || name == "Book5" {
-            matrix = matrix * Mat4::rotate_x(f32::PI / 2.0);
-        }
+        let matrix = Mat4::translate(self.player.pos + vec3(0.0, 0.0, -0.24));
         self.items.push(Item {
+            mesh_index: if name == "Doll" { 1000 } else { 0 },
             name,
             matrix,
             parent_interactable: None,
-            mesh_index: 0,
         })
     }
 
