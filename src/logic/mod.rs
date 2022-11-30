@@ -209,6 +209,8 @@ impl Game {
                 );
                 self.ambient_light = self.assets.config.ambient_light_inside_house;
             }
+        } else {
+            self.show_crouch_tutorial = false;
         }
 
         // Enter study room
