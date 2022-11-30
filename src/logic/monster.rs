@@ -26,6 +26,7 @@ pub struct Monster {
     pub pause_time: f32,
     pub detect_timer: f32,
     pub chase_fade: f32,
+    pub next_alarm_sfx: f32,
 }
 
 impl Drop for Monster {
@@ -42,6 +43,7 @@ impl Monster {
     pub fn new(assets: &Assets, level: &LevelData) -> Self {
         let pos = level.trigger_cubes["GhostSpawn"].center();
         Self {
+            next_alarm_sfx: 0.0,
             chase_fade: 0.0,
             detect_timer: 0.0,
             scan_timer: 0.0,
@@ -152,7 +154,8 @@ impl Game {
                     }
                 }
                 TargetType::Noise | TargetType::Flashdark => {
-                    if self.monster.speed == 1.0 {
+                    if self.monster.speed == 1.0 && self.monster.next_alarm_sfx < 0.0 {
+                        self.monster.next_alarm_sfx = 2.0;
                         let mut effect = self
                             .assets
                             .sfx
@@ -192,6 +195,7 @@ impl Game {
         if self.game_over || self.ending {
             return;
         }
+        self.monster.next_alarm_sfx -= delta_time;
         if self.monster.speed == 1.0 {
             if let Some((vol, music)) = &mut self.chase_music {
                 *vol -= delta_time as f64;
