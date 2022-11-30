@@ -68,6 +68,7 @@ impl Game {
                     Mat3::identity()
                 },
                 Rgba::WHITE,
+                false,
             );
         }
 
@@ -97,6 +98,7 @@ impl Game {
                 self.item_matrix(item),
                 Mat3::identity(),
                 Rgba::WHITE,
+                true,
             );
         }
 

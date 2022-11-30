@@ -170,6 +170,7 @@ impl Game {
         matrix: Mat4<f32>,
         texture_matrix: Mat3<f32>,
         color: Rgba<f32>,
+        shine: bool,
     ) {
         let mut matrix = matrix;
         if mesh.name == "PlayerSpawn" {
@@ -288,6 +289,8 @@ impl Game {
                     u_texture_matrix: texture_matrix,
                     u_dark_texture: mesh.material.dark_texture.as_deref().unwrap_or(texture),
                     u_darkness: if self.fuse_placed || self.main_menu { 1000.0 } else { -6.0 },
+                    u_time: self.time,
+                    u_should_shine: if shine { 1.0 } else { 0.0 },
                 },
                 geng::camera3d_uniforms(&self.camera, self.framebuffer_size),
                 lights,
@@ -310,7 +313,7 @@ impl Game {
         color: Rgba<f32>,
     ) {
         for mesh in &obj.meshes {
-            self.draw_mesh(framebuffer, mesh, matrix, Mat3::identity(), color);
+            self.draw_mesh(framebuffer, mesh, matrix, Mat3::identity(), color, false);
         }
     }
 
