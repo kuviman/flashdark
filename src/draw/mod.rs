@@ -146,7 +146,11 @@ impl Game {
                 &camera2d,
                 &draw_2d::TexturedQuad::new(
                     AABB::point(vec2(-5.0, -3.5)).extend_uniform(1.5),
-                    &self.assets.flashdark,
+                    if self.player.flashdark.dark > 0.5 {
+                        &self.assets.flashdark_dark
+                    } else {
+                        &self.assets.flashdark
+                    },
                 ),
             );
         }

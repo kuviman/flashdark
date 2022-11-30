@@ -54,6 +54,8 @@ pub struct Assets {
     pub reticle: ugli::Texture,
     pub require_item: ugli::Texture,
     pub flashdark: ugli::Texture,
+    #[asset(path = "FlashDark_Dark.png")]
+    pub flashdark_dark: ugli::Texture,
     #[asset(path = "Music")]
     pub music: Music,
     #[asset(path = "level/roomMVP.obj")]
