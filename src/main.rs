@@ -147,6 +147,8 @@ pub struct Game {
     intro_sfx: Option<geng::SoundEffect>,
     particles: Particles,
     level: LevelData,
+    bat_t: f32,
+    bat_go: bool,
 }
 
 impl Drop for Game {
@@ -208,6 +210,8 @@ impl Game {
         navmesh.remove_unreachable_from(level.trigger_cubes["GhostSpawn"].center());
 
         let mut res = Self {
+            bat_t: 0.0,
+            bat_go: false,
             creepy_sing_sfx: None,
             music_box_sfx: None,
             creepy_singing_timer: 0.0,

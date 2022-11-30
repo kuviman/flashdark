@@ -187,6 +187,20 @@ impl Game {
             }
         }
 
+        // Bat
+        if !self.bat_go
+            && self.level.trigger_cubes["BatTrigger"]
+                .horizontal_aabb()
+                .contains(self.player.pos.xy())
+            && normalize_angle(self.player.rot_h - f32::PI / 2.0).abs() < 1.0
+        {
+            self.bat_go = true;
+            self.assets.sfx.bat.play();
+        }
+        if self.bat_go {
+            self.bat_t += delta_time / 0.8;
+        }
+
         // Entering the house
         if self.level.trigger_cubes["HouseEntrance"]
             .horizontal_aabb()

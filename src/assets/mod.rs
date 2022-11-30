@@ -143,6 +143,8 @@ pub struct SfxAssets {
     pub door_locked: geng::Sound,
     #[asset(path = "doorOpen.mp3")]
     pub door_open: geng::Sound,
+    #[asset(path = "bat.mp3")]
+    pub bat: geng::Sound,
     #[asset(path = "doorUnlocked.mp3")]
     pub door_unlocked: geng::Sound,
     #[asset(path = "drawerClose.mp3")]

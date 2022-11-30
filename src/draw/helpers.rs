@@ -168,13 +168,22 @@ impl Game {
         framebuffer: &mut ugli::Framebuffer,
         mesh: &ObjMesh,
         matrix: Mat4<f32>,
-        texture_matrix: Mat3<f32>,
+        mut texture_matrix: Mat3<f32>,
         color: Rgba<f32>,
         shine: bool,
     ) {
         let mut matrix = matrix;
         if mesh.name == "PlayerSpawn" {
             return;
+        }
+        if mesh.name == "S_Bat" {
+            if !self.bat_go || self.bat_t > 1.0 {
+                return;
+            }
+            matrix = Mat4::translate(vec3(self.bat_t * 4.0, 0.0, self.bat_t * 0.3));
+            if (self.time * 10.0) as i64 % 2 == 0 {
+                texture_matrix = Mat3::translate(vec2(0.5, 0.0));
+            }
         }
         if let Some(i) = mesh.name.strip_prefix("S_PianoKeys") {
             let i = i.chars().next().unwrap().to_digit(10).unwrap();
