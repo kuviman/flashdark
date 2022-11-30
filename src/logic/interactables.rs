@@ -209,6 +209,12 @@ impl Game {
             self.ambient_light = self.assets.config.ambient_light_after_fuse;
         }
 
+        if interactable.data.obj.meshes[0].name == "B_SingingGirl" {
+            if let Some(mut sfx) = self.creepy_sing_sfx.take() {
+                sfx.stop();
+            }
+        }
+
         // Key puzzle
         if interactable.data.obj.meshes[0].name == "D_DoorStudy" {
             if self.key_puzzle_state == KeyPuzzleState::Entered {

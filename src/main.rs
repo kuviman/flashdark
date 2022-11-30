@@ -85,6 +85,8 @@ impl Default for Settings {
 }
 
 pub struct Game {
+    creepy_sing_sfx: Option<geng::SoundEffect>,
+    music_box_sfx: Option<geng::SoundEffect>,
     player_inside_house: bool,
     show_crouch_tutorial: bool,
     draw_calls: Cell<usize>,
@@ -175,6 +177,12 @@ impl Game {
         if let Some(sfx) = &mut self.game_over_sfx {
             sfx.stop();
         }
+        if let Some(sfx) = &mut self.creepy_sing_sfx {
+            sfx.stop();
+        }
+        if let Some(sfx) = &mut self.music_box_sfx {
+            sfx.stop();
+        }
         self.piano_music.stop();
         self.monster.stop_sounds();
     }
@@ -200,6 +208,8 @@ impl Game {
         navmesh.remove_unreachable_from(level.trigger_cubes["GhostSpawn"].center());
 
         let mut res = Self {
+            creepy_sing_sfx: None,
+            music_box_sfx: None,
             creepy_singing_timer: 0.0,
             ending_t: 0.0,
             ending: false,

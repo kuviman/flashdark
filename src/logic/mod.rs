@@ -266,6 +266,10 @@ impl Game {
                 .contains(self.player.pos.xy())
         {
             self.creepy_singing_timer = 120.0;
+            if self
+                .interactables
+                .iter()
+                .any(|i| i.data.obj.meshes[0].name == "B_SingingGirl")
             {
                 let mut sfx = self.assets.music.creepy_singing.effect();
                 sfx.set_position(
@@ -283,6 +287,7 @@ impl Game {
                 );
                 sfx.set_max_distance(self.assets.config.max_sound_distance);
                 sfx.play();
+                self.creepy_sing_sfx = Some(sfx);
             }
             {
                 let mut sfx = self.assets.music.music_box.effect();
@@ -301,6 +306,7 @@ impl Game {
                 );
                 sfx.set_max_distance(self.assets.config.max_sound_distance);
                 sfx.play();
+                self.music_box_sfx = Some(sfx);
             }
         }
     }
