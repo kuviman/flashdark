@@ -77,7 +77,7 @@ impl Game {
             }
             self.player.vel.z = 0.0;
         } else {
-            let gravity = 5.0;
+            let gravity = 15.0;
             self.player.vel.z -= gravity * delta_time;
         }
         self.player.pos += self.player.vel * delta_time;
@@ -108,17 +108,39 @@ impl Game {
         if !self.player.god_mode {
             for _ in 0..1 {
                 let mut check = |obj: &Obj, matrix: Mat4<f32>| {
-                    let v = vector_from_obj(obj, matrix, self.player.pos);
-                    let radius = 0.25;
-                    if v.len() < radius {
-                        let n = v.normalize_or_zero();
-                        self.player.vel -= n * Vec3::dot(n, self.player.vel);
-                        self.player.pos += n * (radius - v.len());
+                    for tri in obj
+                        .meshes
+                        .iter()
+                        .filter(|mesh| {
+                            if mesh.name.starts_with("B_SmallGrass")
+                                || mesh.name.starts_with("B_TallGrass")
+                                || mesh.name.starts_with("B_Tree")
+                            {
+                                return false;
+                            }
+                            true
+                        })
+                        .flat_map(|mesh| mesh.geometry.chunks(3))
+                    {
+                        let v = vector_from_triangle(
+                            [tri[0].a_v, tri[1].a_v, tri[2].a_v]
+                                .map(|pos| (matrix * pos.extend(1.0)).xyz()),
+                            self.player.pos,
+                        );
+                        let radius = 0.25;
+                        if v.len() < radius {
+                            let n = v.normalize_or_zero();
+                            self.player.vel -= n * Vec3::dot(n, self.player.vel);
+                            self.player.pos += n * (radius - v.len());
+                        }
                     }
                 };
                 check(&self.level.obj, Mat4::identity());
                 for interactable in &self.interactables {
                     check(&interactable.data.obj, interactable.matrix());
+                }
+                if self.player.vel.z > 1.0 {
+                    self.player.vel.z = 1.0;
                 }
             }
         }

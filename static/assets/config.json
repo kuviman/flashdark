@@ -120,6 +120,7 @@
         "B_SingingGirl": {
             "require_item": "Doll",
             "use_item": true,
+            "sfx": "girlGiggle.mp3",
             "give_item": "Book5",
             "transform_on_use": "B_SingingGirlDone"
         },

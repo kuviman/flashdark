@@ -193,6 +193,8 @@ pub struct SfxAssets {
     pub symbols_puzzle_button: geng::Sound,
     #[asset(path = "SymbolsPuzzledSolved.mp3")]
     pub symbols_puzzle_solved: geng::Sound,
+    #[asset(path = "girlGiggle.mp3")]
+    pub girl_giggle: geng::Sound,
 }
 
 impl SfxAssets {
@@ -205,6 +207,7 @@ impl SfxAssets {
             "curtainsOpen.mp3" => &self.curtains_open,
             "curtainsClose.mp3" => &self.curtains_close,
             "plankRemoval.mp3" => &self.plank_removal,
+            "girlGiggle.mp3" => &self.girl_giggle,
             "libraryClosetMove.mp3" => &self.library_closet_move,
             "SymbolsPuzzleButton.mp3" => &self.symbols_puzzle_button,
             "SymbolsPuzzleSolved.mp3" => &self.symbols_puzzle_solved,
