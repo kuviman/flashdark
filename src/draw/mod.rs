@@ -385,13 +385,36 @@ impl Game {
                     ),
                 );
             }
+
+            let aabb =
+                AABB::point(vec2(0.0, -4.0)).extend_symmetric(vec2(self.intro_skip_t, 0.1) * 3.0);
             self.geng.draw_2d(
                 framebuffer,
                 &camera2d,
-                &draw_2d::Quad::new(
-                    AABB::point(vec2(0.0, -4.0))
-                        .extend_symmetric(vec2(self.intro_skip_t, 0.1) * 3.0),
-                    Rgba::WHITE,
+                &draw_2d::TexturedPolygon::new(
+                    vec![
+                        draw_2d::TexturedVertex {
+                            a_pos: aabb.bottom_left(),
+                            a_color: Rgba::WHITE,
+                            a_vt: vec2(0.5 - 0.5 * self.intro_skip_t, 0.0),
+                        },
+                        draw_2d::TexturedVertex {
+                            a_pos: aabb.bottom_right(),
+                            a_color: Rgba::WHITE,
+                            a_vt: vec2(0.5 + 0.5 * self.intro_skip_t, 0.0),
+                        },
+                        draw_2d::TexturedVertex {
+                            a_pos: aabb.top_right(),
+                            a_color: Rgba::WHITE,
+                            a_vt: vec2(0.5 + 0.5 * self.intro_skip_t, 1.0),
+                        },
+                        draw_2d::TexturedVertex {
+                            a_pos: aabb.top_left(),
+                            a_color: Rgba::WHITE,
+                            a_vt: vec2(0.5 - 0.5 * self.intro_skip_t, 1.0),
+                        },
+                    ],
+                    &self.assets.goo_bar,
                 ),
             );
         }

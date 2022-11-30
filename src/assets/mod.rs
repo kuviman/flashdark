@@ -75,6 +75,8 @@ pub struct Assets {
     pub difficulties: Vec<Difficulty>,
     pub tutorial: TutorialAssets,
     pub tobecontinued: ugli::Texture,
+    #[asset(path = "GooBar.png")]
+    pub goo_bar: ugli::Texture,
 }
 
 #[derive(geng::Assets)]
