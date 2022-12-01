@@ -147,16 +147,23 @@ impl Game {
             fov: 10.0,
         };
         if !self.main_menu && !self.ending {
+            if self.player.flashdark.dark < 1.0 {
+                self.geng.draw_2d(
+                    framebuffer,
+                    &camera2d,
+                    &draw_2d::TexturedQuad::new(
+                        AABB::point(vec2(-5.0, -3.5)).extend_uniform(1.5),
+                        &self.assets.flashdark,
+                    ),
+                );
+            }
             self.geng.draw_2d(
                 framebuffer,
                 &camera2d,
-                &draw_2d::TexturedQuad::new(
+                &draw_2d::TexturedQuad::colored(
                     AABB::point(vec2(-5.0, -3.5)).extend_uniform(1.5),
-                    if self.player.flashdark.dark > 0.5 {
-                        &self.assets.flashdark_dark
-                    } else {
-                        &self.assets.flashdark
-                    },
+                    &self.assets.flashdark_dark,
+                    Rgba::new(1.0, 1.0, 1.0, self.player.flashdark.dark),
                 ),
             );
         }
