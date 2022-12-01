@@ -2,11 +2,13 @@
 
 A puzzle horror game made for [GitHub Game Off 2022](https://itch.io/jam/game-off-2022).
 
+**[PLAY THE GAME ON ITCH.IO](https://kuviman.itch.io/flashdark)**
+
 ![banner](images/banner.png)
 
 *There's something wrong at your Grandmother's house...*
 
-[Watch the Trailer](TODO youtube)
+[Watch the Trailer](https://www.youtube.com/watch?v=RE7KWvYH7jA)
 
 ## Controls
 
