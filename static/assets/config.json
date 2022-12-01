@@ -8,9 +8,7 @@
             "E",
             "MouseRight"
         ],
-        "god_mode": [
-            "L"
-        ],
+        "god_mode": [],
         "toggle_fullscreen": [
             "F11"
         ],
