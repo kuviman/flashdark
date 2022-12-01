@@ -13,4 +13,5 @@ serde = { version = "1" }
 noise = "0.7"
 
 [build-dependencies]
+winres = "0.1"
 cmake = "<=0.1.45" # https://github.com/PistonDevelopers/freetype-sys/issues/99
