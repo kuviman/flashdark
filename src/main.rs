@@ -78,7 +78,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             mouse_sens: 0.5,
-            volume: 0.5,
+            volume: 0.7,
             difficulty: 0,
         }
     }
