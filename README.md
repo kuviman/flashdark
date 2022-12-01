@@ -16,12 +16,13 @@ A puzzle horror game made for [GitHub Game Off 2022](https://itch.io/jam/game-of
 - C - toggle crouching
 - Q or G - drop the item
 - P or Enter or Escape - pause
+- F11 - toggle fullscreen
 
 ## Credits
 
 - Illustrations - [Rincs](https://rincsart.com/)
 - Programming & Game Design - [kuviman](https://github.com/kuviman)
-- Sound Design & 3D & Game Design - [Brainoid]()
+- Sound Design & 3D & Game Design - [Brainoid](https://twitter.com/brainoidgames)
 
 ## Building & running the game from source
 
