@@ -221,6 +221,9 @@ impl Game {
                         .closest_waypoint(self.level.room_data["Kitchen"].center())],
                     TargetType::Noise,
                 );
+                if let Some(mut sfx) = self.swing_sfx.take() {
+                    sfx.stop();
+                }
                 self.ambient_light = self.assets.config.ambient_light_inside_house;
             }
         } else {
