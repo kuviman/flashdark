@@ -85,6 +85,8 @@ impl Default for Settings {
 }
 
 pub struct Game {
+    pressed_play: bool,
+    pressed_play_t: f32,
     creepy_sing_sfx: Option<geng::SoundEffect>,
     music_box_sfx: Option<geng::SoundEffect>,
     player_inside_house: bool,
@@ -210,6 +212,8 @@ impl Game {
         navmesh.remove_unreachable_from(level.trigger_cubes["GhostSpawn"].center());
 
         let mut res = Self {
+            pressed_play: false,
+            pressed_play_t: 0.0,
             bat_t: 0.0,
             bat_go: false,
             creepy_sing_sfx: None,
@@ -405,6 +409,12 @@ impl geng::State for Game {
         self.geng.audio().set_volume(self.settings.volume as f64);
         self.difficulty = self.assets.difficulties[self.settings.difficulty].clone();
         let delta_time = delta_time as f32;
+        if self.pressed_play {
+            self.pressed_play_t += delta_time;
+            if self.pressed_play_t > 1.0 {
+                self.reset();
+            }
+        }
         self.update_particles(delta_time);
         self.rng.update(delta_time);
         self.update_impl(delta_time);
@@ -571,7 +581,9 @@ impl geng::State for Game {
                     match action {
                         UiAction::Settings => self.in_settings = true,
                         UiAction::Exit => self.transition = Some(geng::Transition::Pop),
-                        UiAction::Play => self.reset(),
+                        UiAction::Play => {
+                            self.pressed_play = true;
+                        }
                         UiAction::Back => {
                             self.in_settings = false;
                             batbox::preferences::save("flashdark.json", &self.settings);

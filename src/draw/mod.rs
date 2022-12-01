@@ -738,6 +738,18 @@ impl Game {
                 }
             }
         }
+
+        if self.pressed_play {
+            let alpha = self.pressed_play_t;
+            self.geng.draw_2d(
+                framebuffer,
+                &camera2d,
+                &draw_2d::Quad::new(
+                    AABB::point(Vec2::ZERO).extend_uniform(100.0),
+                    Rgba::new(0.0, 0.0, 0.0, alpha),
+                ),
+            );
+        }
     }
 
     fn update_shadows(&mut self) {
