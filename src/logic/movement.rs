@@ -93,13 +93,23 @@ impl Game {
                     .unwrap()
                     .play()
                     .set_volume(0.5);
-                self.assets
-                    .sfx
-                    .footstep_creaks
-                    .choose(&mut global_rng())
-                    .unwrap()
-                    .play()
-                    .set_volume(0.5);
+                if self.player_inside_house {
+                    self.assets
+                        .sfx
+                        .footstep_creaks
+                        .choose(&mut global_rng())
+                        .unwrap()
+                        .play()
+                        .set_volume(0.5);
+                } else {
+                    self.assets
+                        .sfx
+                        .footsteps_grass
+                        .choose(&mut global_rng())
+                        .unwrap()
+                        .play()
+                        .set_volume(0.5);
+                }
                 self.check_monster_sfx(self.player.pos);
             }
         }

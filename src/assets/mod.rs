@@ -187,6 +187,8 @@ pub struct SfxAssets {
     pub ghost_alarmed: Vec<geng::Sound>,
     #[asset(path = "footstep*.mp3", range = "1..=4")]
     pub footsteps: Vec<geng::Sound>,
+    #[asset(path = "footstepGrass*.mp3", range = "1..=4")]
+    pub footsteps_grass: Vec<geng::Sound>,
     #[asset(path = "footstepCreak*.mp3", range = "1..=3")]
     pub footstep_creaks: Vec<geng::Sound>,
     #[asset(path = "plankRemoval.mp3")]
