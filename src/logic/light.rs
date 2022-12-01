@@ -57,7 +57,7 @@ impl Game {
             if mesh.name == "B_CeilingLight.008_B_CeilingLight.011" {
                 return None;
             }
-            mesh.name.contains("Light").then(|| Light {
+            mesh.name.contains("CeilingLight").then(|| Light {
                 id: id(),
                 flicker_time: 0.0,
                 fov: 2.0,
