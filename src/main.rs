@@ -640,6 +640,9 @@ fn main() {
         vsync: false,
         ..default()
     });
+    #[cfg(not(target_arch = "wasm32"))]
+    geng.set_icon(&static_path().join("assets").join("icon.png"))
+        .unwrap();
     geng.audio().set_volume(0.0);
     geng::run(
         &geng,
