@@ -406,7 +406,9 @@ impl Game {
 impl geng::State for Game {
     fn update(&mut self, delta_time: f64) {
         self.sens = 0.0002 + self.settings.mouse_sens * 0.01;
-        self.geng.audio().set_volume(self.settings.volume as f64);
+        self.geng.audio().set_volume(
+            self.settings.volume as f64 * (1.0 - self.pressed_play_t as f64).clamp(0.0, 1.0),
+        );
         self.difficulty = self.assets.difficulties[self.settings.difficulty].clone();
         let delta_time = delta_time as f32;
         if self.pressed_play {
